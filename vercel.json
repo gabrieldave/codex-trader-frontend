@@ -1,9 +1,10 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "buildCommand": "cd frontend && npm run build",
+  "devCommand": "cd frontend && npm run dev",
+  "installCommand": "cd frontend && npm install",
   "framework": "nextjs",
-  "regions": ["iad1"]
+  "regions": ["iad1"],
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ../frontend"
 }
 
 

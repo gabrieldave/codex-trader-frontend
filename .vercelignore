@@ -1,0 +1,14 @@
+# Ignorar todo excepto el frontend
+../backend
+../node_modules
+../*.py
+../*.md
+../*.sql
+../*.bat
+../*.log
+../data
+../libros procesados
+../rag_infrastructure
+../scripts
+../.git
+
