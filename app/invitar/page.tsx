@@ -61,7 +61,7 @@ export default function InvitarPage() {
 
       setLoadingSummary(true)
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
         const response = await fetch(`${backendUrl}/me/referrals-summary`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`

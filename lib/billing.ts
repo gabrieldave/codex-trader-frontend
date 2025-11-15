@@ -16,7 +16,13 @@ export async function startCheckout(
 ): Promise<void> {
   try {
     // Obtener la URL del backend desde variables de entorno
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+    // IMPORTANTE: En producción, debe ser https://api.codextrader.tech
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+    
+    // Debug: verificar que la variable se está leyendo correctamente
+    if (typeof window !== 'undefined') {
+      console.log('[DEBUG] Backend URL:', backendUrl)
+    }
     
     // Si no hay accessToken, el usuario debe estar logueado primero
     if (!accessToken) {
