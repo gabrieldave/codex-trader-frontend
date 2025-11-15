@@ -1491,7 +1491,7 @@ function Chat() {
       <Toaster position="top-center" />
       
       {/* Contenedor principal: sin max-width en móvil, centrado en escritorio */}
-      <div className="w-full px-0 py-0 lg:max-w-6xl lg:mx-auto lg:px-6 lg:py-0">
+      <div className="w-full lg:max-w-6xl lg:mx-auto lg:px-6">
         <div className="flex flex-col lg:flex-row gap-0 lg:gap-4 h-screen w-full">
           {/* Sidebar de conversaciones - SOLO visible en escritorio */}
           <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-0 lg:h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
@@ -1605,10 +1605,10 @@ function Chat() {
           </aside>
           
           {/* Área principal del chat */}
-          <main className="flex-1 flex flex-col w-full min-w-0 overflow-x-hidden">
+          <main className="flex-1 flex flex-col w-full min-w-0 overflow-x-hidden h-full">
             {/* Header mejorado con contador de tokens */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-30 w-full">
-              <div className="w-full px-3 py-2 sm:px-4 sm:py-3 lg:max-w-3xl lg:mx-auto">
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-30 w-full flex-shrink-0">
+              <div className="w-full px-4 py-2 sm:px-4 sm:py-3 lg:max-w-3xl lg:mx-auto">
             <div className="flex justify-between items-center gap-2 sm:gap-4">
               <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                 <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent truncate">
@@ -1672,7 +1672,7 @@ function Chat() {
         </div>
 
             {/* Selector de modo de respuesta */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-2 sm:py-3 w-full">
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-4 py-2 sm:py-3 w-full flex-shrink-0">
               <div className="w-full lg:max-w-3xl lg:mx-auto">
             <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
               <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Modo:</span>
@@ -1708,7 +1708,7 @@ function Chat() {
             </div>
 
             {/* Área de mensajes con scroll */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden w-full px-3 sm:px-4 py-4 sm:py-6">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden w-full px-4 sm:px-4 py-4 sm:py-6 min-h-0">
               <div className="w-full flex flex-col gap-4 lg:max-w-3xl lg:mx-auto">
           {chatError && (
             <div className="mb-4 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300 px-4 py-3 rounded-r-lg animate-slide-in">
@@ -1718,8 +1718,8 @@ function Chat() {
 
               {/* Panel de bienvenida cuando no hay mensajes */}
               {messages.length === 0 && (
-                <div className="flex items-center justify-center min-h-[60vh] w-full px-3 sm:px-4">
-                  <div className="w-full px-2 sm:px-4 py-6 sm:py-8 lg:max-w-2xl lg:mx-auto">
+                <div className="flex items-center justify-center min-h-[60vh] w-full">
+                  <div className="w-full px-4 sm:px-4 py-6 sm:py-8 lg:max-w-2xl lg:mx-auto">
                 <div className="text-center mb-6 sm:mb-8">
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
                     👋 Bienvenido a Codex Trader
@@ -1785,7 +1785,7 @@ function Chat() {
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div 
-                  className={`w-full max-w-[90%] sm:max-w-[680px] rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-md transition-all hover:shadow-lg ${
+                  className={`w-full max-w-[95%] sm:max-w-[680px] rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-md transition-all hover:shadow-lg ${
                     m.role === 'user' 
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-sm' 
                       : 'bg-gray-800 dark:bg-gray-700 text-gray-100 rounded-bl-sm border border-gray-700 dark:border-gray-600'
@@ -1823,8 +1823,8 @@ function Chat() {
             </div>
             
             {/* Formulario de input mejorado estilo ChatGPT */}
-            <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg sticky bottom-0 z-10 w-full">
-              <div className="w-full px-3 sm:px-4 py-3 sm:py-4 lg:max-w-3xl lg:mx-auto">
+            <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg sticky bottom-0 z-10 w-full flex-shrink-0">
+              <div className="w-full px-4 sm:px-4 py-3 sm:py-4 lg:max-w-3xl lg:mx-auto">
             {/* Texto de advertencia */}
             <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-2 text-center px-2">
               Codex usa contenido profesional de trading con fines educativos. No da recomendaciones personalizadas de inversión.
