@@ -1220,12 +1220,12 @@ function Chat() {
 
                 {/* Enlace a más información */}
                 <div className="mt-6 pt-6 border-t border-gray-700/50">
-                  <a
-                    href="/about"
-                    className="text-sm text-cyan-400 hover:text-cyan-300 text-center block hover:underline"
+                  <Link
+                    href="#que-es-codex-trader"
+                    className="text-sm text-cyan-400 hover:text-cyan-300 text-center block hover:underline transition-colors cursor-pointer"
                   >
                     ¿Primera vez aquí? Conoce qué es Codex Trader
-                  </a>
+                  </Link>
                 </div>
               </div>
 
@@ -1237,6 +1237,59 @@ function Chat() {
           </div>
           </div>
         </main>
+
+        {/* Sección ¿Qué es Codex Trader? */}
+        <section id="que-es-codex-trader" className="relative z-10 border-t border-gray-800/50 bg-gray-900/20 backdrop-blur-sm py-16 scroll-mt-20">
+          <div className="max-w-4xl mx-auto px-6 sm:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
+                ¿Qué es Codex Trader?
+              </h2>
+            </div>
+            
+            <div className="bg-gray-800/40 backdrop-blur-md rounded-xl shadow-lg border border-gray-700/50 p-8 lg:p-10">
+              <p className="text-lg text-gray-300 mb-6 leading-relaxed">
+                Codex Trader es un asistente de IA especializado en trading profesional, entrenado con años de estudio y contenido profesional de trading para ayudarte a entender mejor los mercados financieros.
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-xl mt-1">📊</span>
+                  <p className="text-gray-300 flex-1">
+                    Ayuda a entender gestión de riesgo, tamaño de posición y drawdown.
+                  </p>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <span className="text-xl mt-1">🧠</span>
+                  <p className="text-gray-300 flex-1">
+                    Profundiza en psicología del trader y disciplina emocional.
+                  </p>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <span className="text-xl mt-1">📈</span>
+                  <p className="text-gray-300 flex-1">
+                    Analiza setups, ideas de estrategia y marcos temporales (scalping, intradía, swing trading).
+                  </p>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <span className="text-xl mt-1">🎓</span>
+                  <p className="text-gray-300 flex-1">
+                    Es una herramienta educativa, sin recomendaciones directas de compra/venta.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-8 pt-6 border-t border-gray-700/50">
+                <p className="text-sm text-gray-400 leading-relaxed">
+                  Codex Trader está diseñado para ser tu compañero de estudio en trading. Usa contenido profesional indexado para darte respuestas contextualizadas y ayudarte a desarrollar tu conocimiento sobre los mercados financieros.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Sección de Planes y Precios */}
         <section className="relative z-10 border-t border-gray-800/50 bg-gray-900/20 backdrop-blur-sm py-16">
