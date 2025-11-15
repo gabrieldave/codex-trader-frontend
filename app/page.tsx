@@ -1493,8 +1493,8 @@ function Chat() {
       {/* Contenedor principal: sin max-width en móvil, centrado en escritorio */}
       <div className="w-full h-screen flex flex-col overflow-hidden lg:max-w-6xl lg:mx-auto lg:px-6">
         <div className="flex flex-col lg:flex-row gap-0 lg:gap-4 flex-1 min-h-0 w-full overflow-hidden">
-          {/* Sidebar de conversaciones - SOLO visible en escritorio */}
-          {showConversationsSidebar && (
+          {/* Sidebar de conversaciones - SOLO visible en escritorio cuando showConversationsSidebar es true */}
+          {showConversationsSidebar ? (
           <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-0 lg:h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
           {/* Header del sidebar */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
