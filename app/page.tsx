@@ -1562,10 +1562,6 @@ function Chat() {
                       // Deshabilitar cambio de conversación mientras está cargando
                       if (isLoading) return
                       setCurrentConversationId(conv.id)
-                      // Cerrar sidebar en móvil al seleccionar una conversación
-                      if (window.innerWidth < 1024) {
-                        setShowConversationsSidebar(false)
-                      }
                     }}
                   >
                     <div className="flex items-start justify-between">
