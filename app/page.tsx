@@ -44,7 +44,28 @@ function Chat() {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<Array<{id: string, title: string, created_at: string, updated_at: string}>>([])
   const [isLoadingConversations, setIsLoadingConversations] = useState(false)
-  const [showConversationsSidebar, setShowConversationsSidebar] = useState(true)
+  // Sidebar solo visible en escritorio por defecto
+  const [showConversationsSidebar, setShowConversationsSidebar] = useState(false)
+  
+  // Detectar tamaño de pantalla y ajustar sidebar
+  useEffect(() => {
+    const checkScreenSize = () => {
+      // Solo mostrar sidebar en escritorio (lg: 1024px+)
+      if (window.innerWidth >= 1024) {
+        setShowConversationsSidebar(true)
+      } else {
+        setShowConversationsSidebar(false)
+      }
+    }
+    
+    // Verificar al cargar
+    checkScreenSize()
+    
+    // Escuchar cambios de tamaño
+    window.addEventListener('resize', checkScreenSize)
+    
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
   
   // Estado para el modo de respuesta
   const [responseMode, setResponseMode] = useState<'fast' | 'deep'>('fast')
