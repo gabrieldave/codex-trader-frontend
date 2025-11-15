@@ -1,0 +1,63 @@
+# Variables de Entorno para Vercel - Codex Trader
+# Copia y pega estas variables en Vercel Dashboard
+
+# ============================================
+# VARIABLES OBLIGATORIAS (Públicas)
+# ============================================
+
+# 1. URL de Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://eixvqedpyuybfywmdulg.supabase.co
+
+# 2. Anon Key de Supabase (NO uses service_role aquí)
+# Obtén este valor en: Supabase Dashboard > Settings > API > anon public key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=TU_ANON_KEY_AQUI
+
+# 3. URL del Backend en Railway (con subdominio personalizado)
+NEXT_PUBLIC_BACKEND_URL=https://api.codextrader.tech
+
+# ============================================
+# VARIABLES OPCIONALES (Privadas - Solo para API Routes)
+# ============================================
+
+# 4. URL del Backend para API Routes del servidor
+BACKEND_URL=https://api.codextrader.tech
+
+# ============================================
+# INSTRUCCIONES
+# ============================================
+# 
+# 1. Ve a: https://vercel.com/dashboard
+# 2. Selecciona tu proyecto (codex-trader-frontend)
+# 3. Ve a: Settings > Environment Variables
+# 4. Para cada variable:
+#    - Haz clic en "Add New"
+#    - Key: El nombre de la variable (ej: NEXT_PUBLIC_SUPABASE_URL)
+#    - Value: El valor (ej: https://eixvqedpyuybfywmdulg.supabase.co)
+#    - Environments: Marca Production, Preview (y Development si quieres)
+#    - Haz clic en "Save"
+# 
+# 5. IMPORTANTE: Después de agregar todas las variables, 
+#    ve a Deployments y haz "Redeploy" del último deployment
+# 
+# ============================================
+# DÓNDE OBTENER LOS VALORES
+# ============================================
+# 
+# NEXT_PUBLIC_SUPABASE_URL:
+#   - Ya está aquí: https://eixvqedpyuybfywmdulg.supabase.co
+# 
+# NEXT_PUBLIC_SUPABASE_ANON_KEY:
+#   - Ve a: https://app.supabase.com
+#   - Selecciona tu proyecto
+#   - Ve a: Settings > API
+#   - Copia el valor de "anon public" key
+#   - ⚠️ NO uses la "service_role" key (es secreta)
+# 
+# NEXT_PUBLIC_BACKEND_URL:
+#   - Ya está aquí: https://api.codextrader.tech
+#   - Si cambias el dominio en Railway, actualiza esto
+# 
+# BACKEND_URL:
+#   - Mismo valor que NEXT_PUBLIC_BACKEND_URL
+#   - https://api.codextrader.tech
+
