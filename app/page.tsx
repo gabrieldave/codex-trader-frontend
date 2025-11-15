@@ -1542,8 +1542,8 @@ function Chat() {
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Conversaciones</h2>
               <button
                 onClick={() => setShowConversationsSidebar(false)}
-                className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                title="Ocultar sidebar"
+                className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 lg:block"
+                title="Cerrar conversaciones"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
