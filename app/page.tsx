@@ -44,8 +44,7 @@ function Chat() {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<Array<{id: string, title: string, created_at: string, updated_at: string}>>([])
   const [isLoadingConversations, setIsLoadingConversations] = useState(false)
-  // En móvil, el sidebar está cerrado por defecto. En escritorio, abierto.
-  const [showConversationsSidebar, setShowConversationsSidebar] = useState(false)
+  const [showConversationsSidebar, setShowConversationsSidebar] = useState(true)
   
   // Estado para el modo de respuesta
   const [responseMode, setResponseMode] = useState<'fast' | 'deep'>('fast')
@@ -275,25 +274,6 @@ function Chat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, user])
 
-  // Inicializar sidebar: abierto en escritorio, cerrado en móvil
-  useEffect(() => {
-    const checkScreenSize = () => {
-      if (window.innerWidth >= 1024) {
-        // Escritorio (lg breakpoint)
-        setShowConversationsSidebar(true)
-      } else {
-        // Móvil/tablet
-        setShowConversationsSidebar(false)
-      }
-    }
-    
-    // Verificar al cargar
-    checkScreenSize()
-    
-    // Escuchar cambios de tamaño de ventana
-    window.addEventListener('resize', checkScreenSize)
-    return () => window.removeEventListener('resize', checkScreenSize)
-  }, [])
   
   // Cargar mensajes cuando cambia la conversación actual
   useEffect(() => {
@@ -1507,35 +1487,14 @@ function Chat() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <Toaster position="top-center" />
       
-      {/* Contenedor principal centrado */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Contenedor principal: sin max-width en móvil, centrado en escritorio */}
+      <div className="w-full px-3 py-0 lg:max-w-7xl lg:mx-auto lg:px-6 lg:py-0">
         <div className="flex flex-col lg:flex-row gap-0 lg:gap-4 h-screen">
-          {/* Overlay oscuro para móvil cuando el sidebar está abierto */}
-          {showConversationsSidebar && (
-            <div 
-              className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-              onClick={() => setShowConversationsSidebar(false)}
-            />
-          )}
-          
-          {/* Sidebar de conversaciones */}
-          <aside className={`
-            fixed lg:relative
-            top-0 left-0
-            w-80 lg:w-72
-            h-full lg:h-screen
-            flex-shrink-0
-            bg-white dark:bg-gray-800
-            border-r border-gray-200 dark:border-gray-700
-            flex flex-col
-            lg:sticky lg:top-0
-            z-50 lg:z-auto
-            transform transition-transform duration-300 ease-in-out
-            ${showConversationsSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          `}>
+          {/* Sidebar de conversaciones - SOLO visible en escritorio */}
+          <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-0 lg:h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
           {/* Header del sidebar */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
@@ -1551,13 +1510,7 @@ function Chat() {
               </button>
             </div>
             <button
-              onClick={() => {
-                createNewConversation()
-                // Cerrar sidebar en móvil al crear nueva conversación
-                if (window.innerWidth < 1024) {
-                  setShowConversationsSidebar(false)
-                }
-              }}
+              onClick={createNewConversation}
               disabled={isLoading}
               className="w-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-md disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:transform-none mb-2"
             >
@@ -1656,34 +1609,12 @@ function Chat() {
           </aside>
           
           {/* Área principal del chat */}
-          <main className="flex-1 flex flex-col min-w-0 w-full">
+          <main className="flex-1 flex flex-col w-full min-w-0">
             {/* Header mejorado con contador de tokens */}
             <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-30">
-              <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+              <div className="w-full px-3 py-2 sm:px-4 sm:py-3 lg:max-w-3xl lg:mx-auto">
             <div className="flex justify-between items-center gap-2 sm:gap-4">
               <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                {/* Botón para abrir sidebar (siempre visible en móvil, solo cuando está cerrado en escritorio) */}
-                <button
-                  onClick={() => setShowConversationsSidebar(true)}
-                  className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors lg:hidden"
-                  title="Abrir conversaciones"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-                {/* Botón para abrir sidebar en escritorio (solo cuando está cerrado) */}
-                {!showConversationsSidebar && (
-                  <button
-                    onClick={() => setShowConversationsSidebar(true)}
-                    className="hidden lg:flex p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                    title="Abrir conversaciones"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  </button>
-                )}
                 <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent truncate">
                   CODEX TRADER
                 </h1>
@@ -1746,7 +1677,7 @@ function Chat() {
 
             {/* Selector de modo de respuesta */}
             <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-2 sm:py-3">
-              <div className="max-w-3xl mx-auto">
+              <div className="w-full lg:max-w-3xl lg:mx-auto">
             <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
               <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Modo:</span>
               <div className="flex gap-1 sm:gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
@@ -1781,8 +1712,8 @@ function Chat() {
             </div>
 
             {/* Área de mensajes con scroll */}
-            <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 sm:py-6">
-              <div className="max-w-3xl mx-auto">
+            <div className="flex-1 overflow-y-auto w-full px-3 sm:px-4 py-4 sm:py-6">
+              <div className="w-full flex flex-col gap-4 lg:max-w-3xl lg:mx-auto">
           {chatError && (
             <div className="mb-4 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300 px-4 py-3 rounded-r-lg animate-slide-in">
               <strong>Error:</strong> {chatError}
@@ -1791,8 +1722,8 @@ function Chat() {
 
               {/* Panel de bienvenida cuando no hay mensajes */}
               {messages.length === 0 && (
-                <div className="flex items-center justify-center min-h-[60vh]">
-                  <div className="max-w-2xl w-full px-4 sm:px-6 py-6 sm:py-8">
+                <div className="flex items-center justify-center min-h-[60vh] w-full">
+                  <div className="w-full px-4 sm:px-6 py-6 sm:py-8 lg:max-w-2xl">
                 <div className="text-center mb-6 sm:mb-8">
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
                     👋 Bienvenido a Codex Trader
@@ -1850,7 +1781,7 @@ function Chat() {
                 </div>
               )}
               
-              <div className="flex flex-col gap-4">
+              <div className="w-full flex flex-col gap-4">
             {messages.map((m, index) => (
               <div 
                 key={m.id} 
@@ -1897,7 +1828,7 @@ function Chat() {
             
             {/* Formulario de input mejorado estilo ChatGPT */}
             <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg sticky bottom-0 z-10">
-              <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+              <div className="w-full px-3 sm:px-4 py-3 sm:py-4 lg:max-w-3xl lg:mx-auto">
             {/* Texto de advertencia */}
             <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-2 text-center px-2">
               Codex usa contenido profesional de trading con fines educativos. No da recomendaciones personalizadas de inversión.
