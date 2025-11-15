@@ -1494,7 +1494,7 @@ function Chat() {
         <div className="flex flex-col lg:flex-row gap-0 lg:gap-4 h-screen">
           {/* Sidebar de conversaciones */}
           {showConversationsSidebar && (
-            <aside className="w-full lg:w-72 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col h-screen lg:h-auto lg:sticky lg:top-0">
+            <aside className="w-full lg:w-72 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col lg:sticky lg:top-0 lg:h-screen">
           {/* Header del sidebar */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
@@ -1797,7 +1797,7 @@ function Chat() {
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div 
-                  className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-md transition-all hover:shadow-lg ${
+                  className={`max-w-[85%] sm:max-w-[680px] rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-md transition-all hover:shadow-lg ${
                     m.role === 'user' 
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-sm' 
                       : 'bg-gray-800 dark:bg-gray-700 text-gray-100 rounded-bl-sm border border-gray-700 dark:border-gray-600'
