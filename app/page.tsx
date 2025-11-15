@@ -1491,9 +1491,10 @@ function Chat() {
       <Toaster position="top-center" />
       
       {/* Contenedor principal: sin max-width en móvil, centrado en escritorio */}
-      <div className="w-full h-screen flex flex-col lg:max-w-6xl lg:mx-auto lg:px-6">
-        <div className="flex flex-col lg:flex-row gap-0 lg:gap-4 flex-1 min-h-0 w-full">
+      <div className="w-full h-screen flex flex-col overflow-hidden lg:max-w-6xl lg:mx-auto lg:px-6">
+        <div className="flex flex-col lg:flex-row gap-0 lg:gap-4 flex-1 min-h-0 w-full overflow-hidden">
           {/* Sidebar de conversaciones - SOLO visible en escritorio */}
+          {showConversationsSidebar && (
           <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-0 lg:h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
           {/* Header del sidebar */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -1605,7 +1606,7 @@ function Chat() {
           </aside>
           
           {/* Área principal del chat */}
-          <main className="flex-1 flex flex-col w-full min-w-0 overflow-x-hidden h-full">
+          <main className="flex-1 flex flex-col w-full min-w-0 overflow-hidden">
             {/* Header mejorado con contador de tokens */}
             <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-30 w-full flex-shrink-0">
               <div className="w-full px-4 py-2 sm:px-4 sm:py-3 lg:max-w-3xl lg:mx-auto">
@@ -1708,7 +1709,7 @@ function Chat() {
             </div>
 
             {/* Área de mensajes con scroll */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden w-full px-4 sm:px-4 py-4 sm:py-6 min-h-0">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden w-full px-4 sm:px-4 py-4 sm:py-6 min-h-0 flex flex-col">
               <div className="w-full flex flex-col gap-4 lg:max-w-3xl lg:mx-auto">
           {chatError && (
             <div className="mb-4 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300 px-4 py-3 rounded-r-lg animate-slide-in">
