@@ -1610,34 +1610,34 @@ function Chat() {
           <main className="flex-1 flex flex-col w-full min-w-0 overflow-hidden">
             {/* Header mejorado con contador de tokens */}
             <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-30 w-full flex-shrink-0">
-              <div className="w-full px-4 py-2 sm:px-4 sm:py-3 lg:max-w-3xl lg:mx-auto">
-            <div className="flex justify-between items-center gap-2 sm:gap-4">
-              <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent truncate">
+              <div className="w-full px-3 py-1.5 sm:px-4 sm:py-3 lg:max-w-3xl lg:mx-auto">
+            <div className="flex justify-between items-center gap-1.5 sm:gap-4">
+              <div className="flex items-center gap-1.5 sm:gap-4 min-w-0 flex-1">
+                <h1 className="text-sm sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent truncate">
                   CODEX TRADER
                 </h1>
-                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate hidden sm:block">
+                <div className="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 truncate hidden sm:block">
                   {user.email}
                 </div>
               </div>
-              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
                 {/* Contador de tokens */}
-                <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-0.5 sm:gap-2 px-1.5 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   {isLoadingTokens ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                   ) : (
                     <>
-                      <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className={`text-xs sm:text-sm font-semibold ${
+                      <span className={`text-[10px] sm:text-sm font-semibold ${
                         tokensRestantes !== null && tokensRestantes < 0 
                           ? 'text-red-600 dark:text-red-400' 
                           : 'text-blue-700 dark:text-blue-300'
                       }`}>
                         {tokensRestantes !== null ? tokensRestantes.toLocaleString() : '...'}
                       </span>
-                      <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">tokens</span>
+                      <span className="text-[8px] sm:text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">tokens</span>
                     </>
                   )}
                 </div>
@@ -1654,19 +1654,19 @@ function Chat() {
                 <button
                   onClick={() => router.push('/planes')}
                   disabled={isLoadingTokens || isLoading}
-                  className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 transition-all transform hover:scale-105 shadow-md hover:shadow-lg disabled:transform-none disabled:cursor-not-allowed"
+                  className="px-1.5 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 transition-all transform hover:scale-105 shadow-md hover:shadow-lg disabled:transform-none disabled:cursor-not-allowed"
                   title="Ver planes y suscripciones"
                 >
                   <span className="hidden sm:inline">Recargar</span>
-                  <span className="sm:hidden">💰</span>
+                  <span className="sm:hidden text-xs">💰</span>
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  className="px-1.5 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                   title="Cerrar sesión"
                 >
                   <span className="hidden sm:inline">Salir</span>
-                  <span className="sm:hidden">🚪</span>
+                  <span className="sm:hidden text-xs">🚪</span>
                 </button>
               </div>
             </div>
@@ -1674,14 +1674,14 @@ function Chat() {
         </div>
 
             {/* Selector de modo de respuesta */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-4 py-2 sm:py-3 w-full flex-shrink-0">
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-1.5 sm:py-3 w-full flex-shrink-0">
               <div className="w-full lg:max-w-3xl lg:mx-auto">
-            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-              <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Modo:</span>
-              <div className="flex gap-1 sm:gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <div className="flex items-center gap-1.5 sm:gap-4 flex-wrap">
+              <span className="text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-300">Modo:</span>
+              <div className="flex gap-0.5 sm:gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 sm:p-1">
                 <button
                   onClick={() => setResponseMode('fast')}
-                  className={`px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-md transition-all ${
+                  className={`px-1.5 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold rounded-md transition-all ${
                     responseMode === 'fast'
                       ? 'bg-cyan-600 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
@@ -1692,7 +1692,7 @@ function Chat() {
                 </button>
                 <button
                   onClick={() => setResponseMode('deep')}
-                  className={`px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-md transition-all ${
+                  className={`px-1.5 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold rounded-md transition-all ${
                     responseMode === 'deep'
                       ? 'bg-cyan-600 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
@@ -1703,15 +1703,15 @@ function Chat() {
                   <span className="sm:hidden">Profundo</span>
                 </button>
               </div>
-              <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
+              <span className="text-[8px] sm:text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
                 {responseMode === 'fast' ? 'Respuesta corta (3–4 párrafos)' : 'Resumen + explicación detallada'}
               </span>
               </div>
             </div>
 
             {/* Área de mensajes con scroll */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden w-full px-4 sm:px-4 py-4 sm:py-6 min-h-0 flex flex-col">
-              <div className="w-full flex flex-col gap-4 lg:max-w-3xl lg:mx-auto">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden w-full px-3 sm:px-4 py-3 sm:py-6 min-h-0 flex flex-col">
+              <div className="w-full flex flex-col gap-3 sm:gap-4 lg:max-w-3xl lg:mx-auto">
           {chatError && (
             <div className="mb-4 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300 px-4 py-3 rounded-r-lg animate-slide-in">
               <strong>Error:</strong> {chatError}
@@ -1720,19 +1720,19 @@ function Chat() {
 
               {/* Panel de bienvenida cuando no hay mensajes */}
               {messages.length === 0 && (
-                <div className="flex items-center justify-center min-h-[60vh] w-full">
-                  <div className="w-full px-4 sm:px-4 py-6 sm:py-8 lg:max-w-2xl lg:mx-auto">
-                <div className="text-center mb-6 sm:mb-8">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                <div className="flex items-center justify-center min-h-[50vh] sm:min-h-[60vh] w-full">
+                  <div className="w-full px-3 sm:px-4 py-4 sm:py-8 lg:max-w-2xl lg:mx-auto">
+                <div className="text-center mb-4 sm:mb-8">
+                  <h2 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
                     👋 Bienvenido a Codex Trader
                   </h2>
-                  <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-6">
+                  <p className="text-sm sm:text-lg text-gray-600 dark:text-gray-300 mb-4 sm:mb-6">
                     Tu asistente de IA especializado en trading, entrenado con contenido profesional de trading para ayudarte a entender mejor los mercados.
                   </p>
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                  <h3 className="text-base sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4">
                     Puedes preguntarme sobre:
                   </h3>
-                  <ul className="text-left max-w-md mx-auto space-y-2 text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-6">
+                  <ul className="text-left max-w-md mx-auto space-y-1.5 sm:space-y-2 text-xs sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6">
                     <li className="flex items-start">
                       <span className="mr-2">•</span>
                       <span>Gestión de riesgo y manejo de capital</span>
@@ -1750,31 +1750,31 @@ function Chat() {
                       <span>Ideas de estrategias según tu estilo (scalping, intradía, swing, etc.)</span>
                     </li>
                   </ul>
-                  <p className="text-sm text-amber-600 dark:text-amber-400 mb-8">
+                  <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-400 mb-4 sm:mb-8">
                     ⚠️ Uso educativo: no doy señales directas de compra/venta ni garantizo resultados.
                   </p>
                   
                   {/* Chips de sugerencias */}
-                  <div className="flex flex-wrap justify-center gap-2 sm:gap-3 px-2">
+                  <div className="flex flex-wrap justify-center gap-1.5 sm:gap-3 px-1">
                     <button
                       onClick={() => handleSuggestionClick('Gestión de riesgo para swing trading')}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
+                      className="px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
                     >
                       Gestión de riesgo para swing trading
                     </button>
                     <button
                       onClick={() => handleSuggestionClick('Psicología del trader y disciplina')}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
+                      className="px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
                     >
                       Psicología del trader y disciplina
                     </button>
                     <button
                       onClick={() => handleSuggestionClick('Cómo diseñar una estrategia paso a paso')}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
+                      className="px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
                     >
                       Cómo diseñar una estrategia paso a paso
                     </button>
-                    </div>
+                  </div>
                   </div>
                 </div>
               )}
@@ -1794,11 +1794,11 @@ function Chat() {
                   }`}
                 >
                   {m.role === 'assistant' && (
-                    <div className="flex items-center gap-2 mb-1 sm:mb-2">
-                      <span className="text-[10px] sm:text-xs font-semibold text-cyan-400">Codex</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <span className="text-[9px] sm:text-xs font-semibold text-cyan-400">Codex</span>
                     </div>
                   )}
-                  <p className={`text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words ${
+                  <p className={`text-[11px] sm:text-sm leading-relaxed whitespace-pre-wrap break-words ${
                     m.role === 'user' ? 'text-white' : 'text-gray-100'
                   }`}>
                     {m.content}
@@ -1826,17 +1826,17 @@ function Chat() {
             
             {/* Formulario de input mejorado estilo ChatGPT */}
             <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg sticky bottom-0 z-10 w-full flex-shrink-0">
-              <div className="w-full px-4 sm:px-4 py-3 sm:py-4 lg:max-w-3xl lg:mx-auto">
+              <div className="w-full px-3 sm:px-4 py-2 sm:py-4 lg:max-w-3xl lg:mx-auto">
             {/* Texto de advertencia */}
-            <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-2 text-center px-2">
+            <p className="text-[8px] sm:text-xs text-gray-500 dark:text-gray-400 mb-1.5 sm:mb-2 text-center px-1">
               Codex usa contenido profesional de trading con fines educativos. No da recomendaciones personalizadas de inversión.
             </p>
             
-            <form onSubmit={handleSubmit} className="flex gap-2 sm:gap-3 items-end">
+            <form onSubmit={handleSubmit} className="flex gap-1.5 sm:gap-3 items-end">
               <div className="flex-1 relative">
                 <textarea
                   ref={inputRef}
-                  className="w-full p-3 sm:p-4 pr-10 sm:pr-12 border border-gray-300 dark:border-gray-600 rounded-2xl shadow-sm bg-gray-50 dark:bg-gray-700/50 text-sm sm:text-base text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none max-h-32 transition-all"
+                  className="w-full p-2.5 sm:p-4 pr-8 sm:pr-12 border border-gray-300 dark:border-gray-600 rounded-2xl shadow-sm bg-gray-50 dark:bg-gray-700/50 text-xs sm:text-base text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none max-h-28 sm:max-h-32 transition-all"
                   value={input}
                   placeholder={isLoading ? "Procesando..." : "Ej: Explícame una estrategia de gestión de riesgo para swing trading..."}
                   onChange={handleInputChange}
@@ -1853,7 +1853,7 @@ function Chat() {
               <button
                 type="submit"
                 disabled={isLoading || !input.trim() || !accessToken}
-                className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-full hover:from-cyan-500 hover:to-blue-500 active:from-cyan-700 active:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg text-xs sm:text-sm font-semibold disabled:transform-none flex items-center justify-center min-w-[80px] sm:min-w-[100px]"
+                className="px-3 sm:px-6 py-2.5 sm:py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-full hover:from-cyan-500 hover:to-blue-500 active:from-cyan-700 active:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg text-[10px] sm:text-sm font-semibold disabled:transform-none flex items-center justify-center min-w-[60px] sm:min-w-[100px]"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
