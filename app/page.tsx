@@ -942,41 +942,41 @@ function Chat() {
         </div>
 
         {/* Contenedor principal */}
-        <main className="relative z-10 flex-1 flex items-center">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-8 flex-col lg:flex-row gap-8 lg:gap-12">
+        <main className="relative z-10 flex-1 flex items-center py-8 sm:py-12 lg:py-0">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 flex-col lg:flex-row gap-8 lg:gap-12">
             {/* Hero Section - Izquierda (Desktop) / Arriba (Mobile) */}
-            <div className="flex-1 flex flex-col justify-center">
-            <div className="max-w-xl mx-auto lg:mx-0">
+            <div className="flex-1 flex flex-col justify-center w-full lg:w-auto">
+            <div className="max-w-xl mx-auto lg:mx-0 px-2 sm:px-0">
               {/* Logo y Título */}
-              <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 tracking-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 tracking-tight">
                 CODEX TRADER
               </h1>
               
-              <h2 className="text-xl lg:text-2xl text-cyan-400 mb-6 font-semibold">
+              <h2 className="text-lg sm:text-xl lg:text-2xl text-cyan-400 mb-6 font-semibold">
                 Asistente de IA especializado en Trading
               </h2>
               
-              <p className="text-lg text-gray-300 mb-8 leading-relaxed">
+              <p className="text-base sm:text-lg text-gray-300 mb-6 sm:mb-8 leading-relaxed">
                 Entrenado con años de estudio en trading profesional para responder tus dudas al instante.
               </p>
               
-              <p className="text-base text-gray-400 mb-8 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 leading-relaxed">
                 Accede a un cerebro enfocado en trading que analiza contenido profesional y te ayuda a entender conceptos, estrategias y psicología del mercado en un solo lugar.
               </p>
               
               {/* Bullets de beneficios */}
-              <div className="space-y-4 mb-10">
+              <div className="space-y-3 sm:space-y-4 mb-8 sm:mb-10">
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl mt-1">📘</span>
-                  <p className="text-gray-300 flex-1">Explicaciones claras de conceptos avanzados</p>
+                  <span className="text-xl sm:text-2xl mt-0.5 sm:mt-1 flex-shrink-0">📘</span>
+                  <p className="text-sm sm:text-base text-gray-300 flex-1">Explicaciones claras de conceptos avanzados</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl mt-1">📊</span>
-                  <p className="text-gray-300 flex-1">Ideas de estrategia basadas en contenido profesional</p>
+                  <span className="text-xl sm:text-2xl mt-0.5 sm:mt-1 flex-shrink-0">📊</span>
+                  <p className="text-sm sm:text-base text-gray-300 flex-1">Ideas de estrategia basadas en contenido profesional</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl mt-1">🧠</span>
-                  <p className="text-gray-300 flex-1">Respuestas con contexto, no opiniones al azar</p>
+                  <span className="text-xl sm:text-2xl mt-0.5 sm:mt-1 flex-shrink-0">🧠</span>
+                  <p className="text-sm sm:text-base text-gray-300 flex-1">Respuestas con contexto, no opiniones al azar</p>
                 </div>
               </div>
               
@@ -991,11 +991,11 @@ function Chat() {
               </div>
               
               {/* Ejemplos de preguntas */}
-              <div className="mt-10 p-4 bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700/50">
-                <h3 className="text-sm font-semibold text-gray-300 mb-3">
+              <div className="mt-8 sm:mt-10 p-4 sm:p-5 bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700/50">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-3">
                   Ejemplos de lo que puedes preguntar:
                 </h3>
-                <ul className="space-y-2 text-sm text-gray-400">
+                <ul className="space-y-2 text-xs sm:text-sm text-gray-400">
                   <li>• Explícame gestión de riesgo para swing trading.</li>
                   <li>• ¿Cómo combinan soportes, resistencias y volumen los profesionales?</li>
                   <li>• ¿Qué recomiendan para controlar las emociones al operar?</li>
@@ -1005,10 +1005,10 @@ function Chat() {
           </div>
 
             {/* Tarjeta de Login - Derecha (Desktop) / Abajo (Mobile) */}
-            <div className="flex-shrink-0 w-full lg:w-[500px] xl:w-[550px] flex items-center justify-center">
-            <div className="w-full max-w-md">
+            <div className="flex-shrink-0 w-full lg:w-[500px] xl:w-[550px] flex items-center justify-center px-4 sm:px-0">
+            <div className="w-full max-w-[420px] lg:max-w-md">
               {/* Tarjeta con glassmorphism */}
-              <div className="bg-gray-800/40 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50 p-8 lg:p-10">
+              <div className="bg-gray-800/40 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50 p-6 sm:p-8 lg:p-10">
                 {/* Tabs */}
                 <div className="flex mb-8 bg-gray-900/50 rounded-lg p-1">
                   <button
@@ -1222,7 +1222,7 @@ function Chat() {
                 <div className="mt-6 pt-6 border-t border-gray-700/50">
                   <Link
                     href="#que-es-codex-trader"
-                    className="text-sm text-cyan-400 hover:text-cyan-300 text-center block hover:underline transition-colors cursor-pointer"
+                    className="text-xs sm:text-sm text-cyan-400 hover:text-cyan-300 text-center block hover:underline transition-colors cursor-pointer px-2"
                   >
                     ¿Primera vez aquí? Conoce qué es Codex Trader
                   </Link>
@@ -1230,7 +1230,7 @@ function Chat() {
               </div>
 
               {/* Disclaimer */}
-              <p className="text-xs text-gray-500 text-center mt-6 px-4">
+              <p className="text-xs text-gray-500 text-center mt-6 px-2 sm:px-4 leading-relaxed">
                 Codex Trader es una herramienta educativa. No ofrece asesoría financiera personalizada ni garantiza resultados en el mercado.
               </p>
             </div>
@@ -1239,51 +1239,51 @@ function Chat() {
         </main>
 
         {/* Sección ¿Qué es Codex Trader? */}
-        <section id="que-es-codex-trader" className="relative z-10 border-t border-gray-800/50 bg-gray-900/20 backdrop-blur-sm py-16 scroll-mt-20">
-          <div className="max-w-4xl mx-auto px-6 sm:px-8">
+        <section id="que-es-codex-trader" className="relative z-10 border-t border-gray-800/50 bg-gray-900/20 backdrop-blur-sm py-12 sm:py-16 scroll-mt-20">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
                 ¿Qué es Codex Trader?
               </h2>
             </div>
             
-            <div className="bg-gray-800/40 backdrop-blur-md rounded-xl shadow-lg border border-gray-700/50 p-8 lg:p-10">
-              <p className="text-lg text-gray-300 mb-6 leading-relaxed">
+            <div className="bg-gray-800/40 backdrop-blur-md rounded-xl shadow-lg border border-gray-700/50 p-6 sm:p-8 lg:p-10">
+              <p className="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed">
                 Codex Trader es un asistente de IA especializado en trading profesional, entrenado con años de estudio y contenido profesional de trading para ayudarte a entender mejor los mercados financieros.
               </p>
               
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-start gap-3">
-                  <span className="text-xl mt-1">📊</span>
-                  <p className="text-gray-300 flex-1">
+                  <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">📊</span>
+                  <p className="text-sm sm:text-base text-gray-300 flex-1">
                     Ayuda a entender gestión de riesgo, tamaño de posición y drawdown.
                   </p>
                 </div>
                 
                 <div className="flex items-start gap-3">
-                  <span className="text-xl mt-1">🧠</span>
-                  <p className="text-gray-300 flex-1">
+                  <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">🧠</span>
+                  <p className="text-sm sm:text-base text-gray-300 flex-1">
                     Profundiza en psicología del trader y disciplina emocional.
                   </p>
                 </div>
                 
                 <div className="flex items-start gap-3">
-                  <span className="text-xl mt-1">📈</span>
-                  <p className="text-gray-300 flex-1">
+                  <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">📈</span>
+                  <p className="text-sm sm:text-base text-gray-300 flex-1">
                     Analiza setups, ideas de estrategia y marcos temporales (scalping, intradía, swing trading).
                   </p>
                 </div>
                 
                 <div className="flex items-start gap-3">
-                  <span className="text-xl mt-1">🎓</span>
-                  <p className="text-gray-300 flex-1">
+                  <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">🎓</span>
+                  <p className="text-sm sm:text-base text-gray-300 flex-1">
                     Es una herramienta educativa, sin recomendaciones directas de compra/venta.
                   </p>
                 </div>
               </div>
               
-              <div className="mt-8 pt-6 border-t border-gray-700/50">
-                <p className="text-sm text-gray-400 leading-relaxed">
+              <div className="mt-6 sm:mt-8 pt-6 border-t border-gray-700/50">
+                <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
                   Codex Trader está diseñado para ser tu compañero de estudio en trading. Usa contenido profesional indexado para darte respuestas contextualizadas y ayudarte a desarrollar tu conocimiento sobre los mercados financieros.
                 </p>
               </div>
@@ -1292,8 +1292,8 @@ function Chat() {
         </section>
 
         {/* Sección de Planes y Precios */}
-        <section className="relative z-10 border-t border-gray-800/50 bg-gray-900/20 backdrop-blur-sm py-16">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8">
+        <section className="relative z-10 border-t border-gray-800/50 bg-gray-900/20 backdrop-blur-sm py-12 sm:py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
                 Planes y precios
@@ -1352,8 +1352,8 @@ function Chat() {
 
         {/* Footer con contacto, comunidad, redes y testimonios */}
         <footer className="relative z-10 border-t border-gray-800/50 bg-gray-900/30 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-6 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
               {/* Soporte y ventas */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-300 mb-3">Soporte técnico y ventas de cursos</h3>
@@ -1373,7 +1373,7 @@ function Chat() {
 
               {/* Comunidad */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-300 mb-3">Únete a la comunidad</h3>
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-3">Únete a la comunidad</h3>
                 <div className="space-y-2">
                   <a
                     href="https://chat.whatsapp.com/Lryh2qr01r24zLPw3Yojmt?mode=ems_copy_c"
@@ -1396,7 +1396,7 @@ function Chat() {
 
               {/* Testimonios */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-300 mb-3">Testimonios de alumnos</h3>
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-3">Testimonios de alumnos</h3>
                 <p className="text-xs text-gray-400 mb-3">Lee opiniones reales de quienes ya han trabajado con nosotros:</p>
                 <a
                   href="https://es.trustpilot.com/review/tradingsinperdidas.com"
@@ -1413,7 +1413,7 @@ function Chat() {
 
               {/* Redes oficiales */}
               <div>
-                <h3 className="text-sm font-semibold text-gray-300 mb-3">Sigue solo nuestras redes oficiales:</h3>
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-3">Sigue solo nuestras redes oficiales:</h3>
                 <div className="flex flex-wrap gap-3 mb-3">
                   <a href="https://www.facebook.com/share/1Jq9XMZ6xN/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-cyan-400 transition-colors" title="Facebook">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -1460,7 +1460,7 @@ function Chat() {
             {/* Sitios oficiales */}
             <div className="pt-6 border-t border-gray-800/50">
               <p className="text-xs font-semibold text-gray-400 mb-3">Sitios oficiales:</p>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3 sm:gap-4">
                 <a
                   href="https://landingpage.todossomostraders.com/"
                   target="_blank"
@@ -1606,9 +1606,9 @@ function Chat() {
       <div className="flex-1 flex flex-col">
         {/* Header mejorado con contador de tokens */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-4">
+          <div className="max-w-4xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+            <div className="flex justify-between items-center gap-2 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                 {!showConversationsSidebar && (
                   <button
                     onClick={() => setShowConversationsSidebar(true)}
@@ -1620,16 +1620,16 @@ function Chat() {
                     </svg>
                   </button>
                 )}
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent truncate">
                   CODEX TRADER
                 </h1>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate hidden sm:block">
                   {user.email}
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                 {/* Contador de tokens */}
-                <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   {isLoadingTokens ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                   ) : (
@@ -1637,14 +1637,14 @@ function Chat() {
                       <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className={`font-semibold ${
+                      <span className={`text-xs sm:text-sm font-semibold ${
                         tokensRestantes !== null && tokensRestantes < 0 
                           ? 'text-red-600 dark:text-red-400' 
                           : 'text-blue-700 dark:text-blue-300'
                       }`}>
                         {tokensRestantes !== null ? tokensRestantes.toLocaleString() : '...'}
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">tokens</span>
+                      <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">tokens</span>
                     </>
                   )}
                 </div>
@@ -1661,16 +1661,19 @@ function Chat() {
                 <button
                   onClick={() => router.push('/planes')}
                   disabled={isLoadingTokens || isLoading}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 transition-all transform hover:scale-105 shadow-md hover:shadow-lg disabled:transform-none disabled:cursor-not-allowed"
+                  className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 transition-all transform hover:scale-105 shadow-md hover:shadow-lg disabled:transform-none disabled:cursor-not-allowed"
                   title="Ver planes y suscripciones"
                 >
-                  Recargar
+                  <span className="hidden sm:inline">Recargar</span>
+                  <span className="sm:hidden">💰</span>
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  title="Cerrar sesión"
                 >
-                  Salir
+                  <span className="hidden sm:inline">Salir</span>
+                  <span className="sm:hidden">🚪</span>
                 </button>
               </div>
             </div>
@@ -1678,14 +1681,14 @@ function Chat() {
         </div>
 
         {/* Selector de modo de respuesta */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-2 sm:py-3">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-4 flex-wrap">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Modo de respuesta:</span>
-              <div className="flex gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+              <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Modo:</span>
+              <div className="flex gap-1 sm:gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                 <button
                   onClick={() => setResponseMode('fast')}
-                  className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
+                  className={`px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-md transition-all ${
                     responseMode === 'fast'
                       ? 'bg-cyan-600 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
@@ -1696,17 +1699,18 @@ function Chat() {
                 </button>
                 <button
                   onClick={() => setResponseMode('deep')}
-                  className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
+                  className={`px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-md transition-all ${
                     responseMode === 'deep'
                       ? 'bg-cyan-600 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
                   }`}
                   title="Resumen + explicación detallada"
                 >
-                  Estudio profundo
+                  <span className="hidden sm:inline">Estudio profundo</span>
+                  <span className="sm:hidden">Profundo</span>
                 </button>
               </div>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
                 {responseMode === 'fast' ? 'Respuesta corta (3–4 párrafos)' : 'Resumen + explicación detallada'}
               </span>
             </div>
@@ -1714,7 +1718,7 @@ function Chat() {
         </div>
 
         {/* Área de mensajes con scroll */}
-        <div className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 sm:py-6">
           <div className="max-w-4xl mx-auto">
           {chatError && (
             <div className="mb-4 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300 px-4 py-3 rounded-r-lg animate-slide-in">
@@ -1759,22 +1763,22 @@ function Chat() {
                   </p>
                   
                   {/* Chips de sugerencias */}
-                  <div className="flex flex-wrap justify-center gap-3">
+                  <div className="flex flex-wrap justify-center gap-2 sm:gap-3 px-2">
                     <button
                       onClick={() => handleSuggestionClick('Gestión de riesgo para swing trading')}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
                     >
                       Gestión de riesgo para swing trading
                     </button>
                     <button
                       onClick={() => handleSuggestionClick('Psicología del trader y disciplina')}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
                     >
                       Psicología del trader y disciplina
                     </button>
                     <button
                       onClick={() => handleSuggestionClick('Cómo diseñar una estrategia paso a paso')}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
                     >
                       Cómo diseñar una estrategia paso a paso
                     </button>
@@ -1792,18 +1796,18 @@ function Chat() {
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div 
-                  className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-md transition-all hover:shadow-lg ${
+                  className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-md transition-all hover:shadow-lg ${
                     m.role === 'user' 
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-sm' 
                       : 'bg-gray-800 dark:bg-gray-700 text-gray-100 rounded-bl-sm border border-gray-700 dark:border-gray-600'
                   }`}
                 >
                   {m.role === 'assistant' && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-semibold text-cyan-400">Codex</span>
+                    <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                      <span className="text-[10px] sm:text-xs font-semibold text-cyan-400">Codex</span>
                     </div>
                   )}
-                  <p className={`text-sm leading-relaxed whitespace-pre-wrap break-words ${
+                  <p className={`text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words ${
                     m.role === 'user' ? 'text-white' : 'text-gray-100'
                   }`}>
                     {m.content}
@@ -1832,17 +1836,17 @@ function Chat() {
         
         {/* Formulario de input mejorado estilo ChatGPT */}
         <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
-          <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
             {/* Texto de advertencia */}
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">
+            <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mb-2 text-center px-2">
               Codex usa contenido profesional de trading con fines educativos. No da recomendaciones personalizadas de inversión.
             </p>
             
-            <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+            <form onSubmit={handleSubmit} className="flex gap-2 sm:gap-3 items-end">
               <div className="flex-1 relative">
                 <textarea
                   ref={inputRef}
-                  className="w-full p-4 pr-12 border border-gray-300 dark:border-gray-600 rounded-2xl shadow-sm bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none max-h-32 transition-all"
+                  className="w-full p-3 sm:p-4 pr-10 sm:pr-12 border border-gray-300 dark:border-gray-600 rounded-2xl shadow-sm bg-gray-50 dark:bg-gray-700/50 text-sm sm:text-base text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none max-h-32 transition-all"
                   value={input}
                   placeholder={isLoading ? "Procesando..." : "Ej: Explícame una estrategia de gestión de riesgo para swing trading..."}
                   onChange={handleInputChange}
@@ -1859,7 +1863,7 @@ function Chat() {
               <button
                 type="submit"
                 disabled={isLoading || !input.trim() || !accessToken}
-                className="px-6 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-full hover:from-cyan-500 hover:to-blue-500 active:from-cyan-700 active:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg font-semibold disabled:transform-none flex items-center justify-center min-w-[100px]"
+                className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-full hover:from-cyan-500 hover:to-blue-500 active:from-cyan-700 active:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg text-xs sm:text-sm font-semibold disabled:transform-none flex items-center justify-center min-w-[80px] sm:min-w-[100px]"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
