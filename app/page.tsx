@@ -1491,7 +1491,7 @@ function Chat() {
       
       {/* Sidebar de conversaciones */}
       {showConversationsSidebar && (
-        <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+        <div className="w-full sm:w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
           {/* Header del sidebar */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
@@ -1729,18 +1729,18 @@ function Chat() {
           {/* Panel de bienvenida cuando no hay mensajes */}
           {messages.length === 0 && (
             <div className="flex items-center justify-center min-h-[60vh]">
-              <div className="max-w-2xl w-full px-6 py-8">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              <div className="max-w-2xl w-full px-4 sm:px-6 py-6 sm:py-8">
+                <div className="text-center mb-6 sm:mb-8">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
                     👋 Bienvenido a Codex Trader
                   </h2>
-                  <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+                  <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-6">
                     Tu asistente de IA especializado en trading, entrenado con contenido profesional de trading para ayudarte a entender mejor los mercados.
                   </p>
-                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
                     Puedes preguntarme sobre:
                   </h3>
-                  <ul className="text-left max-w-md mx-auto space-y-2 text-gray-700 dark:text-gray-300 mb-6">
+                  <ul className="text-left max-w-md mx-auto space-y-2 text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-6">
                     <li className="flex items-start">
                       <span className="mr-2">•</span>
                       <span>Gestión de riesgo y manejo de capital</span>
