@@ -44,7 +44,8 @@ function Chat() {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<Array<{id: string, title: string, created_at: string, updated_at: string}>>([])
   const [isLoadingConversations, setIsLoadingConversations] = useState(false)
-  const [showConversationsSidebar, setShowConversationsSidebar] = useState(true)
+  // En móvil, el sidebar está cerrado por defecto. En escritorio, abierto.
+  const [showConversationsSidebar, setShowConversationsSidebar] = useState(false)
   
   // Estado para el modo de respuesta
   const [responseMode, setResponseMode] = useState<'fast' | 'deep'>('fast')
@@ -273,6 +274,26 @@ function Chat() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, user])
+
+  // Inicializar sidebar: abierto en escritorio, cerrado en móvil
+  useEffect(() => {
+    const checkScreenSize = () => {
+      if (window.innerWidth >= 1024) {
+        // Escritorio (lg breakpoint)
+        setShowConversationsSidebar(true)
+      } else {
+        // Móvil/tablet
+        setShowConversationsSidebar(false)
+      }
+    }
+    
+    // Verificar al cargar
+    checkScreenSize()
+    
+    // Escuchar cambios de tamaño de ventana
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
   
   // Cargar mensajes cuando cambia la conversación actual
   useEffect(() => {
@@ -1492,9 +1513,29 @@ function Chat() {
       {/* Contenedor principal centrado */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-0 lg:gap-4 h-screen">
-          {/* Sidebar de conversaciones */}
+          {/* Overlay oscuro para móvil cuando el sidebar está abierto */}
           {showConversationsSidebar && (
-            <aside className="w-full lg:w-72 flex-shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col lg:sticky lg:top-0 lg:h-screen">
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+              onClick={() => setShowConversationsSidebar(false)}
+            />
+          )}
+          
+          {/* Sidebar de conversaciones */}
+          <aside className={`
+            fixed lg:relative
+            top-0 left-0
+            w-80 lg:w-72
+            h-full lg:h-screen
+            flex-shrink-0
+            bg-white dark:bg-gray-800
+            border-r border-gray-200 dark:border-gray-700
+            flex flex-col
+            lg:sticky lg:top-0
+            z-50 lg:z-auto
+            transform transition-transform duration-300 ease-in-out
+            ${showConversationsSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          `}>
           {/* Header del sidebar */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
@@ -1510,7 +1551,13 @@ function Chat() {
               </button>
             </div>
             <button
-              onClick={createNewConversation}
+              onClick={() => {
+                createNewConversation()
+                // Cerrar sidebar en móvil al crear nueva conversación
+                if (window.innerWidth < 1024) {
+                  setShowConversationsSidebar(false)
+                }
+              }}
               disabled={isLoading}
               className="w-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-md disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:transform-none mb-2"
             >
@@ -1562,6 +1609,10 @@ function Chat() {
                       // Deshabilitar cambio de conversación mientras está cargando
                       if (isLoading) return
                       setCurrentConversationId(conv.id)
+                      // Cerrar sidebar en móvil al seleccionar una conversación
+                      if (window.innerWidth < 1024) {
+                        setShowConversationsSidebar(false)
+                      }
                     }}
                   >
                     <div className="flex items-start justify-between">
@@ -1603,20 +1654,30 @@ function Chat() {
             )}
             </div>
           </aside>
-          )}
           
           {/* Área principal del chat */}
-          <main className="flex-1 flex flex-col min-w-0">
+          <main className="flex-1 flex flex-col min-w-0 w-full">
             {/* Header mejorado con contador de tokens */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-10">
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-30">
               <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
             <div className="flex justify-between items-center gap-2 sm:gap-4">
               <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                {/* Botón para abrir sidebar (siempre visible en móvil, solo cuando está cerrado en escritorio) */}
+                <button
+                  onClick={() => setShowConversationsSidebar(true)}
+                  className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors lg:hidden"
+                  title="Abrir conversaciones"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                {/* Botón para abrir sidebar en escritorio (solo cuando está cerrado) */}
                 {!showConversationsSidebar && (
                   <button
                     onClick={() => setShowConversationsSidebar(true)}
-                    className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                    title="Mostrar conversaciones"
+                    className="hidden lg:flex p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    title="Abrir conversaciones"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
