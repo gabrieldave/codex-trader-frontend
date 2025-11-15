@@ -1604,6 +1604,7 @@ function Chat() {
             )}
             </div>
           </aside>
+          )}
           
           {/* Área principal del chat */}
           <main className="flex-1 flex flex-col w-full min-w-0 overflow-hidden">
