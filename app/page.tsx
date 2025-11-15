@@ -1718,8 +1718,8 @@ function Chat() {
 
               {/* Panel de bienvenida cuando no hay mensajes */}
               {messages.length === 0 && (
-                <div className="flex items-center justify-center min-h-[60vh] w-full">
-                  <div className="w-full px-4 sm:px-6 py-6 sm:py-8 lg:max-w-2xl">
+                <div className="flex items-center justify-center min-h-[60vh] w-full px-3 sm:px-4">
+                  <div className="w-full px-2 sm:px-4 py-6 sm:py-8 lg:max-w-2xl lg:mx-auto">
                 <div className="text-center mb-6 sm:mb-8">
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
                     👋 Bienvenido a Codex Trader
