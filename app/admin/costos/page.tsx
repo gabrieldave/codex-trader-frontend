@@ -96,7 +96,7 @@ export default function AdminCostosPage() {
     setLoadingData(true)
     setError(null)
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
       const response = await fetch(
         `${backendUrl}/admin/cost-summary?from=${dateFrom}&to=${dateTo}`,
         {
