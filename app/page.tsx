@@ -806,11 +806,28 @@ function Chat() {
     
     setIsAuthLoading(true)
     try {
+      // Determinar la URL de redirección: usar variable de entorno en producción, o window.location.origin
+      const getRedirectUrl = () => {
+        // En producción, usar la variable de entorno si está disponible
+        if (typeof window !== 'undefined') {
+          // Si estamos en producción (no localhost), usar window.location.origin
+          if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            return `${window.location.origin}/auth/callback`
+          }
+          // En desarrollo, usar localhost
+          return 'http://localhost:3000/auth/callback'
+        }
+        // Fallback para SSR
+        return process.env.NEXT_PUBLIC_SITE_URL 
+          ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+          : 'http://localhost:3000/auth/callback'
+      }
+      
       const { data, error } = await supabase.auth.signUp({ 
         email: email.trim(), 
         password: password.trim(),
         options: {
-          emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/auth/callback`
+          emailRedirectTo: getRedirectUrl()
         }
       })
       
