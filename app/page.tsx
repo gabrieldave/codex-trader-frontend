@@ -1242,12 +1242,17 @@ function Chat() {
 
                 {/* Enlace a más información */}
                 <div className="mt-6 pt-6 border-t border-gray-700/50">
-                  <Link
-                    href="#que-es-codex-trader"
-                    className="text-xs sm:text-sm text-cyan-400 hover:text-cyan-300 text-center block hover:underline transition-colors cursor-pointer px-2"
+                  <button
+                    onClick={() => {
+                      const section = document.getElementById('que-es-codex-trader')
+                      if (section) {
+                        section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      }
+                    }}
+                    className="text-xs sm:text-sm text-cyan-400 hover:text-cyan-300 text-center block hover:underline transition-colors cursor-pointer px-2 w-full"
                   >
                     ¿Primera vez aquí? Conoce qué es Codex Trader
-                  </Link>
+                  </button>
                 </div>
               </div>
 
