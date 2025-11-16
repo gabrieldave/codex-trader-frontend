@@ -1265,49 +1265,116 @@ function Chat() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-                ¿Qué es Codex Trader?
+                🤖 Codex Trader: El Asistente de IA Especializado en Trading
               </h2>
+              <p className="text-base sm:text-lg text-gray-300 mt-4">
+                Bienvenido a Codex Trader. Hemos resuelto el problema de la sobrecarga de información y las respuestas de IA genéricas.
+              </p>
             </div>
             
             <div className="bg-gray-800/40 backdrop-blur-md rounded-xl shadow-lg border border-gray-700/50 p-6 sm:p-8 lg:p-10">
-              <p className="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed">
-                Codex Trader es un asistente de IA especializado en trading profesional, entrenado con años de estudio y contenido profesional de trading para ayudarte a entender mejor los mercados financieros.
+              <p className="text-base sm:text-lg text-gray-300 mb-8 leading-relaxed">
+                Codex Trader es tu copiloto personal de Inteligencia Artificial, entrenado exclusivamente con las bibliotecas más avanzadas de estrategia, análisis técnico, psicología, y gestión de riesgo en los mercados financieros.
               </p>
               
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">📊</span>
-                  <p className="text-sm sm:text-base text-gray-300 flex-1">
-                    Ayuda a entender gestión de riesgo, tamaño de posición y drawdown.
-                  </p>
-                </div>
+              {/* ¿Cómo Funcionamos? */}
+              <div className="mb-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                  <span>💡</span> ¿Cómo Funcionamos? (Nuestra Ventaja)
+                </h3>
+                <p className="text-sm sm:text-base text-gray-300 mb-4 leading-relaxed">
+                  No buscamos en Google. Nuestro sistema se basa en la tecnología RAG (Generación Aumentada por Recuperación) para ofrecer precisión:
+                </p>
                 
-                <div className="flex items-start gap-3">
-                  <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">🧠</span>
-                  <p className="text-sm sm:text-base text-gray-300 flex-1">
-                    Profundiza en psicología del trader y disciplina emocional.
-                  </p>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">📈</span>
-                  <p className="text-sm sm:text-base text-gray-300 flex-1">
-                    Analiza setups, ideas de estrategia y marcos temporales (scalping, intradía, swing trading).
-                  </p>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">🎓</span>
-                  <p className="text-sm sm:text-base text-gray-300 flex-1">
-                    Es una herramienta educativa, sin recomendaciones directas de compra/venta.
-                  </p>
+                <div className="space-y-4 mb-6">
+                  <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700/50">
+                    <h4 className="text-base sm:text-lg font-semibold text-cyan-400 mb-2">📚 Biblioteca Privada</h4>
+                    <p className="text-sm sm:text-base text-gray-300">
+                      Hemos procesado y estructurado una biblioteca de más de 900 libros y recursos profesionales.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700/50">
+                    <h4 className="text-base sm:text-lg font-semibold text-cyan-400 mb-2">⚡ Velocidad Rayo</h4>
+                    <p className="text-sm sm:text-base text-gray-300">
+                      Gracias a un índice vectorial de alta eficiencia (HNSW), tus búsquedas son instantáneas. La IA no pierde tiempo: va directamente a la sección relevante del libro y te entrega el conocimiento.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700/50">
+                    <h4 className="text-base sm:text-lg font-semibold text-cyan-400 mb-2">🎯 Enfoque de Nicho</h4>
+                    <p className="text-sm sm:text-base text-gray-300">
+                      Nuestra IA está especializada. Cuando preguntas sobre "stop loss", solo recibe contexto de trading. No recibe distracciones, solo precisión.
+                    </p>
+                  </div>
                 </div>
               </div>
               
-              <div className="mt-6 sm:mt-8 pt-6 border-t border-gray-700/50">
-                <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
-                  Codex Trader está diseñado para ser tu compañero de estudio en trading. Usa contenido profesional indexado para darte respuestas contextualizadas y ayudarte a desarrollar tu conocimiento sobre los mercados financieros.
+              {/* Beneficios Clave */}
+              <div className="mb-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                  <span>✅</span> Beneficios Clave para Ti
+                </h3>
+                
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">📊</span>
+                    <div className="flex-1">
+                      <p className="text-sm sm:text-base font-semibold text-gray-200 mb-1">Estrategias Verificadas</p>
+                      <p className="text-sm sm:text-base text-gray-300">
+                        Obtén ideas basadas en fuentes sólidas, no en opiniones al azar.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">🧠</span>
+                    <div className="flex-1">
+                      <p className="text-sm sm:text-base font-semibold text-gray-200 mb-1">Dominio de la Psicología</p>
+                      <p className="text-sm sm:text-base text-gray-300">
+                        Recibe ayuda para manejar las emociones, la disciplina y el riesgo, pilares fundamentales de tu plan de trading.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg sm:text-xl mt-0.5 sm:mt-1 flex-shrink-0">💬</span>
+                    <div className="flex-1">
+                      <p className="text-sm sm:text-base font-semibold text-gray-200 mb-1">Respuestas Claras</p>
+                      <p className="text-sm sm:text-base text-gray-300">
+                        Nuestra IA sintetiza contenido complejo en resúmenes directos de 3-4 párrafos.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Call to Action */}
+              <div className="mt-8 pt-6 border-t border-gray-700/50 text-center">
+                <p className="text-base sm:text-lg font-semibold text-white mb-4">
+                  ¿Listo para operar con conocimiento?
                 </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      const loginSection = document.querySelector('main')
+                      if (loginSection) {
+                        loginSection.scrollIntoView({ behavior: 'smooth' })
+                      }
+                    }}
+                    className="px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  >
+                    Iniciar Sesión
+                  </Link>
+                  <Link
+                    href="/planes"
+                    className="px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  >
+                    Ver Planes
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
