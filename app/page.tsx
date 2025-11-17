@@ -319,6 +319,9 @@ function Chat() {
     if (!accessToken) return
     setIsLoadingTokens(true)
     try {
+      // 🚨 DEBUG: Verificar accessToken antes de hacer la llamada
+      console.log('[page.tsx] DEBUG accessToken antes de /api/tokens:', accessToken ? `${accessToken.substring(0, 20)}...` : 'null/undefined')
+      
       const response = await fetch('/api/tokens', {
         headers: {
           'Authorization': `Bearer ${accessToken}`
@@ -431,6 +434,9 @@ function Chat() {
     if (!accessToken) return
     setIsLoadingConversations(true)
     try {
+      // 🚨 DEBUG: Verificar accessToken antes de hacer la llamada
+      console.log('[page.tsx] DEBUG accessToken antes de /api/chat-sessions:', accessToken ? `${accessToken.substring(0, 20)}...` : 'null/undefined')
+      
       const response = await fetch('/api/chat-sessions?limit=50', {
         headers: {
           'Authorization': `Bearer ${accessToken}`
@@ -599,6 +605,9 @@ function Chat() {
     setChatError(null)
 
     try {
+      // 🚨 DEBUG: Verificar accessToken antes de hacer la llamada
+      console.log('[page.tsx] DEBUG accessToken antes de /api/chat-simple:', accessToken ? `${accessToken.substring(0, 20)}...` : 'null/undefined')
+      
       const response = await fetch('/api/chat-simple', {
         method: 'POST',
         headers: {
@@ -607,7 +616,6 @@ function Chat() {
         },
         body: JSON.stringify({
           messages: [{ role: 'user', content: userMessage.content }],
-          token: accessToken,
           conversation_id: conversationIdAtRequest,
           response_mode: responseMode
         }),

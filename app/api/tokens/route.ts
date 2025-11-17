@@ -7,7 +7,12 @@ export async function GET(req: Request) {
     const authHeader = req.headers.get('Authorization') || ''
     const authToken = authHeader.replace('Bearer ', '').trim()
     
+    // 🚨 DEBUG: Verificar token recibido
+    console.log('[API /tokens] DEBUG authHeader recibido:', authHeader ? `${authHeader.substring(0, 30)}...` : 'vacío/null')
+    console.log('[API /tokens] DEBUG authToken extraído:', authToken ? `${authToken.substring(0, 20)}...` : 'null/undefined')
+    
     if (!authToken) {
+      console.error('[API /tokens] ERROR: No se proporcionó token de autenticación')
       return NextResponse.json({ error: "No se proporcionó token de autenticación" }, { status: 401 })
     }
 
