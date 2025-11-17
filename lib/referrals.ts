@@ -1,3 +1,5 @@
+import { authorizedApiCallJson } from './api'
+
 /**
  * Utilidades para el sistema de referidos.
  * Maneja códigos de referido y procesamiento de referencias.
@@ -7,35 +9,17 @@
  * Procesa un código de referido después del registro de un usuario.
  * 
  * @param referralCode - Código de referido del usuario que invitó
- * @param accessToken - Token de autenticación del usuario
  * @returns Promise que resuelve con el resultado del procesamiento
  */
 export async function processReferral(
-  referralCode: string,
-  accessToken: string
+  referralCode: string
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
-    
-    const response = await fetch(`${backendUrl}/referrals/process`, {
+    const data = await authorizedApiCallJson<{ success: boolean; message: string }>('/referrals/process', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      },
       body: JSON.stringify({ referral_code: referralCode.toUpperCase().trim() })
     })
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ 
-        detail: `Error ${response.status}: ${response.statusText}` 
-      }))
-      
-      const errorMessage = errorData.detail || errorData.error || 'Error al procesar código de referido'
-      throw new Error(errorMessage)
-    }
-    
-    const data = await response.json()
     return {
       success: data.success || true,
       message: data.message || 'Código de referido procesado correctamente'
@@ -51,27 +35,11 @@ export async function processReferral(
 /**
  * Obtiene información sobre el sistema de referidos del usuario actual.
  * 
- * @param accessToken - Token de autenticación del usuario
  * @returns Promise con la información de referidos
  */
-export async function getReferralInfo(accessToken: string) {
+export async function getReferralInfo() {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
-    
-    const response = await fetch(`${backendUrl}/referrals/info`, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
-    })
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ 
-        detail: `Error ${response.status}: ${response.statusText}` 
-      }))
-      throw new Error(errorData.detail || errorData.error || 'Error al obtener información de referidos')
-    }
-    
-    return await response.json()
+    return await authorizedApiCallJson('/referrals/info')
   } catch (error) {
     const errorMessage = error instanceof Error 
       ? error.message 

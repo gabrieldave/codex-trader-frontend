@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { CODEX_PLANS, getPlanByCode, type PlanCode } from '@/lib/plans'
 import { startCheckout } from '@/lib/billing'
+import { authorizedApiCallJson } from '@/lib/api'
 
 interface UsageData {
   tokens_monthly_limit: number
@@ -33,22 +34,11 @@ export default function UsageSummary({ accessToken, className = '' }: UsageSumma
       }
 
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
-        const response = await fetch(`${backendUrl}/me/usage`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          setUsageData(data)
-        } else {
-          setError('Error al cargar información de uso')
-        }
+        const data = await authorizedApiCallJson<UsageData>('/me/usage')
+        setUsageData(data)
       } catch (err) {
         console.error('Error al cargar uso:', err)
-        setError('Error de conexión')
+        setError(err instanceof Error ? err.message : 'Error de conexión')
       } finally {
         setLoading(false)
       }

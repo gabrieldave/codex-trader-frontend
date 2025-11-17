@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import toast, { Toaster } from 'react-hot-toast'
+import { authorizedApiCallJson } from '@/lib/api'
 import Link from 'next/link'
 
 interface ReferralsSummary {
@@ -61,23 +62,11 @@ export default function InvitarPage() {
 
       setLoadingSummary(true)
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
-        const response = await fetch(`${backendUrl}/me/referrals-summary`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          setReferralsSummary(data)
-        } else {
-          console.error('Error al cargar resumen de referidos')
-          toast.error('Error al cargar información de referidos')
-        }
+        const data = await authorizedApiCallJson<ReferralsSummary>('/me/referrals-summary')
+        setReferralsSummary(data)
       } catch (error) {
         console.error('Error al cargar resumen de referidos:', error)
-        toast.error('Error de conexión al cargar información de referidos')
+        toast.error(error instanceof Error ? error.message : 'Error de conexión al cargar información de referidos')
       } finally {
         setLoadingSummary(false)
       }

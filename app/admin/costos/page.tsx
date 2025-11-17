@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import toast, { Toaster } from 'react-hot-toast'
+import { authorizedApiCallJson } from '@/lib/api'
 import Link from 'next/link'
 
 interface DailySummary {
@@ -96,33 +97,24 @@ export default function AdminCostosPage() {
     setLoadingData(true)
     setError(null)
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
-      const response = await fetch(
-        `${backendUrl}/admin/cost-summary?from=${dateFrom}&to=${dateTo}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        }
+      const data = await authorizedApiCallJson(
+        `/admin/cost-summary?from=${dateFrom}&to=${dateTo}`
       )
-
-      if (response.ok) {
-        const data = await response.json()
-        setCostSummary(data)
-      } else {
-        const errorData = await response.json().catch(() => ({ detail: 'Error desconocido' }))
-        if (response.status === 403) {
+      setCostSummary(data)
+    } catch (error) {
+      console.error('Error al cargar resumen de costos:', error)
+      if (error instanceof Error) {
+        if (error.message.includes('403') || error.message.includes('denegado')) {
           setError('Acceso denegado. Solo administradores pueden ver esta página.')
           toast.error('No tienes permisos de administrador')
         } else {
-          setError(errorData.detail || 'Error al cargar datos')
+          setError(error.message)
           toast.error('Error al cargar resumen de costos')
         }
+      } else {
+        setError('Error de conexión')
+        toast.error('Error de conexión al cargar datos')
       }
-    } catch (error) {
-      console.error('Error al cargar resumen de costos:', error)
-      setError('Error de conexión')
-      toast.error('Error de conexión al cargar datos')
     } finally {
       setLoadingData(false)
     }

@@ -7,6 +7,7 @@ import type { User } from '@supabase/supabase-js'
 import toast, { Toaster } from 'react-hot-toast'
 import { CODEX_PLANS } from '@/lib/plans'
 import { processReferral } from '@/lib/referrals'
+import { authorizedApiCall } from '@/lib/api'
 import UsageSummary from '@/components/billing/UsageSummary'
 import Link from 'next/link'
 
@@ -148,14 +149,9 @@ function Chat() {
           welcomeEmailSent = true // Marcar como enviado para evitar duplicados
           
           try {
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
-            console.log(`   Llamando a ${backendUrl}/users/notify-registration...`)
-            const response = await fetch(`${backendUrl}/users/notify-registration`, {
+            console.log(`   Llamando a /users/notify-registration...`)
+            const response = await authorizedApiCall('/users/notify-registration', {
               method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${session.access_token}`,
-                'Content-Type': 'application/json'
-              },
               body: JSON.stringify({})
             })
             
@@ -248,13 +244,8 @@ function Chat() {
         
         // Notificar al backend para enviar email de bienvenida
         try {
-          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
-          fetch(`${backendUrl}/users/notify-registration`, {
+          authorizedApiCall('/users/notify-registration', {
             method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
-            },
             body: JSON.stringify({})
           }).then(response => {
             if (response.ok) {
@@ -405,13 +396,8 @@ function Chat() {
     try {
       // Llamar directamente al backend (el API route tiene problemas)
       console.log('🔄 Llamando directamente al backend para resetear tokens...')
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'
-      const response = await fetch(`${backendUrl}/tokens/reset?cantidad=20000`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
+      const response = await authorizedApiCall('/tokens/reset?cantidad=20000', {
+        method: 'POST'
       })
 
       if (response.ok) {
@@ -760,9 +746,9 @@ function Chat() {
         setConfirmPassword('')
         
         // Procesar código de referido si existe
-        if (referralCode && data.session.access_token) {
+        if (referralCode) {
           try {
-            await processReferral(referralCode, data.session.access_token)
+            await processReferral(referralCode)
             toast.success('¡Código de referido aplicado correctamente!')
           } catch (error) {
             // No mostrar error si falla el referido, solo loguear
@@ -848,14 +834,9 @@ function Chat() {
           if (data.session.access_token) {
             console.log('📧 Registro con sesión inmediata detectado, notificando al backend...')
             try {
-              const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
-              console.log(`   Llamando a ${backendUrl}/users/notify-registration...`)
-              const response = await fetch(`${backendUrl}/users/notify-registration`, {
+              console.log(`   Llamando a /users/notify-registration...`)
+              const response = await authorizedApiCall('/users/notify-registration', {
                 method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${data.session.access_token}`,
-                  'Content-Type': 'application/json'
-                },
                 body: JSON.stringify({})
               })
               
@@ -881,9 +862,9 @@ function Chat() {
         }
         
         // Procesar código de referido si existe (después del registro)
-        if (referralCode && data.session?.access_token) {
+        if (referralCode) {
           try {
-            await processReferral(referralCode, data.session.access_token)
+            await processReferral(referralCode)
             toast.success('¡Código de referido aplicado correctamente!')
           } catch (error) {
             // No mostrar error si falla el referido, solo loguear

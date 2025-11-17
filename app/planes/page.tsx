@@ -64,7 +64,7 @@ function PlanesPageContent() {
     
     try {
       // Iniciar checkout de Stripe
-      await startCheckout(planCode, accessToken)
+      await startCheckout(planCode)
     } catch (error) {
       // El error ya se maneja en startCheckout con toast
       console.error('Error al iniciar checkout:', error)
