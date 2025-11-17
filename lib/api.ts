@@ -37,13 +37,25 @@ export async function authorizedApiCall(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  // 1. Obtener el token JWT de la sesión de Supabase
+  // 1. Obtener el token JWT de la sesión de Supabase (Punto A)
   const supabase = createClient()
   const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+  
+  // 🚨 DEBUG: Imprime el valor del token en la consola del navegador
+  console.log('[API] DEBUG TOKEN:', session?.access_token ? `${session.access_token.substring(0, 20)}...` : 'null/undefined')
+  console.log('[API] DEBUG Session completa:', session ? 'existe' : 'no existe')
   
   if (sessionError) {
     console.error('[API] Error al obtener sesión:', sessionError)
     throw new Error(`Error de sesión: ${sessionError.message}`)
+  }
+  
+  // Verificar explícitamente que el access_token existe
+  if (!session?.access_token) {
+    // Si es null o indefinido, la sesión expiró o no se encontró.
+    // (Esto es lo que causa tu error 401)
+    console.error('[API] No hay sesión activa o access_token es null/undefined')
+    throw new Error('NoSession: Sesión JWT no encontrada o expirada.')
   }
   
   if (!session) {
@@ -59,12 +71,19 @@ export async function authorizedApiCall(
     ? endpoint 
     : `${backendUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
   
-  // 4. Inyectar el token en la cabecera Authorization
+  // 4. Definir las cabeceras, incluyendo el token
+  // Asegúrate de que el access_token se inyecte solo si existe.
   const headers: HeadersInit = {
+    ...options.headers, // Headers adicionales primero
+    'Authorization': `Bearer ${session.access_token}`, // <--- El formato correcto
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${session.access_token}`, // <--- SOLUCIÓN DEL 401
-    ...options.headers, // Headers adicionales pueden sobrescribir los defaults
   }
+  
+  // 🚨 DEBUG: Verificar que el header se construyó correctamente
+  const authHeader = Array.isArray(headers) 
+    ? headers.find(([key]) => key.toLowerCase() === 'authorization')?.[1]
+    : (headers as Record<string, string>)['Authorization']
+  console.log('[API] DEBUG Header Authorization:', authHeader ? `${authHeader.substring(0, 30)}...` : 'no existe')
   
   // 5. Preparar el body (si existe)
   // IMPORTANTE: Eliminar cualquier token del body por seguridad (solo debe ir en headers)
