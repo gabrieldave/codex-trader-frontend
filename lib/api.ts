@@ -71,6 +71,12 @@ export async function authorizedApiCall(
     ? endpoint 
     : `${backendUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
   
+  // 🚨 DEBUG: Verificar URL construida
+  console.log('[API] DEBUG backendUrl:', backendUrl)
+  console.log('[API] DEBUG endpoint:', endpoint)
+  console.log('[API] DEBUG URL completa:', url)
+  console.log('[API] DEBUG método:', options.method || 'GET')
+  
   // 4. Definir las cabeceras, incluyendo el token
   // Asegúrate de que el access_token se inyecte solo si existe.
   const headers: HeadersInit = {
