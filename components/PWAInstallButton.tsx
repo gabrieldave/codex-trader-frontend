@@ -108,7 +108,7 @@ export default function PWAInstallButton() {
       message = 'Para instalar esta app en iOS:\n\n1. Toca el botón de compartir (cuadrado con flecha) en la parte inferior\n2. Desplázate y selecciona "Añadir a pantalla de inicio"\n3. Toca "Añadir" en la esquina superior derecha'
     } else if (isAndroid) {
       if (isChrome) {
-        message = 'Para instalar esta app en Android:\n\n1. Busca el icono de instalación (➕) en la barra de direcciones\n2. O ve al menú (⋮) y selecciona "Instalar app"\n3. Confirma la instalación'
+        message = 'Para instalar esta app en Android Chrome:\n\n1. Busca el icono de instalación (➕) en la barra de direcciones (arriba a la derecha, junto a la URL)\n2. Si no lo ves, ve al menú (⋮) en la esquina superior derecha\n3. Selecciona "Instalar app" o "Añadir a pantalla de inicio"\n4. Confirma la instalación\n\n💡 Nota: Si cancelaste antes, el icono puede tardar unos días en reaparecer. Usa el menú del navegador mientras tanto.'
       } else {
         message = 'Para instalar esta app en Android:\n\n1. Ve al menú del navegador (⋮)\n2. Busca la opción "Añadir a pantalla de inicio" o "Instalar app"\n3. Confirma la instalación'
       }
