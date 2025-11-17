@@ -64,7 +64,12 @@ export async function authorizedApiCall(
   }
   
   // 2. Obtener la URL del backend desde variables de entorno
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
+  let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
+  
+  // Asegurar que la URL tenga protocolo (https://)
+  if (backendUrl && !backendUrl.startsWith('http://') && !backendUrl.startsWith('https://')) {
+    backendUrl = `https://${backendUrl}`
+  }
   
   // 3. Construir la URL completa
   const url = endpoint.startsWith('http') 
