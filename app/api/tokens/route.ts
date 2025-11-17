@@ -19,6 +19,12 @@ export async function GET(req: Request) {
 
     const backendBaseUrl = process.env.BACKEND_URL || 'http://localhost:8000'
     const backendUrl = `${backendBaseUrl}/tokens`
+    
+    // 🚨 DEBUG: Verificar configuración del backend
+    console.log('[API /tokens] DEBUG backendBaseUrl:', backendBaseUrl)
+    console.log('[API /tokens] DEBUG backendUrl:', backendUrl)
+    console.log('[API /tokens] DEBUG Token que se enviará al backend:', authToken ? `${authToken.substring(0, 20)}...` : 'null')
+    
     const response = await fetch(backendUrl, {
       method: 'GET',
       headers: {
@@ -26,8 +32,13 @@ export async function GET(req: Request) {
       }
     })
 
+    // 🚨 DEBUG: Verificar respuesta del backend
+    console.log('[API /tokens] DEBUG Response status:', response.status)
+    console.log('[API /tokens] DEBUG Response ok:', response.ok)
+    
     if (!response.ok) {
       const errorText = await response.text()
+      console.error('[API /tokens] ERROR Backend response:', errorText)
       return NextResponse.json({ error: errorText }, { status: response.status })
     }
 

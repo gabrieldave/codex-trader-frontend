@@ -32,6 +32,12 @@ export async function POST(req: Request) {
 
     const backendBaseUrl = process.env.BACKEND_URL || 'http://localhost:8000'
     const backendUrl = `${backendBaseUrl}/chat`
+    
+    // 🚨 DEBUG: Verificar configuración del backend
+    console.log('[API /chat-simple] DEBUG backendBaseUrl:', backendBaseUrl)
+    console.log('[API /chat-simple] DEBUG backendUrl:', backendUrl)
+    console.log('[API /chat-simple] DEBUG Token que se enviará al backend:', authToken ? `${authToken.substring(0, 20)}...` : 'null')
+    
     const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
@@ -45,8 +51,13 @@ export async function POST(req: Request) {
       })
     })
 
+    // 🚨 DEBUG: Verificar respuesta del backend
+    console.log('[API /chat-simple] DEBUG Response status:', response.status)
+    console.log('[API /chat-simple] DEBUG Response ok:', response.ok)
+    
     if (!response.ok) {
       const errorText = await response.text()
+      console.error('[API /chat-simple] ERROR Backend response:', errorText)
       if (response.status === 401) {
         return NextResponse.json({ error: "No autorizado" }, { status: 401 })
       }
