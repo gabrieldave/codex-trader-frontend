@@ -10,6 +10,7 @@ import { processReferral } from '@/lib/referrals'
 import { authorizedApiCall } from '@/lib/api'
 import UsageSummary from '@/components/billing/UsageSummary'
 import Link from 'next/link'
+import PWAInstallButton from '@/components/PWAInstallButton'
 
 interface Message {
   id: string
@@ -1889,6 +1890,7 @@ function Chat() {
                       <span className="hidden sm:inline">Recargar</span>
                       <span className="sm:hidden text-xs">💰</span>
                     </button>
+                    <PWAInstallButton />
                     <button
                       onClick={handleLogout}
                       className="px-1.5 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"

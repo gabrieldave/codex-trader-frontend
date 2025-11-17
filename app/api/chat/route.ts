@@ -14,17 +14,12 @@ export async function POST(req: Request) {
       return new Response("No se proporcionó ningún mensaje", { status: 400 })
     }
     
-    // Obtener el token de autorización de los headers del request o del body
+    // Obtener el token SOLO del header Authorization (nunca del body por seguridad)
     const authHeader = req.headers.get('Authorization') || ''
-    let authToken = authHeader.replace('Bearer ', '').trim()
-    
-    // Si no hay token en los headers, intentar obtenerlo del body
-    if (!authToken && body.token) {
-      authToken = body.token
-    }
+    const authToken = authHeader.replace('Bearer ', '').trim()
     
     if (!authToken) {
-      return new Response("No se proporcionó token de autenticación", { status: 401 })
+      return new Response("No se proporcionó token de autenticación en el header Authorization", { status: 401 })
     }
 
     // 1. URL de tu backend de Python (el motor)

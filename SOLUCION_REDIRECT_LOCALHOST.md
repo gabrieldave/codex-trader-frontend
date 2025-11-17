@@ -65,3 +65,4 @@ Si después de configurar las URLs correctas en Supabase el problema persiste:
 3. Limpia la caché del navegador
 4. Prueba en modo incógnito
 
+
