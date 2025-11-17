@@ -7,6 +7,7 @@ import { CODEX_PLANS, type CodexPlan, type PlanCode, getPlanByCode } from '@/lib
 import { startCheckout } from '@/lib/billing'
 import type { User } from '@supabase/supabase-js'
 import toast, { Toaster } from 'react-hot-toast'
+import Link from 'next/link'
 
 function PlanesPageContent() {
   const [supabase] = useState(() => createClient())
@@ -100,6 +101,27 @@ function PlanesPageContent() {
       {/* Contenedor principal */}
       <main className="relative z-10 flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
+          {/* Header con navegación */}
+          <div className="mb-8">
+            {user ? (
+              <Link 
+                href="/" 
+                className="inline-flex items-center text-blue-300 hover:text-blue-200 transition-colors mb-4"
+              >
+                <span className="mr-2">←</span>
+                <span>Volver al Chat</span>
+              </Link>
+            ) : (
+              <Link 
+                href="/" 
+                className="inline-flex items-center text-blue-300 hover:text-blue-200 transition-colors mb-4"
+              >
+                <span className="mr-2">←</span>
+                <span>Volver</span>
+              </Link>
+            )}
+          </div>
+          
           {/* Header */}
           <div className="text-center mb-12 sm:mb-16">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
