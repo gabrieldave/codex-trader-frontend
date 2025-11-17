@@ -100,7 +100,7 @@ export default function AdminCostosPage() {
       const data = await authorizedApiCallJson(
         `/admin/cost-summary?from=${dateFrom}&to=${dateTo}`
       )
-      setCostSummary(data)
+      setCostSummary(data as CostSummary)
     } catch (error) {
       console.error('Error al cargar resumen de costos:', error)
       if (error instanceof Error) {
