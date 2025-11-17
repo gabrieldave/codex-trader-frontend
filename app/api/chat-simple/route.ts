@@ -12,15 +12,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No se proporcionó ningún mensaje" }, { status: 400 })
     }
     
+    // Obtener el token SOLO del header Authorization (nunca del body por seguridad)
     const authHeader = req.headers.get('Authorization') || ''
-    let authToken = authHeader.replace('Bearer ', '').trim()
+    const authToken = authHeader.replace('Bearer ', '').trim()
     
-    if (!authToken && body.token) {
-      authToken = body.token
-    }
+    // 🚨 DEBUG: Verificar token recibido
+    console.log('[API /chat-simple] DEBUG authHeader recibido:', authHeader ? `${authHeader.substring(0, 30)}...` : 'vacío/null')
+    console.log('[API /chat-simple] DEBUG authToken extraído:', authToken ? `${authToken.substring(0, 20)}...` : 'null/undefined')
+    console.log('[API /chat-simple] DEBUG Todos los headers:', Object.fromEntries(req.headers.entries()))
     
     if (!authToken) {
-      return NextResponse.json({ error: "No se proporcionó token de autenticación" }, { status: 401 })
+      console.error('[API /chat-simple] ERROR: No se proporcionó token de autenticación')
+      return NextResponse.json({ error: "No se proporcionó token de autenticación en el header Authorization" }, { status: 401 })
     }
 
     // Obtener conversation_id y response_mode del body si existen

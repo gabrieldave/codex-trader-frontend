@@ -11,6 +11,7 @@ export async function GET(req: Request) {
     // 🚨 DEBUG: Verificar token recibido
     console.log('[API /chat-sessions] DEBUG authHeader recibido:', authHeader ? `${authHeader.substring(0, 30)}...` : 'vacío/null')
     console.log('[API /chat-sessions] DEBUG authToken extraído:', authToken ? `${authToken.substring(0, 20)}...` : 'null/undefined')
+    console.log('[API /chat-sessions] DEBUG Todos los headers:', Object.fromEntries(req.headers.entries()))
     
     if (!authToken) {
       console.error('[API /chat-sessions] ERROR: No se proporcionó token de autenticación')

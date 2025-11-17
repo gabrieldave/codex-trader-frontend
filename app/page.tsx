@@ -322,10 +322,13 @@ function Chat() {
       // 🚨 DEBUG: Verificar accessToken antes de hacer la llamada
       console.log('[page.tsx] DEBUG accessToken antes de /api/tokens:', accessToken ? `${accessToken.substring(0, 20)}...` : 'null/undefined')
       
+      const headers = {
+        'Authorization': `Bearer ${accessToken}`
+      }
+      console.log('[page.tsx] DEBUG Headers que se envían a /api/tokens:', headers)
+      
       const response = await fetch('/api/tokens', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+        headers
       })
       if (response.ok) {
         const data = await response.json()
