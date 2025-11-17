@@ -9,6 +9,8 @@ export interface CodexPlan {
   badge: string; // ej. "Ideal para empezar", "Más popular", etc.
   shortDescription: string;
   fullDescription: string;
+  fastQueries: string; // "500", "2,500", "Ilimitadas", etc.
+  deepQueries: string; // Descripción de estudios detallados con citación
 }
 
 export const CODEX_PLANS: CodexPlan[] = [
@@ -21,7 +23,9 @@ export const CODEX_PLANS: CodexPlan[] = [
     badge: "Para empezar en serio",
     shortDescription: "17 estudios de mercado completos al mes.",
     fullDescription:
-      "Accede a hasta 17 análisis profundos al mes. Ideal para traders que analizan 3–4 oportunidades por semana y quieren validar sus ideas con contenido profesional."
+      "Accede a hasta 17 análisis profundos al mes. Ideal para traders que analizan 3–4 oportunidades por semana y quieren validar sus ideas con contenido profesional.",
+    fastQueries: "500",
+    deepQueries: "17 Estudios Detallados con Citación"
   },
   {
     code: "trader",
@@ -32,7 +36,9 @@ export const CODEX_PLANS: CodexPlan[] = [
     badge: "Trader activo",
     shortDescription: "45 análisis profundos cada mes.",
     fullDescription:
-      "Pensado para traders activos que revisan el mercado todos los días. Hasta 45 consultas profundas al mes para gestionar riesgo, psicología y setups diarios."
+      "Pensado para traders activos que revisan el mercado todos los días. Hasta 45 consultas profundas al mes para gestionar riesgo, psicología y setups diarios.",
+    fastQueries: "2,500",
+    deepQueries: "45 Estudios Detallados con Citación"
   },
   {
     code: "pro",
@@ -43,7 +49,9 @@ export const CODEX_PLANS: CodexPlan[] = [
     badge: "Para analistas serios",
     shortDescription: "113 consultas detalladas al mes.",
     fullDescription:
-      "Para analistas serios que hacen backtesting, análisis multi-libro y creación de sistemas. Aproximadamente 4 análisis profundos al día durante todo el mes."
+      "Para analistas serios que hacen backtesting, análisis multi-libro y creación de sistemas. Aproximadamente 4 análisis profundos al día durante todo el mes.",
+    fastQueries: "Ilimitadas",
+    deepQueries: "113 Consultas Profundas con Validación de Fuentes"
   },
   {
     code: "institucional",
@@ -54,7 +62,9 @@ export const CODEX_PLANS: CodexPlan[] = [
     badge: "Equipos y fondos",
     shortDescription: "Hasta 340 análisis mensuales para equipos.",
     fullDescription:
-      "Diseñado para equipos, mesas de trading y fondos familiares. Hasta 340 análisis profundos compartidos entre 3–5 traders."
+      "Diseñado para equipos, mesas de trading y fondos familiares. Hasta 340 análisis profundos compartidos entre 3–5 traders.",
+    fastQueries: "Ilimitadas",
+    deepQueries: "340 Análisis Mensuales (para equipos)"
   }
 ];
 

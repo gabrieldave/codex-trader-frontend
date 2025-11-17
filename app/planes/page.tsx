@@ -184,9 +184,14 @@ function PlanCard({ plan, onSelect }: PlanCardProps) {
           <span className="text-gray-400 text-sm ml-1">/mes</span>
         </div>
 
-        <p className="text-cyan-400 font-semibold mb-3 text-sm lg:text-base">
-          Hasta {plan.approxDeepAnalyses} análisis profundos al mes
-        </p>
+        <div className="mb-4 space-y-2">
+          <p className="text-cyan-400 font-semibold text-sm lg:text-base">
+            <span className="font-bold">{plan.fastQueries}</span> Consultas Rápidas
+          </p>
+          <p className="text-cyan-400 font-semibold text-sm lg:text-base">
+            y hasta <span className="font-bold">{plan.deepQueries}</span>
+          </p>
+        </div>
 
         <p className="text-gray-300 mb-6 text-sm lg:text-base leading-relaxed">
           {plan.shortDescription}
