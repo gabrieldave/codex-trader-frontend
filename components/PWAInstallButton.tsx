@@ -17,6 +17,7 @@ export default function PWAInstallButton() {
 
     if (checkIfInstalled()) {
       setIsInstalled(true)
+      setCanInstall(false)
       return
     }
 
@@ -27,11 +28,15 @@ export default function PWAInstallButton() {
       const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
       const isEdge = /Edg/.test(navigator.userAgent)
       const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
+      const isFirefox = /Firefox/.test(navigator.userAgent)
       
-      // Chrome, Edge y Safari móvil soportan PWA
-      return isMobile || isChrome || isEdge || (isSafari && isMobile)
+      // Chrome, Edge, Firefox y Safari móvil soportan PWA
+      // Mostrar el botón si es móvil o si es un navegador moderno
+      return isMobile || isChrome || isEdge || isFirefox || (isSafari && isMobile)
     }
 
+    // Siempre establecer canInstall si el navegador lo soporta
+    // Esto asegura que el botón aparezca incluso si el evento ya se consumió
     setCanInstall(checkPWAInstallable())
 
     // Atrapar el evento de instalación
@@ -80,20 +85,44 @@ export default function PWAInstallButton() {
         setInstallPrompt(null)
       } catch (error) {
         console.error('Error al instalar PWA:', error)
+        // Si falla, mostrar instrucciones
+        showInstallInstructions()
       }
     } else {
-      // Si no tenemos el prompt pero el navegador soporta PWA, mostrar instrucciones
-      if (canInstall && !isInstalled) {
-        // Para iOS Safari, mostrar instrucciones
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-        if (isIOS) {
-          alert('Para instalar esta app en iOS:\n1. Toca el botón de compartir\n2. Selecciona "Añadir a pantalla de inicio"')
-        } else {
-          // Para otros navegadores, intentar abrir el menú de instalación
-          alert('Para instalar esta app, busca el icono de instalación en la barra de direcciones de tu navegador.')
-        }
-      }
+      // Si no tenemos el prompt, mostrar instrucciones
+      showInstallInstructions()
     }
+  }
+
+  const showInstallInstructions = () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    const isAndroid = /Android/.test(navigator.userAgent)
+    const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
+    const isEdge = /Edg/.test(navigator.userAgent)
+    const isFirefox = /Firefox/.test(navigator.userAgent)
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
+
+    let message = ''
+
+    if (isIOS) {
+      message = 'Para instalar esta app en iOS:\n\n1. Toca el botón de compartir (cuadrado con flecha) en la parte inferior\n2. Desplázate y selecciona "Añadir a pantalla de inicio"\n3. Toca "Añadir" en la esquina superior derecha'
+    } else if (isAndroid) {
+      if (isChrome) {
+        message = 'Para instalar esta app en Android:\n\n1. Busca el icono de instalación (➕) en la barra de direcciones\n2. O ve al menú (⋮) y selecciona "Instalar app"\n3. Confirma la instalación'
+      } else {
+        message = 'Para instalar esta app en Android:\n\n1. Ve al menú del navegador (⋮)\n2. Busca la opción "Añadir a pantalla de inicio" o "Instalar app"\n3. Confirma la instalación'
+      }
+    } else if (isChrome || isEdge) {
+      message = 'Para instalar esta app:\n\n1. Busca el icono de instalación (➕) en la barra de direcciones (al lado de la URL)\n2. Haz clic en él y confirma la instalación\n\nSi no ves el icono, recarga la página o espera unos segundos.'
+    } else if (isFirefox) {
+      message = 'Para instalar esta app en Firefox:\n\n1. Ve al menú (☰)\n2. Busca "Instalar" o "Añadir a pantalla de inicio"\n3. Confirma la instalación'
+    } else if (isSafari) {
+      message = 'Para instalar esta app en Safari:\n\n1. Ve al menú "Archivo"\n2. Selecciona "Añadir a pantalla de inicio"\n3. Confirma la instalación'
+    } else {
+      message = 'Para instalar esta app:\n\nBusca el icono de instalación en la barra de direcciones de tu navegador o en el menú. Si no lo ves, tu navegador puede no soportar instalación de PWAs.'
+    }
+
+    alert(message)
   }
 
   // No mostrar el botón si ya está instalada
