@@ -23,13 +23,6 @@ export const metadata: Metadata = {
     title: "Codex Trader",
   },
   manifest: "/manifest.json",
-  themeColor: "#0f172a",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
   icons: {
     icon: [
       { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
