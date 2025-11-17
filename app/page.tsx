@@ -35,6 +35,7 @@ function Chat() {
   const [showReloadModal, setShowReloadModal] = useState(false)
   const [reloadAmount, setReloadAmount] = useState('10000')
   const [isLoadingTokens, setIsLoadingTokens] = useState(false)
+  const [isAdmin, setIsAdmin] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   
@@ -189,6 +190,8 @@ function Chat() {
     const code = searchParams.get('code') // Code PKCE de Supabase
     const error = searchParams.get('error')
     const message = searchParams.get('message')
+    const checkoutStatus = searchParams.get('checkout') // 'success' o 'cancelled'
+    const sessionId = searchParams.get('session_id') // ID de sesión de Stripe
     
     // Si hay un code PKCE, intercambiarlo por una sesión
     if (code) {
@@ -277,14 +280,43 @@ function Chat() {
       // Limpiar los parámetros de la URL
       router.replace(window.location.pathname, { scroll: false })
     }
+    
+    // Manejar resultado del checkout de Stripe
+    if (checkoutStatus === 'success') {
+      console.log('✅ Checkout exitoso detectado, session_id:', sessionId)
+      toast.success('¡Pago exitoso! Tu suscripción ha sido activada. Recargando información...')
+      
+      // Si el usuario está autenticado, recargar tokens y conversaciones
+      if (accessToken && user) {
+        // Recargar tokens para reflejar la nueva suscripción
+        loadTokens()
+        loadConversations()
+      }
+      
+      // Limpiar los parámetros de la URL
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('checkout')
+      newUrl.searchParams.delete('session_id')
+      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+    } else if (checkoutStatus === 'cancelled') {
+      console.log('⚠️ Checkout cancelado por el usuario')
+      toast.error('El pago fue cancelado. Puedes intentar nuevamente cuando estés listo.')
+      
+      // Limpiar los parámetros de la URL
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('checkout')
+      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, router, accessToken, user, supabase])
 
   // Cargar tokens y conversaciones cuando el usuario está logueado
   useEffect(() => {
-    if (accessToken && user) {
-      loadTokens()
-      loadConversations()
-    }
+      if (accessToken && user) {
+        loadTokens()
+        loadConversations()
+        checkIsAdmin()
+      }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, user])
 
@@ -1754,6 +1786,16 @@ function Chat() {
                         title="Resetear tokens a 20,000 (emergencia)"
                       >
                         Resetear
+                      </button>
+                    )}
+                    {isAdmin && (
+                      <button
+                        onClick={() => router.push('/admin/metrics')}
+                        className="px-1.5 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-md hover:shadow-lg"
+                        title="Dashboard de administración"
+                      >
+                        <span className="hidden sm:inline">📊 Admin</span>
+                        <span className="sm:hidden text-xs">📊</span>
                       </button>
                     )}
                     <button
