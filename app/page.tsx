@@ -155,7 +155,8 @@ function Chat() {
               headers: {
                 'Authorization': `Bearer ${session.access_token}`,
                 'Content-Type': 'application/json'
-              }
+              },
+              body: JSON.stringify({})
             })
             
             console.log(`   Response status: ${response.status}`)
@@ -253,7 +254,8 @@ function Chat() {
             headers: {
               'Authorization': `Bearer ${accessToken}`,
               'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({})
           }).then(response => {
             if (response.ok) {
               console.log('Email de bienvenida solicitado correctamente')
@@ -853,7 +855,8 @@ function Chat() {
                 headers: {
                   'Authorization': `Bearer ${data.session.access_token}`,
                   'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({})
               })
               
               console.log(`   Response status: ${response.status}`)
