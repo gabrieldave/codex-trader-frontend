@@ -10,6 +10,11 @@ const withPWA = require('next-pwa')({
 
 const nextConfig: NextConfig = {
   /* config options here */
+  // Configuración de Turbopack para evitar conflicto con next-pwa
+  // next-pwa usa Webpack, así que necesitamos especificar que usamos Webpack
+  webpack: (config, { isServer }) => {
+    return config;
+  },
 };
 
 // Exportar con PWA wrapper
