@@ -195,7 +195,13 @@ export async function publicApiCall(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
+  let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
+  
+  // Asegurar que la URL tenga protocolo (https://)
+  if (backendUrl && !backendUrl.startsWith('http://') && !backendUrl.startsWith('https://')) {
+    backendUrl = `https://${backendUrl}`
+  }
+  
   const url = endpoint.startsWith('http') 
     ? endpoint 
     : `${backendUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
