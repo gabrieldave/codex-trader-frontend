@@ -67,9 +67,39 @@ export async function authorizedApiCall(
   }
   
   // 5. Preparar el body (si existe)
+  // IMPORTANTE: Eliminar cualquier token del body por seguridad (solo debe ir en headers)
   let body: BodyInit | null | undefined = options.body
-  if (body && typeof body === 'object' && !(body instanceof FormData) && !(body instanceof Blob) && !(body instanceof ArrayBuffer) && !(body instanceof URLSearchParams)) {
-    body = JSON.stringify(body)
+  if (body && typeof body === 'object' && !(body instanceof FormData) && !(body instanceof Blob) && !(body instanceof ArrayBuffer) && !(body instanceof URLSearchParams) && !ArrayBuffer.isView(body)) {
+    // Si es un objeto plano, crear una copia sin campos de token
+    try {
+      const bodyObj = body as unknown as Record<string, unknown>
+      const sanitizedBody: Record<string, unknown> = {}
+      for (const key in bodyObj) {
+        // Excluir campos relacionados con tokens del body
+        if (key !== 'token' && key !== 'access_token' && key !== 'auth_token' && key !== 'jwt_token') {
+          sanitizedBody[key] = bodyObj[key]
+        }
+      }
+      body = JSON.stringify(sanitizedBody)
+    } catch {
+      // Si falla la sanitización, usar el body original
+    }
+  } else if (typeof body === 'string') {
+    // Si es un string JSON, parsearlo, eliminar tokens, y volver a stringify
+    try {
+      const parsed = JSON.parse(body) as Record<string, unknown> | null
+      if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+        const sanitizedBody: Record<string, unknown> = {}
+        for (const key in parsed) {
+          if (key !== 'token' && key !== 'access_token' && key !== 'auth_token' && key !== 'jwt_token') {
+            sanitizedBody[key] = parsed[key]
+          }
+        }
+        body = JSON.stringify(sanitizedBody)
+      }
+    } catch {
+      // Si no es JSON válido, dejarlo como está
+    }
   }
   
   // 6. Realizar la solicitud con las cabeceras actualizadas
@@ -103,7 +133,7 @@ export async function authorizedApiCall(
  * console.log(data.tokens_restantes)
  * ```
  */
-export async function authorizedApiCallJson<T = any>(
+export async function authorizedApiCallJson<T = unknown>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
@@ -111,9 +141,9 @@ export async function authorizedApiCallJson<T = any>(
   
   if (!response.ok) {
     const errorText = await response.text()
-    let errorData: any
+    let errorData: { detail?: string; error?: string } = {}
     try {
-      errorData = JSON.parse(errorText)
+      errorData = JSON.parse(errorText) as { detail?: string; error?: string }
     } catch {
       errorData = { detail: errorText || `Error ${response.status}: ${response.statusText}` }
     }
