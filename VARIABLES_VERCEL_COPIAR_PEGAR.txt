@@ -6,21 +6,21 @@
 # ============================================
 
 # 1. URL de Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://eixvqedpyuybfywmdulg.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://hozhyzdurdopkjoehqrh.supabase.co
 
 # 2. Anon Key de Supabase (NO uses service_role aquí)
 # Obtén este valor en: Supabase Dashboard > Settings > API > anon public key
 NEXT_PUBLIC_SUPABASE_ANON_KEY=TU_ANON_KEY_AQUI
 
-# 3. URL del Backend en Railway (con subdominio personalizado)
-NEXT_PUBLIC_BACKEND_URL=https://api.codextrader.tech
+# 3. URL del Backend en Railway
+NEXT_PUBLIC_BACKEND_URL=https://web-production-9ab2.up.railway.app
 
 # ============================================
 # VARIABLES OPCIONALES (Privadas - Solo para API Routes)
 # ============================================
 
 # 4. URL del Backend para API Routes del servidor
-BACKEND_URL=https://api.codextrader.tech
+BACKEND_URL=https://web-production-9ab2.up.railway.app
 
 # ============================================
 # INSTRUCCIONES
@@ -32,7 +32,7 @@ BACKEND_URL=https://api.codextrader.tech
 # 4. Para cada variable:
 #    - Haz clic en "Add New"
 #    - Key: El nombre de la variable (ej: NEXT_PUBLIC_SUPABASE_URL)
-#    - Value: El valor (ej: https://eixvqedpyuybfywmdulg.supabase.co)
+#    - Value: El valor (ej: https://hozhyzdurdopkjoehqrh.supabase.co)
 #    - Environments: Marca Production, Preview (y Development si quieres)
 #    - Haz clic en "Save"
 # 
@@ -44,7 +44,7 @@ BACKEND_URL=https://api.codextrader.tech
 # ============================================
 # 
 # NEXT_PUBLIC_SUPABASE_URL:
-#   - Ya está aquí: https://eixvqedpyuybfywmdulg.supabase.co
+#   - Ya está aquí: https://hozhyzdurdopkjoehqrh.supabase.co
 # 
 # NEXT_PUBLIC_SUPABASE_ANON_KEY:
 #   - Ve a: https://app.supabase.com
@@ -54,10 +54,10 @@ BACKEND_URL=https://api.codextrader.tech
 #   - ⚠️ NO uses la "service_role" key (es secreta)
 # 
 # NEXT_PUBLIC_BACKEND_URL:
-#   - Ya está aquí: https://api.codextrader.tech
+#   - Ya está aquí: https://web-production-9ab2.up.railway.app
 #   - Si cambias el dominio en Railway, actualiza esto
 # 
 # BACKEND_URL:
 #   - Mismo valor que NEXT_PUBLIC_BACKEND_URL
-#   - https://api.codextrader.tech
+#   - https://web-production-9ab2.up.railway.app
 

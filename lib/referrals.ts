@@ -15,7 +15,7 @@ export async function processReferral(
   accessToken: string
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
     
     const response = await fetch(`${backendUrl}/referrals/process`, {
       method: 'POST',
@@ -56,7 +56,7 @@ export async function processReferral(
  */
 export async function getReferralInfo(accessToken: string) {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
     
     const response = await fetch(`${backendUrl}/referrals/info`, {
       headers: {

@@ -9,7 +9,7 @@ Este documento lista todas las variables de entorno que necesitas configurar en 
 ### 1. NEXT_PUBLIC_SUPABASE_URL
 **Tipo:** Pública (visible en el navegador)  
 **Descripción:** URL de tu proyecto Supabase  
-**Ejemplo:** `https://eixvqedpyuybfywmdulg.supabase.co`  
+**Ejemplo:** `https://hozhyzdurdopkjoehqrh.supabase.co`  
 **Dónde encontrarla:**
 - Ve a tu [Dashboard de Supabase](https://app.supabase.com)
 - Selecciona tu proyecto
@@ -34,7 +34,7 @@ Este documento lista todas las variables de entorno que necesitas configurar en 
 ### 3. NEXT_PUBLIC_BACKEND_URL
 **Tipo:** Pública (visible en el navegador)  
 **Descripción:** URL de tu backend en producción (Railway, Render, etc.)  
-**Ejemplo:** `https://codex-trader-backend.railway.app`  
+**Ejemplo:** `https://web-production-9ab2.up.railway.app`  
 **Dónde encontrarla:**
 - En Railway: Ve a tu proyecto → **Settings** → **Domains** → Copia la URL
 - En Render: Ve a tu servicio → Copia la URL del dashboard
@@ -49,7 +49,7 @@ Estas variables solo son necesarias si usas API Routes del servidor que necesita
 ### 4. BACKEND_URL
 **Tipo:** Privada (solo en servidor)  
 **Descripción:** URL del backend para API Routes del servidor  
-**Ejemplo:** `https://codex-trader-backend.railway.app`  
+**Ejemplo:** `https://web-production-9ab2.up.railway.app`  
 **Nota:** Generalmente es la misma que `NEXT_PUBLIC_BACKEND_URL`, pero esta es privada
 
 ---
@@ -141,10 +141,10 @@ Si necesitas actualizar una variable:
 Copia y pega esto en un documento temporal mientras configuras Vercel:
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://hozhyzdurdopkjoehqrh.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_aqui
-NEXT_PUBLIC_BACKEND_URL=https://tu-backend.railway.app
-BACKEND_URL=https://tu-backend.railway.app
+NEXT_PUBLIC_BACKEND_URL=https://web-production-9ab2.up.railway.app
+BACKEND_URL=https://web-production-9ab2.up.railway.app
 ```
 
 ---

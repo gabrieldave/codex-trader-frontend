@@ -16,8 +16,8 @@ export async function startCheckout(
 ): Promise<void> {
   try {
     // Obtener la URL del backend desde variables de entorno
-    // IMPORTANTE: En producción, debe ser https://api.codextrader.tech
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+    // IMPORTANTE: En producción, debe ser https://web-production-9ab2.up.railway.app
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
     
     // Debug: verificar que la variable se está leyendo correctamente
     if (typeof window !== 'undefined') {

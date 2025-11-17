@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
         // Intentar enviar email de bienvenida en segundo plano (no esperar)
         if (data?.session?.access_token || confirmationToken || accessTokenFromHash) {
           try {
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
             
             // Preparar body y headers
             const body: { token_hash?: string } = {}

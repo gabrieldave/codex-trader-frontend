@@ -148,7 +148,7 @@ function Chat() {
           welcomeEmailSent = true // Marcar como enviado para evitar duplicados
           
           try {
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
             console.log(`   Llamando a ${backendUrl}/users/notify-registration...`)
             const response = await fetch(`${backendUrl}/users/notify-registration`, {
               method: 'POST',
@@ -846,7 +846,7 @@ function Chat() {
           if (data.session.access_token) {
             console.log('📧 Registro con sesión inmediata detectado, notificando al backend...')
             try {
-              const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+              const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
               console.log(`   Llamando a ${backendUrl}/users/notify-registration...`)
               const response = await fetch(`${backendUrl}/users/notify-registration`, {
                 method: 'POST',
