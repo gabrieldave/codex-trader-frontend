@@ -21,10 +21,15 @@ export async function startCheckout(
     try {
       // Llamar al endpoint del backend usando la función centralizada
       // La función authorizedApiCallJson obtiene automáticamente el token de la sesión
+      console.log('[Billing] Iniciando checkout para plan:', planCode)
       const data = await authorizedApiCallJson<{ url: string }>('/billing/create-checkout-session', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ planCode })
       })
+      console.log('[Billing] Checkout session creada:', data.url)
       
       // Cerrar el toast de loading
       toast.dismiss(loadingToast)
