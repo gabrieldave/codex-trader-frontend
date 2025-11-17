@@ -5,13 +5,34 @@ import { useState, useEffect } from 'react'
 export default function PWAInstallButton() {
   const [installPrompt, setInstallPrompt] = useState<any>(null)
   const [isInstalled, setIsInstalled] = useState(false)
+  const [canInstall, setCanInstall] = useState(false)
 
   useEffect(() => {
     // Verificar si la app ya está instalada
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    const checkIfInstalled = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      const isInWebAppiOS = (window.navigator as any).standalone === true
+      return isStandalone || isInWebAppiOS
+    }
+
+    if (checkIfInstalled()) {
       setIsInstalled(true)
       return
     }
+
+    // Verificar si el navegador soporta instalación PWA
+    const checkPWAInstallable = () => {
+      // Verificar si es un navegador que soporta PWA
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
+      const isEdge = /Edg/.test(navigator.userAgent)
+      const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
+      
+      // Chrome, Edge y Safari móvil soportan PWA
+      return isMobile || isChrome || isEdge || (isSafari && isMobile)
+    }
+
+    setCanInstall(checkPWAInstallable())
 
     // Atrapar el evento de instalación
     const handleBeforeInstallPrompt = (event: Event) => {
@@ -19,6 +40,7 @@ export default function PWAInstallButton() {
       event.preventDefault()
       // Guardar el evento para que pueda ser disparado después
       setInstallPrompt(event)
+      setCanInstall(true)
       console.log("PWA: Invitación de instalación atrapada.")
     }
 
@@ -28,6 +50,7 @@ export default function PWAInstallButton() {
     window.addEventListener('appinstalled', () => {
       setIsInstalled(true)
       setInstallPrompt(null)
+      setCanInstall(false)
       console.log('PWA: App instalada')
     })
 
@@ -38,33 +61,48 @@ export default function PWAInstallButton() {
   }, [])
 
   const handleInstallClick = async () => {
-    if (!installPrompt) {
-      return // No hay evento que disparar
-    }
+    if (installPrompt) {
+      try {
+        // Mostrar el pop-up de instalación
+        await (installPrompt as any).prompt()
 
-    try {
-      // Mostrar el pop-up de instalación
-      await (installPrompt as any).prompt()
+        // Esperar a que el usuario responda
+        const { outcome } = await (installPrompt as any).userChoice
 
-      // Esperar a que el usuario responda
-      const { outcome } = await (installPrompt as any).userChoice
+        if (outcome === 'accepted') {
+          console.log('PWA: Usuario aceptó la instalación')
+          setIsInstalled(true)
+        } else {
+          console.log('PWA: Usuario canceló la instalación')
+        }
 
-      if (outcome === 'accepted') {
-        console.log('PWA: Usuario aceptó la instalación')
-        setIsInstalled(true)
-      } else {
-        console.log('PWA: Usuario canceló la instalación')
+        // Limpiar el evento, ya que solo se puede usar una vez
+        setInstallPrompt(null)
+      } catch (error) {
+        console.error('Error al instalar PWA:', error)
       }
-
-      // Limpiar el evento, ya que solo se puede usar una vez
-      setInstallPrompt(null)
-    } catch (error) {
-      console.error('Error al instalar PWA:', error)
+    } else {
+      // Si no tenemos el prompt pero el navegador soporta PWA, mostrar instrucciones
+      if (canInstall && !isInstalled) {
+        // Para iOS Safari, mostrar instrucciones
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+        if (isIOS) {
+          alert('Para instalar esta app en iOS:\n1. Toca el botón de compartir\n2. Selecciona "Añadir a pantalla de inicio"')
+        } else {
+          // Para otros navegadores, intentar abrir el menú de instalación
+          alert('Para instalar esta app, busca el icono de instalación en la barra de direcciones de tu navegador.')
+        }
+      }
     }
   }
 
-  // No mostrar el botón si ya está instalada o si no hay prompt disponible
-  if (isInstalled || !installPrompt) {
+  // No mostrar el botón si ya está instalada
+  if (isInstalled) {
+    return null
+  }
+
+  // Mostrar el botón si podemos instalar (tengamos o no el prompt)
+  if (!canInstall) {
     return null
   }
 
