@@ -46,17 +46,21 @@ function Chat() {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<Array<{id: string, title: string, created_at: string, updated_at: string}>>([])
   const [isLoadingConversations, setIsLoadingConversations] = useState(false)
-  // Sidebar solo visible en escritorio por defecto
-  const [showConversationsSidebar, setShowConversationsSidebar] = useState(false)
+  // Estado para controlar el menú hamburguesa (móvil)
+  const [menuAbierto, setMenuAbierto] = useState(false)
+  // Estado para controlar sidebar en escritorio (si el usuario lo cerró)
+  const [sidebarCerradoDesktop, setSidebarCerradoDesktop] = useState(false)
   
-  // Detectar tamaño de pantalla y ajustar sidebar
+  // Detectar tamaño de pantalla y ajustar sidebar solo al cargar
   useEffect(() => {
     const checkScreenSize = () => {
-      // Solo mostrar sidebar en escritorio (lg: 1024px+)
-      if (window.innerWidth >= 1024) {
-        setShowConversationsSidebar(true)
+      // En escritorio (md: 768px+), verificar si el usuario cerró el sidebar antes
+      if (window.innerWidth >= 768) {
+        const wasClosed = sessionStorage.getItem('sidebarClosed') === 'true'
+        setSidebarCerradoDesktop(wasClosed)
       } else {
-        setShowConversationsSidebar(false)
+        // En móvil, siempre cerrar el menú al cambiar a móvil
+        setMenuAbierto(false)
       }
     }
     
@@ -1660,16 +1664,32 @@ function Chat() {
       {/* Contenedor principal: sin max-width en móvil, centrado en escritorio */}
       <div className="w-full h-screen flex flex-col overflow-hidden lg:max-w-6xl lg:mx-auto lg:px-6">
         <div className="flex flex-col lg:flex-row gap-0 lg:gap-4 flex-1 min-h-0 w-full overflow-hidden">
-          {/* Sidebar de conversaciones - SOLO visible en escritorio cuando showConversationsSidebar es true */}
-          {showConversationsSidebar ? (
-          <aside className="hidden lg:flex lg:flex-col lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-0 lg:h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+          {/* Sidebar de conversaciones - Oculto en móvil por defecto, visible en escritorio */}
+          {/* Backdrop para móvil - solo visible cuando menuAbierto es true */}
+          {menuAbierto && (
+            <div 
+              className="md:hidden fixed inset-0 bg-black/50 z-40"
+              onClick={() => setMenuAbierto(false)}
+            />
+          )}
+          {/* Sidebar: En móvil usa translate-x para animación, en escritorio usa hidden md:block según estado */}
+          <aside className={`${menuAbierto ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative inset-y-0 left-0 md:inset-auto z-50 md:z-auto flex flex-col w-72 flex-shrink-0 md:sticky md:top-0 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-xl md:shadow-none transition-transform duration-300 ease-in-out block ${sidebarCerradoDesktop ? 'md:hidden' : 'md:block'}`}>
           {/* Header del sidebar */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Conversaciones</h2>
               <button
-                onClick={() => setShowConversationsSidebar(false)}
-                className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 lg:block"
+                onClick={() => {
+                  // En móvil, cerrar el menú
+                  if (window.innerWidth < 768) {
+                    setMenuAbierto(false)
+                  } else {
+                    // En escritorio, ocultar el sidebar
+                    setSidebarCerradoDesktop(true)
+                    sessionStorage.setItem('sidebarClosed', 'true')
+                  }
+                }}
+                className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 title="Cerrar conversaciones"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1771,15 +1791,47 @@ function Chat() {
             )}
             </div>
           </aside>
-          ) : null}
           
           {/* Área principal del chat */}
           <main className="flex-1 flex flex-col w-full min-w-0 overflow-hidden">
             {/* Header mejorado con contador de tokens */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-30 w-full flex-shrink-0">
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-40 w-full flex-shrink-0">
               <div className="w-full px-3 py-1.5 sm:px-4 sm:py-3 lg:max-w-3xl lg:mx-auto">
                 <div className="flex justify-between items-center gap-1.5 sm:gap-4">
                   <div className="flex items-center gap-1.5 sm:gap-4 min-w-0 flex-1">
+                    {/* Botón hamburguesa - SOLO visible en móvil (md:hidden) según instrucciones */}
+                    <button
+                      onClick={() => setMenuAbierto(!menuAbierto)}
+                      className="md:hidden p-2.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 active:bg-blue-100 dark:active:bg-blue-900/30 rounded-lg transition-colors flex-shrink-0 z-50 relative"
+                      title={menuAbierto ? "Cerrar menú" : "Abrir menú"}
+                      aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
+                    >
+                      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                        {menuAbierto ? (
+                          // Icono X cuando está abierto
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        ) : (
+                          // Icono hamburguesa (3 líneas) cuando está cerrado
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        )}
+                      </svg>
+                    </button>
+                    {/* Botón para abrir sidebar en escritorio cuando está cerrado */}
+                    {sidebarCerradoDesktop && (
+                      <button
+                        onClick={() => {
+                          setSidebarCerradoDesktop(false)
+                          sessionStorage.setItem('sidebarClosed', 'false')
+                        }}
+                        className="hidden md:flex p-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors flex-shrink-0"
+                        title="Abrir menú de conversaciones"
+                        aria-label="Abrir menú de conversaciones"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                      </button>
+                    )}
                     <h1 className="text-sm sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent truncate">
                       CODEX TRADER
                     </h1>

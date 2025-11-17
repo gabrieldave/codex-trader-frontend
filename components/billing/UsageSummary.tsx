@@ -109,23 +109,41 @@ export default function UsageSummary({ accessToken, className = '' }: UsageSumma
       {/* Tokens disponibles */}
       <div className="mb-4">
         <p className="text-blue-200 text-sm mb-1">Tokens disponibles</p>
-        <p className="text-white font-semibold text-xl">
-          {usageData.tokens_restantes.toLocaleString()} / {usageData.tokens_monthly_limit.toLocaleString()} este mes
+        <p className="text-white font-semibold text-xl mb-1">
+          {usageData.tokens_restantes.toLocaleString()} tokens
         </p>
+        {usageData.tokens_restantes > usageData.tokens_monthly_limit ? (
+          // Si tiene más tokens que el límite (tokens extra)
+          <div className="text-green-300 text-xs">
+            <p className="mb-1">
+              ✅ {usageData.tokens_monthly_limit.toLocaleString()} tokens del plan
+            </p>
+            <p>
+              + {(usageData.tokens_restantes - usageData.tokens_monthly_limit).toLocaleString()} tokens extra
+            </p>
+          </div>
+        ) : (
+          // Si está usando tokens del límite mensual
+          <p className="text-blue-300 text-xs">
+            {usageData.tokens_restantes.toLocaleString()} / {usageData.tokens_monthly_limit.toLocaleString()} del límite mensual
+          </p>
+        )}
       </div>
 
-      {/* Barra de progreso */}
-      <div className="mb-4">
-        <div className="w-full bg-blue-900/50 rounded-full h-4 mb-2 overflow-hidden">
-          <div
-            className={`h-full ${progressColor} transition-all duration-300 rounded-full`}
-            style={{ width: `${Math.min(usagePercent, 100)}%` }}
-          />
+      {/* Barra de progreso - solo mostrar si está usando tokens del límite */}
+      {usageData.tokens_restantes <= usageData.tokens_monthly_limit && (
+        <div className="mb-4">
+          <div className="w-full bg-blue-900/50 rounded-full h-4 mb-2 overflow-hidden">
+            <div
+              className={`h-full ${progressColor} transition-all duration-300 rounded-full`}
+              style={{ width: `${Math.min(usagePercent, 100)}%` }}
+            />
+          </div>
+          <p className="text-blue-200 text-xs text-center">
+            Has usado ~{usagePercent.toFixed(1)}% de tu límite mensual.
+          </p>
         </div>
-        <p className="text-blue-200 text-xs text-center">
-          Has usado ~{usagePercent.toFixed(1)}% de tu límite mensual.
-        </p>
-      </div>
+      )}
 
       {/* Mensajes según el estado */}
       <div className="space-y-3">
