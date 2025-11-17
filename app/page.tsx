@@ -346,6 +346,36 @@ function Chat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentConversationId, accessToken])
 
+  // Función para verificar si el usuario es admin
+  const checkIsAdmin = async () => {
+    if (!accessToken) {
+      setIsAdmin(false)
+      return
+    }
+    
+    try {
+      const headers = {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/me/is-admin`, {
+        method: 'GET',
+        headers
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setIsAdmin(data.is_admin || false)
+      } else {
+        setIsAdmin(false)
+      }
+    } catch (error) {
+      console.error('Error al verificar si es admin:', error)
+      setIsAdmin(false)
+    }
+  }
+
   // Función para cargar tokens restantes
   const loadTokens = async () => {
     if (!accessToken) return
