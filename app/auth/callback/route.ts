@@ -193,10 +193,35 @@ export async function GET(request: NextRequest) {
 
       if (!error && data?.user) {
         // Usuario confirmado exitosamente
+        // IMPORTANTE: Asegurar que la sesión esté establecida para login automático
+        let sessionEstablecida = false
+        
+        // IMPORTANTE: Asegurar que la sesión esté establecida
+        // verifyOtp puede devolver la sesión directamente o necesitamos obtenerla
+        if (data.session) {
+          sessionEstablecida = true
+          console.log('[CALLBACK] ✅ Sesión ya establecida después de verificar OTP')
+          console.log('[CALLBACK] ✅ Usuario logueado automáticamente:', data.session.user.email)
+        } else {
+          // Intentar obtener la sesión actual (puede haberse establecido en cookies)
+          try {
+            const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+            if (sessionData?.session) {
+              sessionEstablecida = true
+              console.log('[CALLBACK] ✅ Sesión obtenida después de verificar OTP')
+              console.log('[CALLBACK] ✅ Usuario logueado automáticamente:', sessionData.session.user.email)
+            } else {
+              console.warn('[CALLBACK] ⚠️ No hay sesión después de verificar OTP')
+              console.warn('[CALLBACK] ⚠️ Error de sesión:', sessionError?.message || 'No se pudo obtener sesión')
+              console.log('[CALLBACK] ℹ️ El usuario necesitará hacer login manualmente')
+            }
+          } catch (sessionErr) {
+            console.warn('[CALLBACK] ⚠️ Error al obtener sesión:', sessionErr)
+          }
+        }
+        
         // IMPORTANTE: Notificar al backend para enviar email de bienvenida
         // Esto se hace en segundo plano y no bloquea la redirección
-        // En móvil, es mejor redirigir a la página principal para que el usuario pueda hacer login
-        
         // IMPORTANTE: Intentar enviar email de bienvenida SIEMPRE después de confirmar
         // El backend puede usar token_hash o access_token para autenticar
         try {
@@ -271,10 +296,16 @@ export async function GET(request: NextRequest) {
         }
 
         // Redirigir a la página principal con mensaje de éxito
-        // En móvil, es mejor redirigir a / para que el usuario pueda hacer login
+        // Si la sesión está establecida, el usuario quedará logueado automáticamente
         const redirectUrl = new URL('/', requestUrl.origin)
         redirectUrl.searchParams.set('confirmed', 'true')
         redirectUrl.searchParams.set('email_confirmed', 'true')
+        if (sessionEstablecida) {
+          redirectUrl.searchParams.set('session_established', 'true')
+          console.log('[CALLBACK] ✅ Redirigiendo con sesión establecida - usuario logueado automáticamente')
+        } else {
+          console.log('[CALLBACK] ⚠️ Redirigiendo sin sesión - usuario necesitará hacer login')
+        }
         return NextResponse.redirect(redirectUrl)
       } else {
         // Error al verificar el token
