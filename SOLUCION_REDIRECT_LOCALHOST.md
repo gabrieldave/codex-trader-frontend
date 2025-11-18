@@ -66,3 +66,4 @@ Si después de configurar las URLs correctas en Supabase el problema persiste:
 4. Prueba en modo incógnito
 
 
+
