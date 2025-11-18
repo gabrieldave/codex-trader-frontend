@@ -197,72 +197,77 @@ export async function GET(request: NextRequest) {
         // Esto se hace en segundo plano y no bloquea la redirección
         // En móvil, es mejor redirigir a la página principal para que el usuario pueda hacer login
         
-        // Intentar enviar email de bienvenida en segundo plano (no esperar)
-        if (data?.session?.access_token || confirmationToken || accessTokenFromHash) {
-          try {
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
-            
-            // Preparar body y headers
-            const body: { token_hash?: string } = {}
-            
-            // Si tenemos token_hash, token, o code, usarlo (más confiable después de confirmar)
-            if (token_hash) {
-              body.token_hash = token_hash
-            } else if (token) {
-              // Si solo tenemos token, también podemos usarlo
-              body.token_hash = token
-            } else if (code) {
-              // Si tenemos code, también podemos usarlo (aunque ya lo intercambiamos)
-              body.token_hash = code
-            }
-            
-            const headers: Record<string, string> = {
-              'Content-Type': 'application/json'
-            }
-            
-            // Si tenemos access_token, también incluirlo en el header
-            const accessToken = data.session?.access_token || accessTokenFromHash
-            if (accessToken) {
-              headers['Authorization'] = `Bearer ${accessToken}`
-              console.log('✅ Token de autorización incluido en header')
-            } else {
-              console.warn('⚠️ No hay access_token disponible para enviar en header')
-            }
-            
-            // Enviar en segundo plano (no esperar para no bloquear la redirección)
-            const notifyUrl = `${backendUrl}/users/notify-registration`
-            console.log('📧 Notificando registro al backend:', notifyUrl)
-            console.log('📧 Headers:', { ...headers, Authorization: headers.Authorization ? 'Bearer ***' : 'none' })
-            
-            fetch(notifyUrl, {
-              method: 'POST',
-              headers,
-              body: JSON.stringify(body)
-            })
-            .then(async response => {
-              if (response.ok) {
-                const responseData = await response.json()
-                console.log('✅ Email de bienvenida enviado correctamente desde callback:', responseData)
-              } else {
-                const errorText = await response.text()
-                console.error('❌ Error al notificar registro desde callback:', response.status, errorText)
-                // Intentar parsear el error como JSON si es posible
-                try {
-                  const errorJson = JSON.parse(errorText)
-                  console.error('❌ Detalles del error:', errorJson)
-                } catch {
-                  // Si no es JSON, ya tenemos el texto
-                }
-              }
-            })
-            .catch(fetchError => {
-              console.error('❌ Error de red al notificar registro desde callback:', fetchError)
-              console.error('❌ URL intentada:', notifyUrl)
-            })
-          } catch (error) {
-            // No crítico si falla, solo loguear
-            console.error('Error al notificar registro después de confirmación (no crítico):', error)
+        // IMPORTANTE: Intentar enviar email de bienvenida SIEMPRE después de confirmar
+        // El backend puede usar token_hash o access_token para autenticar
+        try {
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+          
+          // Preparar body con token_hash si está disponible
+          const body: { token_hash?: string } = {}
+          
+          // Prioridad: token_hash > token > code
+          if (token_hash) {
+            body.token_hash = token_hash
+          } else if (token) {
+            body.token_hash = token
+          } else if (code) {
+            body.token_hash = code
           }
+          
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json'
+          }
+          
+          // Si tenemos access_token, incluirlo en el header (mejor opción)
+          const accessToken = data.session?.access_token || accessTokenFromHash
+          if (accessToken) {
+            headers['Authorization'] = `Bearer ${accessToken}`
+            console.log('[CALLBACK] ✅ Token de autorización incluido en header')
+          } else if (confirmationToken) {
+            console.log('[CALLBACK] ⚠️ No hay access_token, usando token_hash en body')
+          } else {
+            console.warn('[CALLBACK] ⚠️ No hay access_token ni token_hash disponible')
+          }
+          
+          // Construir URL y hacer la llamada
+          const notifyUrl = `${backendUrl}/users/notify-registration`
+          console.log('[CALLBACK] 📧 Notificando registro al backend:', notifyUrl)
+          console.log('[CALLBACK] 📧 Body:', body)
+          console.log('[CALLBACK] 📧 Headers:', { ...headers, Authorization: headers.Authorization ? 'Bearer ***' : 'none' })
+          
+          // IMPORTANTE: Usar fetch con manejo robusto de errores
+          // No usar await para no bloquear la redirección
+          fetch(notifyUrl, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body)
+          })
+          .then(async response => {
+            console.log('[CALLBACK] 📧 Response status:', response.status)
+            if (response.ok) {
+              const responseData = await response.json()
+              console.log('[CALLBACK] ✅ Email de bienvenida enviado correctamente:', responseData)
+            } else {
+              const errorText = await response.text()
+              console.error('[CALLBACK] ❌ Error al notificar registro:', response.status, errorText)
+              // Intentar parsear el error como JSON si es posible
+              try {
+                const errorJson = JSON.parse(errorText)
+                console.error('[CALLBACK] ❌ Detalles del error:', errorJson)
+              } catch {
+                // Si no es JSON, ya tenemos el texto
+              }
+            }
+          })
+          .catch(fetchError => {
+            console.error('[CALLBACK] ❌ Error de red al notificar registro:', fetchError)
+            console.error('[CALLBACK] ❌ URL intentada:', notifyUrl)
+            console.error('[CALLBACK] ❌ Error tipo:', fetchError instanceof Error ? fetchError.name : typeof fetchError)
+          })
+        } catch (error) {
+          // Capturar cualquier error en la preparación de la llamada
+          console.error('[CALLBACK] ❌ Error al preparar notificación de registro:', error)
+          console.error('[CALLBACK] ❌ Stack:', error instanceof Error ? error.stack : 'N/A')
         }
 
         // Redirigir a la página principal con mensaje de éxito
