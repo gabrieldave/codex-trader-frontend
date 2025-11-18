@@ -38,6 +38,8 @@ function Chat() {
   const [isLoadingTokens, setIsLoadingTokens] = useState(false)
   const [isAdmin, setIsAdmin] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  // Bandera para evitar notificaciones duplicadas de checkout
+  const checkoutNotificationSent = useRef<boolean>(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   
   // AbortController para cancelar peticiones activas (usamos ref para evitar problemas de closures)
@@ -333,8 +335,9 @@ function Chat() {
     }
     
     // Manejar resultado del checkout de Stripe
-    if (checkoutStatus === 'success') {
+    if (checkoutStatus === 'success' && !checkoutNotificationSent.current) {
       console.log('✅ Checkout exitoso detectado, session_id:', sessionId)
+      checkoutNotificationSent.current = true // Marcar como enviado para evitar duplicados
       toast.success('¡Pago exitoso! Tu suscripción ha sido activada. Recargando información...')
       
       // Si el usuario está autenticado, recargar tokens y conversaciones
@@ -344,11 +347,15 @@ function Chat() {
         loadConversations()
       }
       
-      // Limpiar los parámetros de la URL
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.delete('checkout')
-      newUrl.searchParams.delete('session_id')
-      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+      // Limpiar los parámetros de la URL después de un delay
+      setTimeout(() => {
+        const newUrl = new URL(window.location.href)
+        newUrl.searchParams.delete('checkout')
+        newUrl.searchParams.delete('session_id')
+        router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+        // Resetear la bandera después de limpiar la URL
+        checkoutNotificationSent.current = false
+      }, 3000)
     } else if (checkoutStatus === 'cancelled') {
       console.log('⚠️ Checkout cancelado por el usuario')
       toast.error('El pago fue cancelado. Puedes intentar nuevamente cuando estés listo.')
