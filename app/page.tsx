@@ -133,6 +133,9 @@ function Chat() {
       if (session) {
         setUser(session.user)
         setAccessToken(session.access_token)
+        // Cargar tokens y conversaciones cuando hay sesión
+        loadTokens()
+        loadConversations()
         
         // Si el usuario acaba de confirmar su email (SIGNED_IN después de confirmación)
         // o si hay parámetros de confirmación en la URL, notificar al backend
