@@ -109,13 +109,18 @@ function Chat() {
           console.log('✅ Sesión encontrada al cargar:', session.user.email)
           setUser(session.user)
           setAccessToken(session.access_token)
+          // Cargar tokens y conversaciones si hay sesión
+          loadTokens()
+          loadConversations()
         } else {
           console.log('⚠️ No hay sesión al cargar la página')
         }
       } catch (err) {
         console.error('Error inesperado al verificar sesión:', err)
+      } finally {
+        // IMPORTANTE: Siempre resolver el loading, incluso si hay errores
+        setLoading(false)
       }
-      setLoading(false)
     }
     checkUser()
 
