@@ -18,7 +18,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No se proporcionó token de autenticación" }, { status: 401 })
     }
 
-    const backendUrl = `${process.env.BACKEND_URL || 'http://localhost:8000'}/tokens/reload`
+    // IMPORTANTE: Usar NEXT_PUBLIC_BACKEND_URL porque las variables sin NEXT_PUBLIC_ no están disponibles en el cliente
+    const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'https://api.codextrader.tech'
+    const backendUrl = `${backendBaseUrl}/tokens/reload`
     
     let response: Response
     try {
@@ -36,7 +38,7 @@ export async function POST(req: Request) {
       console.error('Error de conexión al backend:', fetchError)
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
         return NextResponse.json({ 
-          error: 'El servidor no responde. Verifica que el backend esté corriendo en http://localhost:8000',
+          error: 'El servidor no responde. Verifica la conexión con el backend.',
           detail: 'Timeout de conexión'
         }, { status: 503 })
       }

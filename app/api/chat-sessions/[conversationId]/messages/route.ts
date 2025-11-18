@@ -19,7 +19,8 @@ export async function GET(
     const limit = parseInt(searchParams.get('limit') || '100')
     const { conversationId } = await params
 
-    const backendBaseUrl = process.env.BACKEND_URL || 'http://localhost:8000'
+    // IMPORTANTE: Usar NEXT_PUBLIC_BACKEND_URL porque las variables sin NEXT_PUBLIC_ no están disponibles en el cliente
+    const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'https://api.codextrader.tech'
     const backendUrl = `${backendBaseUrl}/chat-sessions/${conversationId}/messages?limit=${limit}`
     const response = await fetch(backendUrl, {
       method: 'GET',

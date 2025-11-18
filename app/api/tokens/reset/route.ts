@@ -26,7 +26,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No se proporcionó token de autenticación" }, { status: 401 })
     }
 
-    const backendBaseUrl = process.env.BACKEND_URL || 'http://localhost:8000'
+    // IMPORTANTE: Usar NEXT_PUBLIC_BACKEND_URL porque las variables sin NEXT_PUBLIC_ no están disponibles en el cliente
+    const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'https://api.codextrader.tech'
     const backendUrl = `${backendBaseUrl}/tokens/reset?cantidad=${cantidad}`
     console.log(`🔵 Llamando al backend: ${backendUrl}`)
     

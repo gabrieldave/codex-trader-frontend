@@ -30,7 +30,8 @@ export async function POST(req: Request) {
     const conversationId = body.conversation_id || null
     const responseMode = body.response_mode || 'fast'
 
-    const backendBaseUrl = process.env.BACKEND_URL || 'http://localhost:8000'
+    // IMPORTANTE: Usar NEXT_PUBLIC_BACKEND_URL porque las variables sin NEXT_PUBLIC_ no están disponibles en el cliente
+    const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'https://api.codextrader.tech'
     const backendUrl = `${backendBaseUrl}/chat`
     
     // 🚨 DEBUG: Verificar configuración del backend

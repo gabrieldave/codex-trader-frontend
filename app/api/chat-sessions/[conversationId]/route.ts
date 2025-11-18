@@ -17,7 +17,8 @@ export async function DELETE(
 
     const { conversationId } = await params
 
-    const backendBaseUrl = process.env.BACKEND_URL || 'http://localhost:8000'
+    // IMPORTANTE: Usar NEXT_PUBLIC_BACKEND_URL porque las variables sin NEXT_PUBLIC_ no están disponibles en el cliente
+    const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'https://api.codextrader.tech'
     const backendUrl = `${backendBaseUrl}/chat-sessions/${conversationId}`
     const response = await fetch(backendUrl, {
       method: 'DELETE',
@@ -62,7 +63,8 @@ export async function PATCH(
       return NextResponse.json({ error: "El título es requerido" }, { status: 400 })
     }
 
-    const backendBaseUrl = process.env.BACKEND_URL || 'http://localhost:8000'
+    // IMPORTANTE: Usar NEXT_PUBLIC_BACKEND_URL porque las variables sin NEXT_PUBLIC_ no están disponibles en el cliente
+    const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'https://api.codextrader.tech'
     const backendUrl = `${backendBaseUrl}/chat-sessions/${conversationId}`
     const response = await fetch(backendUrl, {
       method: 'PATCH',

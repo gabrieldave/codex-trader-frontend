@@ -22,8 +22,8 @@ export async function POST(req: Request) {
       return new Response("No se proporcionó token de autenticación en el header Authorization", { status: 401 })
     }
 
-    // 1. URL de tu backend de Python (el motor)
-    const backendBaseUrl = process.env.BACKEND_URL || 'http://localhost:8000'
+    // IMPORTANTE: Usar NEXT_PUBLIC_BACKEND_URL porque las variables sin NEXT_PUBLIC_ no están disponibles en el cliente
+    const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'https://api.codextrader.tech'
     const backendUrl = `${backendBaseUrl}/chat`
 
     // 2. Reenviar la consulta y el token de auth a tu motor de Python

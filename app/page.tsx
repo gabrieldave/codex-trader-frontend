@@ -410,7 +410,9 @@ function Chat() {
         'Content-Type': 'application/json'
       }
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/me/is-admin`, {
+      // IMPORTANTE: Usar NEXT_PUBLIC_BACKEND_URL en lugar de NEXT_PUBLIC_API_URL
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+      const response = await fetch(`${backendUrl}/me/is-admin`, {
         method: 'GET',
         headers
       })
