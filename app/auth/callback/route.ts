@@ -224,6 +224,9 @@ export async function GET(request: NextRequest) {
             const accessToken = data.session?.access_token || accessTokenFromHash
             if (accessToken) {
               headers['Authorization'] = `Bearer ${accessToken}`
+              console.log('✅ Token de autorización incluido en header')
+            } else {
+              console.warn('⚠️ No hay access_token disponible para enviar en header')
             }
             
             // Enviar en segundo plano (no esperar para no bloquear la redirección)
@@ -232,15 +235,17 @@ export async function GET(request: NextRequest) {
               headers,
               body: JSON.stringify(body)
             })
-            .then(response => {
+            .then(async response => {
               if (response.ok) {
-                console.log('Email de bienvenida enviado correctamente')
+                const responseData = await response.json()
+                console.log('✅ Email de bienvenida enviado correctamente desde callback:', responseData)
               } else {
-                console.error('Error al notificar registro:', response.status)
+                const errorText = await response.text()
+                console.error('❌ Error al notificar registro desde callback:', response.status, errorText)
               }
             })
             .catch(fetchError => {
-              console.error('Error de red al notificar registro:', fetchError)
+              console.error('❌ Error de red al notificar registro desde callback:', fetchError)
             })
           } catch (error) {
             // No crítico si falla, solo loguear

@@ -222,6 +222,9 @@ function Chat() {
     if (confirmed === 'true' || emailConfirmed === 'true') {
       console.log('📧 Confirmación detectada en URL, verificando sesión...')
       
+      // IMPORTANTE: Asegurar que el loading se resuelva incluso si no hay sesión
+      setLoading(false)
+      
       // Intentar obtener la sesión después de un delay para dar tiempo a que se establezca
       setTimeout(async () => {
         try {
@@ -229,6 +232,9 @@ function Chat() {
           
           if (sessionError) {
             console.log('⚠️ Error al obtener sesión:', sessionError)
+            // Mostrar mensaje y cambiar a modo login
+            toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
+            setAuthMode('login')
             return
           }
           
@@ -236,49 +242,47 @@ function Chat() {
             console.log('✅ Sesión encontrada después de confirmación:', sessionData.session.user.email)
             setUser(sessionData.session.user)
             setAccessToken(sessionData.session.access_token)
+            
+            // Notificar al backend para enviar email de bienvenida
+            try {
+              const response = await authorizedApiCall('/users/notify-registration', {
+                method: 'POST',
+                body: JSON.stringify({})
+              })
+              
+              if (response.ok) {
+                const responseData = await response.json()
+                console.log('✅ Email de bienvenida solicitado correctamente:', responseData)
+                toast.success('¡Cuenta confirmada exitosamente! El email de bienvenida llegará pronto.')
+              } else {
+                const errorText = await response.text()
+                console.error('❌ Error al notificar registro:', response.status, errorText)
+                toast.success('¡Cuenta confirmada exitosamente! (El email de bienvenida puede tardar un momento)')
+              }
+            } catch (err) {
+              console.error('❌ Error al notificar registro después de confirmación:', err)
+              toast.success('¡Cuenta confirmada exitosamente! (El email de bienvenida puede tardar un momento)')
+            }
           } else {
             console.log('⚠️ No hay sesión después de confirmación, el usuario debe hacer login')
+            toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
+            setAuthMode('login')
           }
         } catch (err) {
           console.error('❌ Error al verificar sesión después de confirmación:', err)
+          toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
+          setAuthMode('login')
         }
-      }, 1000) // Esperar 1 segundo para que Supabase establezca la sesión
-    }
-    
-    if (confirmed === 'true' || emailConfirmed === 'true') {
-      // Si el usuario ya está autenticado, mostrar mensaje de éxito y enviar email
-      if (accessToken && user) {
-        toast.success('¡Cuenta confirmada exitosamente! El email de bienvenida llegará pronto.')
-        
-        // Notificar al backend para enviar email de bienvenida
-        try {
-          authorizedApiCall('/users/notify-registration', {
-            method: 'POST',
-            body: JSON.stringify({})
-          }).then(response => {
-            if (response.ok) {
-              console.log('Email de bienvenida solicitado correctamente')
-            } else {
-              console.error('Error al notificar registro:', response.status)
-            }
-          }).catch(() => {
-            console.error('Error al notificar registro después de confirmación (no crítico)')
-          })
-        } catch {
-          // No crítico
-        }
-      } else {
-        // Si no está autenticado, mostrar mensaje y cambiar a modo login
-        toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar. El email de bienvenida llegará cuando inicies sesión.')
-        setAuthMode('login')
-      }
+      }, 1500) // Aumentar a 1.5 segundos para dar más tiempo
       
-      // Limpiar el parámetro de la URL (incluyendo code si existe)
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.delete('confirmed')
-      newUrl.searchParams.delete('email_confirmed')
-      newUrl.searchParams.delete('code')
-      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+      // Limpiar el parámetro de la URL (incluyendo code si existe) después de un delay
+      setTimeout(() => {
+        const newUrl = new URL(window.location.href)
+        newUrl.searchParams.delete('confirmed')
+        newUrl.searchParams.delete('email_confirmed')
+        newUrl.searchParams.delete('code')
+        router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+      }, 2000)
     } else if (error) {
       const errorMessage = message || 'Error al confirmar tu cuenta'
       toast.error(errorMessage)
