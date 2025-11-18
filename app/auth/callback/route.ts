@@ -89,11 +89,49 @@ export async function GET(request: NextRequest) {
       }
       
       if (data.session) {
-        console.log('✅ Sesión establecida correctamente desde code PKCE')
-        // Redirigir al frontend con éxito
+        console.log('[CALLBACK] ✅ Sesión establecida correctamente desde code PKCE')
+        console.log('[CALLBACK] ✅ Usuario logueado automáticamente:', data.session.user.email)
+        
+        // IMPORTANTE: Notificar al backend para enviar email de bienvenida
+        // Esto se hace en segundo plano y no bloquea la redirección
+        try {
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+          const notifyUrl = `${backendUrl}/users/notify-registration`
+          
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${data.session.access_token}`
+          }
+          
+          console.log('[CALLBACK] 📧 Notificando registro al backend desde PKCE:', notifyUrl)
+          
+          fetch(notifyUrl, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({})
+          })
+          .then(async response => {
+            console.log('[CALLBACK] 📧 Response status:', response.status)
+            if (response.ok) {
+              const responseData = await response.json()
+              console.log('[CALLBACK] ✅ Email de bienvenida enviado correctamente:', responseData)
+            } else {
+              const errorText = await response.text()
+              console.error('[CALLBACK] ❌ Error al notificar registro:', response.status, errorText)
+            }
+          })
+          .catch(fetchError => {
+            console.error('[CALLBACK] ❌ Error de red al notificar registro:', fetchError)
+          })
+        } catch (error) {
+          console.error('[CALLBACK] ❌ Error al preparar notificación:', error)
+        }
+        
+        // Redirigir al frontend con éxito - usuario ya está logueado
         const redirectUrl = new URL('/', requestUrl.origin)
         redirectUrl.searchParams.set('confirmed', 'true')
         redirectUrl.searchParams.set('email_confirmed', 'true')
+        redirectUrl.searchParams.set('session_established', 'true')
         // Crear respuesta con cookies establecidas
         const response = NextResponse.redirect(redirectUrl)
         return response
