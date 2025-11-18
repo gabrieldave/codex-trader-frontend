@@ -445,10 +445,18 @@ function Chat() {
       })
       if (response.ok) {
         const data = await response.json()
+        console.log('[page.tsx] ✅ Tokens recibidos:', data)
         setTokensRestantes(data.tokens_restantes || data.tokens || null)
+      } else {
+        const errorText = await response.text()
+        console.error('[page.tsx] ❌ Error al cargar tokens:', response.status, errorText)
+        // Si es 401, puede que el token haya expirado
+        if (response.status === 401) {
+          console.warn('[page.tsx] ⚠️ Token de autenticación inválido o expirado')
+        }
       }
     } catch (error) {
-      console.error('Error al cargar tokens:', error)
+      console.error('[page.tsx] ❌ Error al cargar tokens:', error)
     } finally {
       setIsLoadingTokens(false)
     }
