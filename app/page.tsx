@@ -273,6 +273,10 @@ function Chat() {
             setUser(sessionData.session.user)
             setAccessToken(sessionData.session.access_token)
             
+            // IMPORTANTE: Cargar tokens después de establecer sesión
+            loadTokens()
+            loadConversations()
+            
             // Notificar al backend para enviar email de bienvenida (segunda llamada por si la primera falló)
             try {
               const response = await authorizedApiCall('/users/notify-registration', {
