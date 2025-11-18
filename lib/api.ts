@@ -64,7 +64,7 @@ export async function authorizedApiCall(
   }
   
   // 2. Obtener la URL del backend desde variables de entorno
-  let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
+  let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
   
   // Asegurar que la URL tenga protocolo (https://)
   if (backendUrl && !backendUrl.startsWith('http://') && !backendUrl.startsWith('https://')) {
@@ -195,7 +195,7 @@ export async function publicApiCall(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
+  let backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
   
   // Asegurar que la URL tenga protocolo (https://)
   if (backendUrl && !backendUrl.startsWith('http://') && !backendUrl.startsWith('https://')) {

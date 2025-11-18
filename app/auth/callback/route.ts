@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
         // Intentar enviar email de bienvenida en segundo plano (no esperar)
         if (data?.session?.access_token || confirmationToken || accessTokenFromHash) {
           try {
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://web-production-9ab2.up.railway.app'
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
             
             // Preparar body y headers
             const body: { token_hash?: string } = {}
@@ -230,7 +230,11 @@ export async function GET(request: NextRequest) {
             }
             
             // Enviar en segundo plano (no esperar para no bloquear la redirección)
-            fetch(`${backendUrl}/users/notify-registration`, {
+            const notifyUrl = `${backendUrl}/users/notify-registration`
+            console.log('📧 Notificando registro al backend:', notifyUrl)
+            console.log('📧 Headers:', { ...headers, Authorization: headers.Authorization ? 'Bearer ***' : 'none' })
+            
+            fetch(notifyUrl, {
               method: 'POST',
               headers,
               body: JSON.stringify(body)
@@ -242,10 +246,18 @@ export async function GET(request: NextRequest) {
               } else {
                 const errorText = await response.text()
                 console.error('❌ Error al notificar registro desde callback:', response.status, errorText)
+                // Intentar parsear el error como JSON si es posible
+                try {
+                  const errorJson = JSON.parse(errorText)
+                  console.error('❌ Detalles del error:', errorJson)
+                } catch {
+                  // Si no es JSON, ya tenemos el texto
+                }
               }
             })
             .catch(fetchError => {
               console.error('❌ Error de red al notificar registro desde callback:', fetchError)
+              console.error('❌ URL intentada:', notifyUrl)
             })
           } catch (error) {
             // No crítico si falla, solo loguear
