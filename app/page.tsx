@@ -220,10 +220,40 @@ function Chat() {
     
     // Si hay parámetros de confirmación, esperar a que se establezca la sesión
     if (confirmed === 'true' || emailConfirmed === 'true') {
-      console.log('📧 Confirmación detectada en URL, verificando sesión...')
+      console.log('[PAGE] 📧 Confirmación detectada en URL, verificando sesión...')
       
       // IMPORTANTE: Asegurar que el loading se resuelva incluso si no hay sesión
       setLoading(false)
+      
+      // OPCIÓN 2: Llamar al endpoint INMEDIATAMENTE sin esperar sesión
+      // Esto asegura que el email se envíe incluso si hay problemas con la sesión
+      console.log('[PAGE] 📧 Llamando al endpoint inmediatamente (sin esperar sesión)...')
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+      const notifyUrl = `${backendUrl}/users/notify-registration`
+      
+      // Intentar llamar al endpoint con el code si está disponible
+      fetch(notifyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          token_hash: code || undefined
+        })
+      })
+      .then(async response => {
+        console.log('[PAGE] 📧 Response status (llamada inmediata):', response.status)
+        if (response.ok) {
+          const responseData = await response.json()
+          console.log('[PAGE] ✅ Email de bienvenida solicitado correctamente (llamada inmediata):', responseData)
+        } else {
+          const errorText = await response.text()
+          console.error('[PAGE] ❌ Error en llamada inmediata:', response.status, errorText)
+        }
+      })
+      .catch(fetchError => {
+        console.error('[PAGE] ❌ Error de red en llamada inmediata:', fetchError)
+      })
       
       // Intentar obtener la sesión después de un delay para dar tiempo a que se establezca
       setTimeout(async () => {
@@ -231,7 +261,7 @@ function Chat() {
           const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
           
           if (sessionError) {
-            console.log('⚠️ Error al obtener sesión:', sessionError)
+            console.log('[PAGE] ⚠️ Error al obtener sesión:', sessionError)
             // Mostrar mensaje y cambiar a modo login
             toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
             setAuthMode('login')
@@ -239,11 +269,11 @@ function Chat() {
           }
           
           if (sessionData?.session?.access_token && sessionData.session.user) {
-            console.log('✅ Sesión encontrada después de confirmación:', sessionData.session.user.email)
+            console.log('[PAGE] ✅ Sesión encontrada después de confirmación:', sessionData.session.user.email)
             setUser(sessionData.session.user)
             setAccessToken(sessionData.session.access_token)
             
-            // Notificar al backend para enviar email de bienvenida
+            // Notificar al backend para enviar email de bienvenida (segunda llamada por si la primera falló)
             try {
               const response = await authorizedApiCall('/users/notify-registration', {
                 method: 'POST',
@@ -252,24 +282,24 @@ function Chat() {
               
               if (response.ok) {
                 const responseData = await response.json()
-                console.log('✅ Email de bienvenida solicitado correctamente:', responseData)
+                console.log('[PAGE] ✅ Email de bienvenida solicitado correctamente (con sesión):', responseData)
                 toast.success('¡Cuenta confirmada exitosamente! El email de bienvenida llegará pronto.')
               } else {
                 const errorText = await response.text()
-                console.error('❌ Error al notificar registro:', response.status, errorText)
+                console.error('[PAGE] ❌ Error al notificar registro:', response.status, errorText)
                 toast.success('¡Cuenta confirmada exitosamente! (El email de bienvenida puede tardar un momento)')
               }
             } catch (err) {
-              console.error('❌ Error al notificar registro después de confirmación:', err)
+              console.error('[PAGE] ❌ Error al notificar registro después de confirmación:', err)
               toast.success('¡Cuenta confirmada exitosamente! (El email de bienvenida puede tardar un momento)')
             }
           } else {
-            console.log('⚠️ No hay sesión después de confirmación, el usuario debe hacer login')
+            console.log('[PAGE] ⚠️ No hay sesión después de confirmación, el usuario debe hacer login')
             toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
             setAuthMode('login')
           }
         } catch (err) {
-          console.error('❌ Error al verificar sesión después de confirmación:', err)
+          console.error('[PAGE] ❌ Error al verificar sesión después de confirmación:', err)
           toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
           setAuthMode('login')
         }
