@@ -115,6 +115,8 @@ export async function GET(request: NextRequest) {
           
           console.log('[CALLBACK] 📧 Notificando registro al backend desde PKCE:', notifyUrl)
           
+          // Nota: No podemos pasar la contraseña desde el callback porque no la tenemos
+          // El email de bienvenida mostrará que use la contraseña que ingresó al registrarse
           fetch(notifyUrl, {
             method: 'POST',
             headers,

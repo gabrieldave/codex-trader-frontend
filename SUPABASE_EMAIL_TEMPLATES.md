@@ -64,6 +64,14 @@ Este archivo contiene los templates HTML personalizados para los emails de auten
                   Gracias por unirte a nuestra comunidad de traders. Para activar tu cuenta y comenzar a usar nuestro asistente de inteligencia artificial especializado en trading, confirma tu correo electrónico haciendo clic en el botón de abajo.
                 </p>
               </div>
+              
+              <!-- Aviso sobre email de bienvenida -->
+              <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 5px solid #f59e0b; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.6;">
+                  <strong style="font-size: 16px;">📧 Importante:</strong><br>
+                  Después de confirmar tu correo, recibirás un <strong>email de bienvenida</strong> con tus credenciales de acceso (usuario y contraseña) para que puedas iniciar sesión manualmente en la plataforma.
+                </p>
+              </div>
             </td>
           </tr>
           
@@ -132,17 +140,29 @@ Este archivo contiene los templates HTML personalizados para los emails de auten
             </td>
           </tr>
           
-          <!-- Security Notice -->
-          <tr>
-            <td style="padding: 0 40px 40px 40px; background: #ffffff;">
-              <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 5px solid #f59e0b; padding: 20px; border-radius: 8px;">
-                <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.6;">
-                  <strong style="font-size: 16px;">🔒 Seguridad:</strong><br>
-                  Este enlace es único y solo puede usarse una vez. Expirará en <strong>24 horas</strong> por tu seguridad. Si no solicitaste esta cuenta, puedes ignorar este email de forma segura.
-                </p>
-              </div>
-            </td>
-          </tr>
+              <!-- Security Notice -->
+              <tr>
+                <td style="padding: 0 40px 40px 40px; background: #ffffff;">
+                  <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 5px solid #f59e0b; padding: 20px; border-radius: 8px;">
+                    <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.6;">
+                      <strong style="font-size: 16px;">🔒 Seguridad:</strong><br>
+                      Este enlace es único y solo puede usarse una vez. Expirará en <strong>24 horas</strong> por tu seguridad. Si no solicitaste esta cuenta, puedes ignorar este email de forma segura.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Email de Bienvenida Notice -->
+              <tr>
+                <td style="padding: 0 40px 40px 40px; background: #ffffff;">
+                  <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left: 5px solid #3b82f6; padding: 20px; border-radius: 8px;">
+                    <p style="margin: 0; font-size: 14px; color: #1e40af; line-height: 1.6;">
+                      <strong style="font-size: 16px;">📧 Importante:</strong><br>
+                      Después de confirmar tu correo, recibirás un <strong>email de bienvenida</strong> con tus credenciales de acceso (usuario y contraseña) para que puedas iniciar sesión manualmente en la plataforma. Por favor, revisa tu bandeja de entrada (y spam) en los próximos minutos.
+                    </p>
+                  </div>
+                </td>
+              </tr>
           
           <!-- Footer -->
           <tr>

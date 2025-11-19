@@ -195,10 +195,25 @@ function Chat() {
           welcomeEmailSent = true // Marcar como enviado para evitar duplicados
           
           try {
+            // Intentar recuperar contraseña de sessionStorage si está disponible
+            let userPassword = null
+            if (session.user?.email) {
+              try {
+                userPassword = sessionStorage.getItem(`temp_password_${session.user.email}`)
+                if (userPassword) {
+                  console.log('📝 Contraseña recuperada de sessionStorage para email de bienvenida')
+                  // Eliminar después de usar
+                  sessionStorage.removeItem(`temp_password_${session.user.email}`)
+                }
+              } catch (e) {
+                console.warn('⚠️ No se pudo recuperar contraseña de sessionStorage:', e)
+              }
+            }
+            
             console.log(`   Llamando a /users/notify-registration...`)
             const response = await authorizedApiCall('/users/notify-registration', {
               method: 'POST',
-              body: JSON.stringify({})
+              body: JSON.stringify({ password: userPassword })
             })
             
             console.log(`   Response status: ${response.status}`)
@@ -336,9 +351,24 @@ function Chat() {
             
             // Notificar al backend para enviar email de bienvenida (segunda llamada por si la primera falló)
             try {
+              // Intentar recuperar contraseña de sessionStorage si está disponible
+              let userPassword = null
+              if (sessionData.session.user?.email) {
+                try {
+                  userPassword = sessionStorage.getItem(`temp_password_${sessionData.session.user.email}`)
+                  if (userPassword) {
+                    console.log('[PAGE] 📝 Contraseña recuperada de sessionStorage para email de bienvenida')
+                    // Eliminar después de usar
+                    sessionStorage.removeItem(`temp_password_${sessionData.session.user.email}`)
+                  }
+                } catch (e) {
+                  console.warn('[PAGE] ⚠️ No se pudo recuperar contraseña de sessionStorage:', e)
+                }
+              }
+              
               const response = await authorizedApiCall('/users/notify-registration', {
                 method: 'POST',
-                body: JSON.stringify({})
+                body: JSON.stringify({ password: userPassword })
               })
               
               if (response.ok) {
@@ -1131,6 +1161,17 @@ function Chat() {
       }
       
       if (data?.user) {
+        // Guardar contraseña temporalmente en sessionStorage para incluirla en el email de bienvenida
+        // Se eliminará después de enviar el email
+        if (data.user.email) {
+          try {
+            sessionStorage.setItem(`temp_password_${data.user.email}`, password.trim())
+            console.log('📝 Contraseña guardada temporalmente para email de bienvenida')
+          } catch (e) {
+            console.warn('⚠️ No se pudo guardar contraseña en sessionStorage:', e)
+          }
+        }
+        
         // Si hay sesión inmediata, el usuario ya está autenticado
         if (data.session) {
           toast.success(`¡Registro exitoso! Usuario creado: ${data.user.email}`)
@@ -1141,9 +1182,10 @@ function Chat() {
             console.log('📧 Registro con sesión inmediata detectado, notificando al backend...')
             try {
               console.log(`   Llamando a /users/notify-registration...`)
+              // Incluir contraseña en el body para el email de bienvenida
               const response = await authorizedApiCall('/users/notify-registration', {
                 method: 'POST',
-                body: JSON.stringify({})
+                body: JSON.stringify({ password: password.trim() })
               })
               
               console.log(`   Response status: ${response.status}`)
