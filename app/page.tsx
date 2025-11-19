@@ -30,6 +30,7 @@ function Chat() {
   const referralCode = searchParams.get('ref') // Código de referido desde la URL
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [chatError, setChatError] = useState<string | null>(null)
   const [tokensRestantes, setTokensRestantes] = useState<number | null>(null)
@@ -42,6 +43,7 @@ function Chat() {
   // Bandera para evitar notificaciones duplicadas de checkout
   const checkoutNotificationSent = useRef<boolean>(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   
   // AbortController para cancelar peticiones activas (usamos ref para evitar problemas de closures)
   const currentAbortControllerRef = useRef<AbortController | null>(null)
@@ -1197,23 +1199,54 @@ function Chat() {
     try {
       // Llamar directamente al backend para evitar que Vercel bufferice el stream
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
-      const backendChatUrl = `${backendUrl}/chat`
       
-      console.log('[page.tsx] Streaming directo desde backend:', backendChatUrl)
+      let response: Response
       
-      const response = await fetch(backendChatUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({
-          query: userMessage.content,
-          conversation_id: conversationIdAtRequest,
-          response_mode: responseMode
-        }),
-        signal: controller.signal
-      })
+      // Si hay una imagen seleccionada, usar FormData y endpoint /chat/vision
+      if (selectedImage) {
+        const backendChatUrl = `${backendUrl}/chat/vision`
+        console.log('[page.tsx] Enviando mensaje con imagen:', backendChatUrl)
+        
+        const formData = new FormData()
+        formData.append('file', selectedImage)
+        formData.append('query', userMessage.content)
+        formData.append('response_mode', responseMode === 'deep' ? 'Estudio Profundo' : 'Rápida')
+        if (conversationIdAtRequest) {
+          formData.append('conversation_id', conversationIdAtRequest)
+        }
+        
+        // Para FormData, NO establecer Content-Type (el navegador lo configura automáticamente con el boundary)
+        response = await fetch(backendChatUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+            // NO incluir 'Content-Type' - el navegador lo configura automáticamente para multipart/form-data
+          },
+          body: formData,
+          signal: controller.signal
+        })
+        
+        // Limpiar la imagen después de enviarla
+        setSelectedImage(null)
+      } else {
+        // Flujo normal sin imagen: usar JSON y endpoint /chat
+        const backendChatUrl = `${backendUrl}/chat`
+        console.log('[page.tsx] Streaming directo desde backend:', backendChatUrl)
+        
+        response = await fetch(backendChatUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({
+            query: userMessage.content,
+            conversation_id: conversationIdAtRequest,
+            response_mode: responseMode
+          }),
+          signal: controller.signal
+        })
+      }
 
       if (controller.signal.aborted) {
         return
@@ -1323,8 +1356,39 @@ function Chat() {
   // Función para manejar el submit del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim()) return
-    await sendUserMessage(input)
+    if (!input.trim() && !selectedImage) return
+    await sendUserMessage(input || '¿Qué hago aquí?')
+  }
+
+  // Función para manejar la selección de imagen
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validar que sea una imagen
+      if (!file.type.startsWith('image/')) {
+        toast.error('Por favor, selecciona un archivo de imagen')
+        return
+      }
+      // Validar tamaño (máximo 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('La imagen es demasiado grande. Máximo 10MB')
+        return
+      }
+      setSelectedImage(file)
+    }
+  }
+
+  // Función para eliminar la imagen seleccionada
+  const handleRemoveImage = () => {
+    setSelectedImage(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  // Función para abrir el selector de archivos
+  const handleImageButtonClick = () => {
+    fileInputRef.current?.click()
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -2760,18 +2824,73 @@ function Chat() {
               Codex usa contenido profesional de trading con fines educativos. No da recomendaciones personalizadas de inversión.
             </p>
             
+            {/* Vista previa de imagen */}
+            {selectedImage && (
+              <div className="mb-2 flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2">
+                <div className="relative">
+                  <img
+                    src={URL.createObjectURL(selectedImage)}
+                    alt="Vista previa"
+                    className="w-12 h-12 object-cover rounded"
+                  />
+                  <button
+                    onClick={handleRemoveImage}
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                    aria-label="Eliminar imagen"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
+                    {selectedImage.name}
+                  </p>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                    {(selectedImage.size / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+                <span className="px-2 py-1 text-[10px] font-semibold bg-blue-500 text-white rounded-full">
+                  📷 Análisis de Gráfico
+                </span>
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="flex gap-1.5 sm:gap-3 items-end">
+              {/* Botón de carga de imagen */}
+              <button
+                type="button"
+                onClick={handleImageButtonClick}
+                disabled={!accessToken || isLoading}
+                className="flex-shrink-0 p-2 sm:p-3 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 disabled:hover:bg-transparent"
+                aria-label="Subir imagen"
+                title="Subir imagen para análisis"
+              >
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </button>
+              
+              {/* Input de archivo oculto */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+                aria-label="Seleccionar imagen"
+              />
+              
               <div className="flex-1 relative">
                 <textarea
                   ref={inputRef}
                   className="w-full p-2.5 sm:p-4 pr-8 sm:pr-12 border border-gray-300 dark:border-gray-600 rounded-2xl shadow-sm bg-gray-50 dark:bg-gray-700/50 text-xs sm:text-base text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none max-h-28 sm:max-h-32 transition-all"
                   value={input}
-                  placeholder={isLoading ? "Procesando..." : "Ej: Explícame una estrategia de gestión de riesgo para swing trading..."}
+                  placeholder={isLoading ? "Procesando..." : selectedImage ? "Describe qué quieres analizar en este gráfico..." : "Ej: Explícame una estrategia de gestión de riesgo para swing trading..."}
                   onChange={handleInputChange}
                   disabled={!accessToken}
                   rows={1}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey && !isLoading && input.trim() && accessToken) {
+                    if (e.key === 'Enter' && !e.shiftKey && !isLoading && (input.trim() || selectedImage) && accessToken) {
                       e.preventDefault()
                       handleSubmit(e)
                     }
@@ -2780,7 +2899,7 @@ function Chat() {
               </div>
               <button
                 type="submit"
-                disabled={isLoading || !input.trim() || !accessToken}
+                disabled={isLoading || (!input.trim() && !selectedImage) || !accessToken}
                 className="px-3 sm:px-6 py-2.5 sm:py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-full hover:from-cyan-500 hover:to-blue-500 active:from-cyan-700 active:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg text-[10px] sm:text-sm font-semibold disabled:transform-none flex items-center justify-center min-w-[60px] sm:min-w-[100px]"
               >
                 {isLoading ? (
