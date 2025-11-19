@@ -67,3 +67,7 @@ Si después de configurar las URLs correctas en Supabase el problema persiste:
 
 
 
+
+
+
+
