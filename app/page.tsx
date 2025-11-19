@@ -1147,16 +1147,20 @@ function Chat() {
     }
 
     try {
-      console.log('[page.tsx] DEBUG accessToken antes de /api/chat-simple:', accessToken ? `${accessToken.substring(0, 20)}...` : 'null/undefined')
+      // Llamar directamente al backend para evitar que Vercel bufferice el stream
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
+      const backendChatUrl = `${backendUrl}/chat`
       
-      const response = await fetch('/api/chat-simple', {
+      console.log('[page.tsx] Streaming directo desde backend:', backendChatUrl)
+      
+      const response = await fetch(backendChatUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: userMessage.content }],
+          query: userMessage.content,
           conversation_id: conversationIdAtRequest,
           response_mode: responseMode
         }),
