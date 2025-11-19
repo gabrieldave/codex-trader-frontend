@@ -1391,6 +1391,28 @@ function Chat() {
     fileInputRef.current?.click()
   }
 
+  // Función para manejar pegar imágenes desde el portapapeles
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const blob = items[i].getAsFile()
+        if (blob) {
+          // Validar tamaño (máximo 10MB)
+          if (blob.size > 10 * 1024 * 1024) {
+            toast.error('La imagen es demasiado grande. Máximo 10MB')
+            return
+          }
+          // Crear un File desde el Blob
+          const file = new File([blob], 'screenshot.png', { type: blob.type })
+          setSelectedImage(file)
+          toast.success('Imagen pegada desde el portapapeles')
+        }
+        break
+      }
+    }
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value)
     // Auto-resize textarea
@@ -2861,13 +2883,11 @@ function Chat() {
                 type="button"
                 onClick={handleImageButtonClick}
                 disabled={!accessToken || isLoading}
-                className="flex-shrink-0 p-2 sm:p-3 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 disabled:hover:bg-transparent"
+                className="flex-shrink-0 p-2 sm:p-3 text-2xl sm:text-3xl hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 disabled:hover:bg-transparent"
                 aria-label="Subir imagen"
-                title="Subir imagen para análisis"
+                title="Subir imagen para análisis (o pega con Ctrl+V)"
               >
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                📷
               </button>
               
               {/* Input de archivo oculto */}
@@ -2885,8 +2905,9 @@ function Chat() {
                   ref={inputRef}
                   className="w-full p-2.5 sm:p-4 pr-8 sm:pr-12 border border-gray-300 dark:border-gray-600 rounded-2xl shadow-sm bg-gray-50 dark:bg-gray-700/50 text-xs sm:text-base text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none max-h-28 sm:max-h-32 transition-all"
                   value={input}
-                  placeholder={isLoading ? "Procesando..." : selectedImage ? "Describe qué quieres analizar en este gráfico..." : "Ej: Explícame una estrategia de gestión de riesgo para swing trading..."}
+                  placeholder={isLoading ? "Procesando..." : selectedImage ? "Describe qué quieres analizar en este gráfico..." : "Ej: Explícame una estrategia de gestión de riesgo para swing trading... (o pega una imagen con Ctrl+V)"}
                   onChange={handleInputChange}
+                  onPaste={handlePaste}
                   disabled={!accessToken}
                   rows={1}
                   onKeyDown={(e) => {
