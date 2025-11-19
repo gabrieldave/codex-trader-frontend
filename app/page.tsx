@@ -547,6 +547,66 @@ function Chat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, user])
   
+  // Sistema de heartbeat para detectar pestañas inactivas y promover nueva maestra
+  useEffect(() => {
+    // Si esta es la pestaña maestra, enviar heartbeat periódicamente
+    if (isMasterTabRef.current) {
+      const heartbeatInterval = setInterval(() => {
+        try {
+          sessionStorage.setItem('master_tab_heartbeat', Date.now().toString())
+          sessionStorage.setItem('master_tab_id', tabIdRef.current)
+        } catch (e) {
+          console.warn('[page.tsx] ⚠️ Error en heartbeat:', e)
+        }
+      }, 2000) // Heartbeat cada 2 segundos
+      
+      return () => clearInterval(heartbeatInterval)
+    } else {
+      // Si no es maestra, verificar periódicamente si la maestra sigue activa
+      const checkMasterInterval = setInterval(() => {
+        try {
+          const masterTab = sessionStorage.getItem('master_tab_id')
+          const lastHeartbeat = sessionStorage.getItem('master_tab_heartbeat')
+          
+          if (!masterTab || !lastHeartbeat) {
+            // No hay maestra, esta pestaña puede convertirse en maestra
+            isMasterTabRef.current = true
+            sessionStorage.setItem('master_tab_id', tabIdRef.current)
+            sessionStorage.setItem('master_tab_heartbeat', Date.now().toString())
+            console.log(`[page.tsx] ✅ Pestaña promovida a maestra (tab: ${tabIdRef.current})`)
+            // Recargar datos ahora que somos maestra
+            if (accessToken && user) {
+              setTimeout(() => {
+                loadTokens()
+                loadConversations()
+              }, 100)
+            }
+          } else {
+            const heartbeatAge = Date.now() - parseInt(lastHeartbeat, 10)
+            // Si el heartbeat tiene más de 5 segundos, la maestra está inactiva
+            if (heartbeatAge > 5000) {
+              console.log(`[page.tsx] ⚠️ Pestaña maestra inactiva (${heartbeatAge}ms sin heartbeat), promoviendo esta pestaña`)
+              isMasterTabRef.current = true
+              sessionStorage.setItem('master_tab_id', tabIdRef.current)
+              sessionStorage.setItem('master_tab_heartbeat', Date.now().toString())
+              // Recargar datos ahora que somos maestra
+              if (accessToken && user) {
+                setTimeout(() => {
+                  loadTokens()
+                  loadConversations()
+                }, 100)
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('[page.tsx] ⚠️ Error verificando maestra:', e)
+        }
+      }, 3000) // Verificar cada 3 segundos
+      
+      return () => clearInterval(checkMasterInterval)
+    }
+  }, [accessToken, user])
+  
   // Limpiar tab ID cuando se cierra la pestaña
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -555,6 +615,7 @@ function Chat() {
         if (masterTab === tabIdRef.current) {
           // Si esta es la pestaña maestra y se está cerrando, limpiar
           sessionStorage.removeItem('master_tab_id')
+          sessionStorage.removeItem('master_tab_heartbeat')
           console.log(`[page.tsx] 🧹 Pestaña maestra cerrada, limpiando (tab: ${tabIdRef.current})`)
         }
       } catch (e) {
@@ -562,15 +623,27 @@ function Chat() {
       }
     }
     
+    // También limpiar cuando la pestaña pierde el foco (opcional, más agresivo)
+    const handleVisibilityChange = () => {
+      if (document.hidden && isMasterTabRef.current) {
+        // La pestaña maestra perdió el foco, pero no la cerramos
+        // Solo dejamos que el heartbeat expire si no vuelve
+        console.log(`[page.tsx] ℹ️ Pestaña maestra perdió foco (tab: ${tabIdRef.current})`)
+      }
+    }
+    
     window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
     
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       // También limpiar al desmontar el componente
       try {
         const masterTab = sessionStorage.getItem('master_tab_id')
         if (masterTab === tabIdRef.current) {
           sessionStorage.removeItem('master_tab_id')
+          sessionStorage.removeItem('master_tab_heartbeat')
         }
       } catch (e) {
         // Ignorar errores
