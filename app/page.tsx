@@ -1734,9 +1734,50 @@ function Chat() {
                     <h2 className="text-2xl font-bold text-white mb-2">
                       Crear cuenta en Codex Trader
                     </h2>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-400 mb-4">
                       Crea tu acceso y empieza a estudiar trading con tu asistente de IA especializado.
                     </p>
+                    
+                    {/* Banner de cuenta gratis */}
+                    <div className="relative overflow-hidden bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-blue-500/20 border border-emerald-500/30 rounded-lg p-4 mb-4 backdrop-blur-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 mt-0.5">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shadow-lg">
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-bold text-white mb-1 flex items-center gap-2">
+                            <span>🎁 Cuenta Gratis Incluida</span>
+                          </h3>
+                          <p className="text-sm text-gray-200 leading-relaxed">
+                            Al registrarte, recibes <span className="font-bold text-emerald-300">20,000 tokens gratis</span> para explorar todas las funcionalidades del asistente. Sin tarjeta de crédito, sin compromiso.
+                          </p>
+                          <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-500/20 text-emerald-200 rounded-full border border-emerald-400/30">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                              Acceso inmediato
+                            </span>
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-500/20 text-emerald-200 rounded-full border border-emerald-400/30">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                              Sin tarjeta
+                            </span>
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-500/20 text-emerald-200 rounded-full border border-emerald-400/30">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                              Cancela cuando quieras
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -1884,21 +1925,29 @@ function Chat() {
 
                 {/* Link para cambiar modo */}
                 {authMode === 'login' && (
-                  <p className="text-sm text-gray-400 mt-6 text-center">
-                    ¿No tienes cuenta?{' '}
-                    <button
-                      onClick={() => {
-                        setAuthMode('signup')
-                        setEmail('')
-                        setName('')
-                        setPassword('')
-                        setConfirmPassword('')
-                      }}
-                      className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline"
-                    >
-                      Crear cuenta
-                    </button>
-                  </p>
+                  <div className="mt-6 space-y-3">
+                    <p className="text-sm text-gray-400 text-center">
+                      ¿No tienes cuenta?{' '}
+                      <button
+                        onClick={() => {
+                          setAuthMode('signup')
+                          setEmail('')
+                          setName('')
+                          setPassword('')
+                          setConfirmPassword('')
+                        }}
+                        className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline"
+                      >
+                        Crear cuenta
+                      </button>
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-xs text-emerald-300/80">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>20,000 tokens gratis al registrarte</span>
+                    </div>
+                  </div>
                 )}
 
                 {/* Enlace a más información */}
