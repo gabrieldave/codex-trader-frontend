@@ -1120,15 +1120,12 @@ function Chat() {
   const sendUserMessage = async (messageText: string) => {
     if (!messageText.trim() || !accessToken || isLoading) return
 
-    // Guardar el conversationId actual para verificar después de la respuesta
     const conversationIdAtRequest = currentConversationId
 
-    // Abortar cualquier petición anterior si existe
     if (currentAbortControllerRef.current) {
       currentAbortControllerRef.current.abort()
     }
 
-    // Crear nuevo AbortController para esta petición
     const controller = new AbortController()
     currentAbortControllerRef.current = controller
 
@@ -1143,8 +1140,13 @@ function Chat() {
     setIsLoading(true)
     setChatError(null)
 
+    const updateAssistantMessage = (messageId: string, content: string) => {
+      setMessages(prev =>
+        prev.map(msg => (msg.id === messageId ? { ...msg, content } : msg))
+      )
+    }
+
     try {
-      // 🚨 DEBUG: Verificar accessToken antes de hacer la llamada
       console.log('[page.tsx] DEBUG accessToken antes de /api/chat-simple:', accessToken ? `${accessToken.substring(0, 20)}...` : 'null/undefined')
       
       const response = await fetch('/api/chat-simple', {
@@ -1161,19 +1163,24 @@ function Chat() {
         signal: controller.signal
       })
 
-      // Verificar si la petición fue abortada
       if (controller.signal.aborted) {
         return
       }
 
-      // Verificar si el usuario cambió de conversación mientras se procesaba la respuesta
       if (currentConversationId !== conversationIdAtRequest) {
-        // Ignorar esta respuesta, el usuario cambió de conversación
         return
       }
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }))
+        const errorText = await response.text()
+        let errorMessage = errorText || 'Error desconocido'
+        try {
+          const parsed = JSON.parse(errorText)
+          errorMessage = parsed.error || parsed.detail || errorMessage
+        } catch {
+          // Mantener texto plano
+        }
+
         if (response.status === 401) {
           setChatError('No autorizado. Por favor, inicia sesión nuevamente.')
           toast.error('Sesión expirada. Por favor, inicia sesión nuevamente.')
@@ -1181,65 +1188,80 @@ function Chat() {
           setChatError('Tokens agotados. Por favor, recarga.')
           toast.error('Tokens agotados. Por favor, recarga tokens.')
         } else {
-          setChatError(errorData.error || 'Error al procesar la consulta')
-          toast.error(errorData.error || 'Error al procesar la consulta')
+          setChatError(errorMessage)
+          toast.error(errorMessage)
         }
         setIsLoading(false)
         currentAbortControllerRef.current = null
         return
       }
 
-      const data = await response.json()
-
-      // Verificar nuevamente si el usuario cambió de conversación después de recibir la respuesta
-      if (currentConversationId !== conversationIdAtRequest) {
-        // Ignorar esta respuesta, el usuario cambió de conversación
-        setIsLoading(false)
-        currentAbortControllerRef.current = null
-        return
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('El backend no envió datos de streaming')
       }
 
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: data.message || data.response || 'Sin respuesta'
+      const decoder = new TextDecoder()
+      const assistantMessageId = `assistant-${Date.now()}`
+      setMessages(prev => [
+        ...prev,
+        {
+          id: assistantMessageId,
+          role: 'assistant',
+          content: ''
+        }
+      ])
+
+      let fullResponse = ''
+      let done = false
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read()
+        if (controller.signal.aborted) {
+          return
+        }
+        if (value) {
+          const chunk = decoder.decode(value, { stream: !readerDone })
+          if (chunk) {
+            fullResponse += chunk
+            updateAssistantMessage(assistantMessageId, fullResponse)
+          }
+        }
+        done = readerDone
       }
 
-      setMessages(prev => [...prev, assistantMessage])
-      
-      // Actualizar conversation_id si se creó una nueva conversación
-      if (data.conversation_id && data.conversation_id !== currentConversationId) {
-        setCurrentConversationId(data.conversation_id)
-        // Recargar conversaciones para actualizar la lista
+      const finalChunk = decoder.decode()
+      if (finalChunk) {
+        fullResponse += finalChunk
+        updateAssistantMessage(assistantMessageId, fullResponse)
+      }
+
+      const conversationIdHeader = response.headers.get('X-Conversation-Id')
+      if (conversationIdHeader && conversationIdHeader !== currentConversationId) {
+        setCurrentConversationId(conversationIdHeader)
+        loadConversations()
+      } else if (!currentConversationId && !conversationIdAtRequest) {
         loadConversations()
       }
-      
-      if (data.tokens_restantes !== undefined) {
-        setTokensRestantes(data.tokens_restantes)
-      } else {
-        loadTokens()
-      }
+
+      await loadTokens()
     } catch (error) {
-      // Ignorar errores de abort
       if (error instanceof Error && error.name === 'AbortError') {
         return
       }
-      
-      // Verificar si el usuario cambió de conversación
+
       if (currentConversationId !== conversationIdAtRequest) {
         return
       }
-      
+
       console.error('Error:', error)
       const errorMsg = error instanceof Error ? error.message : 'Error desconocido'
       setChatError(errorMsg)
       toast.error(errorMsg)
     } finally {
-      // Solo actualizar el estado si todavía estamos en la misma conversación
       if (currentConversationId === conversationIdAtRequest) {
         setIsLoading(false)
       }
-      // Limpiar el AbortController solo si todavía es el mismo (no fue abortado por cambio de conversación)
       if (currentAbortControllerRef.current === controller) {
         currentAbortControllerRef.current = null
       }
