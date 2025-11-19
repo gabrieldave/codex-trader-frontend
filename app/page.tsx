@@ -242,9 +242,11 @@ function Chat() {
     const checkoutStatus = searchParams.get('checkout') // 'success' o 'cancelled'
     const sessionId = searchParams.get('session_id') // ID de sesión de Stripe
     
-    // Si hay un code PKCE, intercambiarlo por una sesión
-    if (code) {
-      console.log('📧 Code PKCE detectado, intercambiando por sesión...')
+    // IMPORTANTE: NO intercambiar code PKCE automáticamente si viene de confirmación de email
+    // El usuario debe hacer login manualmente después de confirmar su email
+    // Solo procesar code si NO viene de confirmación de email
+    if (code && !confirmed && !emailConfirmed) {
+      console.log('📧 Code PKCE detectado (no es confirmación de email), intercambiando por sesión...')
       supabase.auth.exchangeCodeForSession(code)
         .then(({ data, error: exchangeError }) => {
           if (exchangeError) {
@@ -260,6 +262,12 @@ function Chat() {
         .catch((err) => {
           console.error('❌ Error inesperado al intercambiar code:', err)
         })
+    } else if (code && (confirmed || emailConfirmed)) {
+      console.log('📧 Code PKCE detectado pero viene de confirmación de email - NO iniciar sesión automáticamente')
+      // Limpiar el code de la URL sin procesarlo
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('code')
+      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
     }
     
     // Si hay parámetros de confirmación, esperar a que se establezca la sesión
@@ -350,11 +358,17 @@ function Chat() {
             console.log('[PAGE] ⚠️ No hay sesión después de confirmación, el usuario debe hacer login')
             toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
             setAuthMode('login')
+            // Asegurar que el usuario no esté logueado
+            setUser(null)
+            setAccessToken(null)
           }
         } catch (err) {
           console.error('[PAGE] ❌ Error al verificar sesión después de confirmación:', err)
           toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
           setAuthMode('login')
+          // Asegurar que el usuario no esté logueado
+          setUser(null)
+          setAccessToken(null)
         }
       }, 1500) // Aumentar a 1.5 segundos para dar más tiempo
       

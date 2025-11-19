@@ -89,11 +89,21 @@ export async function GET(request: NextRequest) {
       }
       
       if (data.session) {
-        console.log('[CALLBACK] ✅ Sesión establecida correctamente desde code PKCE')
-        console.log('[CALLBACK] ✅ Usuario logueado automáticamente:', data.session.user.email)
+        console.log('[CALLBACK] ✅ Email confirmado correctamente desde code PKCE')
+        console.log('[CALLBACK] ✅ Usuario:', data.session.user.email)
+        
+        // IMPORTANTE: Cerrar la sesión automática para que el usuario tenga que hacer login manualmente
+        // Esto evita problemas con múltiples pestañas y da control al usuario
+        try {
+          await supabase.auth.signOut()
+          console.log('[CALLBACK] ✅ Sesión cerrada - usuario deberá hacer login manualmente')
+        } catch (signOutError) {
+          console.warn('[CALLBACK] ⚠️ No se pudo cerrar sesión automática:', signOutError)
+        }
         
         // IMPORTANTE: Notificar al backend para enviar email de bienvenida
         // Esto se hace en segundo plano y no bloquea la redirección
+        // Usar el token temporal antes de cerrar sesión
         try {
           const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
           const notifyUrl = `${backendUrl}/users/notify-registration`
@@ -127,12 +137,11 @@ export async function GET(request: NextRequest) {
           console.error('[CALLBACK] ❌ Error al preparar notificación:', error)
         }
         
-        // Redirigir al frontend con éxito - usuario ya está logueado
+        // Redirigir al frontend con éxito - usuario NO está logueado, debe hacer login manualmente
         const redirectUrl = new URL('/', requestUrl.origin)
         redirectUrl.searchParams.set('confirmed', 'true')
         redirectUrl.searchParams.set('email_confirmed', 'true')
-        redirectUrl.searchParams.set('session_established', 'true')
-        // Crear respuesta con cookies establecidas
+        // NO establecer session_established - el usuario debe hacer login manualmente
         const response = NextResponse.redirect(redirectUrl)
         return response
       } else {
@@ -333,17 +342,24 @@ export async function GET(request: NextRequest) {
           console.error('[CALLBACK] ❌ Stack:', error instanceof Error ? error.stack : 'N/A')
         }
 
+        // IMPORTANTE: Cerrar la sesión automática para que el usuario tenga que hacer login manualmente
+        // Esto evita problemas con múltiples pestañas y da control al usuario
+        if (sessionEstablecida) {
+          try {
+            await supabase.auth.signOut()
+            console.log('[CALLBACK] ✅ Sesión cerrada - usuario deberá hacer login manualmente')
+          } catch (signOutError) {
+            console.warn('[CALLBACK] ⚠️ No se pudo cerrar sesión automática:', signOutError)
+          }
+        }
+        
         // Redirigir a la página principal con mensaje de éxito
-        // Si la sesión está establecida, el usuario quedará logueado automáticamente
+        // El usuario NO quedará logueado automáticamente - debe hacer login manualmente
         const redirectUrl = new URL('/', requestUrl.origin)
         redirectUrl.searchParams.set('confirmed', 'true')
         redirectUrl.searchParams.set('email_confirmed', 'true')
-        if (sessionEstablecida) {
-          redirectUrl.searchParams.set('session_established', 'true')
-          console.log('[CALLBACK] ✅ Redirigiendo con sesión establecida - usuario logueado automáticamente')
-        } else {
-          console.log('[CALLBACK] ⚠️ Redirigiendo sin sesión - usuario necesitará hacer login')
-        }
+        // NO establecer session_established - el usuario debe hacer login manualmente
+        console.log('[CALLBACK] ✅ Redirigiendo - usuario debe hacer login manualmente')
         return NextResponse.redirect(redirectUrl)
       } else {
         // Error al verificar el token
