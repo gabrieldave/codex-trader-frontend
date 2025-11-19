@@ -365,6 +365,16 @@ function Chat() {
       newUrl.searchParams.delete('checkout')
       router.replace(newUrl.pathname + newUrl.search, { scroll: false })
     }
+    
+    // IMPORTANTE: Si el usuario ya está logueado y hay un código de referido en la URL,
+    // limpiarlo sin intentar procesarlo (los códigos solo se usan al registrarse)
+    if (referralCode && user && accessToken) {
+      console.log('ℹ️ Usuario ya logueado detectado con código de referido en URL. Limpiando parámetro (los códigos solo se usan al registrarse).')
+      // Limpiar el parámetro ref de la URL sin intentar procesarlo
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('ref')
+      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, router, accessToken, user, supabase])
 
