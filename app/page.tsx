@@ -2601,24 +2601,32 @@ function Chat() {
                         <h3 className="text-base sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4">
                           Puedes preguntarme sobre:
                         </h3>
-                        <ul className="text-left max-w-md mx-auto space-y-1.5 sm:space-y-2 text-xs sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6">
-                          <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Gestión de riesgo y manejo de capital</span>
-                          </li>
-                          <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Análisis técnico y lectura de gráficos</span>
-                          </li>
-                          <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Psicología del trader y disciplina</span>
-                          </li>
-                          <li className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <span>Ideas de estrategias según tu estilo (scalping, intradía, swing, etc.)</span>
-                          </li>
-                        </ul>
+                        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 px-2 mb-4 sm:mb-6 max-w-2xl mx-auto">
+                          <button
+                            onClick={() => handleSuggestionClick('Gestión de riesgo y manejo de capital')}
+                            className="px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 rounded-full transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
+                          >
+                            Gestión de riesgo y manejo de capital
+                          </button>
+                          <button
+                            onClick={() => handleSuggestionClick('Análisis técnico y lectura de gráficos')}
+                            className="px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 rounded-full transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
+                          >
+                            Análisis técnico y lectura de gráficos
+                          </button>
+                          <button
+                            onClick={() => handleSuggestionClick('Psicología del trader y disciplina')}
+                            className="px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 rounded-full transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
+                          >
+                            Psicología del trader y disciplina
+                          </button>
+                          <button
+                            onClick={() => handleSuggestionClick('Ideas de estrategias según tu estilo (scalping, intradía, swing, etc.)')}
+                            className="px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 rounded-full transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
+                          >
+                            Ideas de estrategias según tu estilo
+                          </button>
+                        </div>
                         <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-400 mb-4 sm:mb-8">
                           ⚠️ Uso educativo: no doy señales directas de compra/venta ni garantizo resultados.
                         </p>
