@@ -66,13 +66,54 @@ export async function POST(req: Request) {
     const headers = new Headers()
     const backendContentType = backendResponse.headers.get('Content-Type') || 'text/plain; charset=utf-8'
     headers.set('Content-Type', backendContentType)
-
+    
+    // Headers críticos para streaming: deshabilitar compresión y cache
+    headers.set('Cache-Control', 'no-cache, no-transform')
+    headers.set('X-Accel-Buffering', 'no') // Deshabilitar buffering en nginx/Vercel
+    headers.set('Connection', 'keep-alive')
+    
+    // Si Vercel intenta comprimir, esto puede ayudar a evitarlo
+    // Pero no podemos controlar completamente la compresión de Vercel
+    
     const conversationIdHeader = backendResponse.headers.get('X-Conversation-Id')
     if (conversationIdHeader) {
       headers.set('X-Conversation-Id', conversationIdHeader)
     }
 
-    return new Response(backendResponse.body, {
+    // Verificar que el body sea un ReadableStream
+    if (!backendResponse.body) {
+      return NextResponse.json({ error: 'No response body from backend' }, { status: 500 })
+    }
+
+    // Crear un stream personalizado que lea del backend y envíe chunks inmediatamente
+    // Esto ayuda a evitar que Vercel bufferice toda la respuesta
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = backendResponse.body!.getReader()
+        const decoder = new TextDecoder()
+        
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            
+            if (done) {
+              controller.close()
+              break
+            }
+            
+            // Enviar chunk inmediatamente sin bufferizar
+            const chunk = decoder.decode(value, { stream: true })
+            controller.enqueue(encoder.encode(chunk))
+          }
+        } catch (error) {
+          console.error('[Stream error]:', error)
+          controller.error(error)
+        }
+      }
+    })
+
+    return new Response(stream, {
       status: backendResponse.status,
       headers
     })
