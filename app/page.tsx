@@ -605,6 +605,7 @@ function Chat() {
       
       return () => clearInterval(checkMasterInterval)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, user])
   
   // Limpiar tab ID cuando se cierra la pestaña
@@ -639,13 +640,15 @@ function Chat() {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       // También limpiar al desmontar el componente
+      // Capturar el tabId actual para el cleanup
+      const currentTabId = tabIdRef.current
       try {
         const masterTab = sessionStorage.getItem('master_tab_id')
-        if (masterTab === tabIdRef.current) {
+        if (masterTab === currentTabId) {
           sessionStorage.removeItem('master_tab_id')
           sessionStorage.removeItem('master_tab_heartbeat')
         }
-      } catch (e) {
+      } catch {
         // Ignorar errores
       }
     }
