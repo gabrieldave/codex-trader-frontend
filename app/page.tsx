@@ -886,15 +886,17 @@ function Chat() {
         setPassword('')
         setConfirmPassword('')
         
-        // Procesar código de referido si existe
+        // Procesar código de referido si existe (en background para no bloquear)
         if (referralCode) {
-          try {
-            await processReferral(referralCode)
-            toast.success('¡Código de referido aplicado correctamente!')
-          } catch (error) {
-            // No mostrar error si falla el referido, solo loguear
-            console.error('Error al procesar código de referido:', error)
-          }
+          // Procesar en background sin bloquear la UI
+          processReferral(referralCode)
+            .then(() => {
+              toast.success('¡Código de referido aplicado correctamente!')
+            })
+            .catch((error) => {
+              // No mostrar error si falla el referido, solo loguear
+              console.error('Error al procesar código de referido:', error)
+            })
         }
         
         // Si hay un plan seleccionado, redirigir a planes después del login
@@ -1002,22 +1004,24 @@ function Chat() {
           console.log('⚠️ Usuario registrado pero requiere confirmación de email. Los emails se enviarán después de confirmar.')
         }
         
-        // Procesar código de referido si existe (después del registro)
-        if (referralCode) {
-          try {
-            await processReferral(referralCode)
-            toast.success('¡Código de referido aplicado correctamente!')
-          } catch (error) {
-            // No mostrar error si falla el referido, solo loguear
-            console.error('Error al procesar código de referido:', error)
-          }
-        }
-        
-        // Cambiar a modo login después del registro
+        // Cambiar a modo login después del registro (inmediatamente, no esperar referido)
         setAuthMode('login')
         setName('')
         setPassword('')
         setConfirmPassword('')
+        
+        // Procesar código de referido si existe (en background, no bloquea la UI)
+        if (referralCode) {
+          // Ejecutar en background sin await para no bloquear la UI
+          processReferral(referralCode)
+            .then(() => {
+              toast.success('¡Código de referido aplicado correctamente!')
+            })
+            .catch((error) => {
+              // No mostrar error si falla el referido, solo loguear
+              console.error('Error al procesar código de referido:', error)
+            })
+        }
         
         // Si hay un plan seleccionado, redirigir a planes después del registro
         if (selectedPlan) {
