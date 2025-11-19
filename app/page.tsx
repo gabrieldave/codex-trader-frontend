@@ -309,6 +309,8 @@ function Chat() {
   useEffect(() => {
     const confirmed = searchParams.get('confirmed')
     const emailConfirmed = searchParams.get('email_confirmed')
+    const registered = searchParams.get('registered')
+    const registeredEmail = searchParams.get('email')
     const code = searchParams.get('code') // Code PKCE de Supabase
     const error = searchParams.get('error')
     const message = searchParams.get('message')
