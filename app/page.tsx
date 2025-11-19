@@ -2766,26 +2766,49 @@ function Chat() {
                           ⚠️ Uso educativo: no doy señales directas de compra/venta ni garantizo resultados.
                         </p>
                         
-                        {/* Chips de sugerencias */}
-                        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-3 px-1">
-                          <button
-                            onClick={() => handleSuggestionClick('Gestión de riesgo para swing trading')}
-                            className="px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
-                          >
-                            Gestión de riesgo para swing trading
-                          </button>
-                          <button
-                            onClick={() => handleSuggestionClick('Psicología del trader y disciplina')}
-                            className="px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
-                          >
-                            Psicología del trader y disciplina
-                          </button>
-                          <button
-                            onClick={() => handleSuggestionClick('Cómo diseñar una estrategia paso a paso')}
-                            className="px-2 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors border border-gray-300 dark:border-gray-600"
-                          >
-                            Cómo diseñar una estrategia paso a paso
-                          </button>
+                        {/* Botón destacado para análisis profundo con imagen */}
+                        <div className="max-w-md mx-auto mt-6 sm:mt-8">
+                          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-4 sm:p-6 shadow-2xl transform transition-all duration-300 hover:scale-105">
+                            <p className="text-white text-center text-base sm:text-lg font-bold mb-4 sm:mb-5">
+                              📊 Añade una imagen de tu gráfica para Análisis Profundo
+                            </p>
+                            <button
+                              onClick={handleImageButtonClick}
+                              disabled={!accessToken}
+                              className="w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-500 hover:from-yellow-500 hover:via-orange-500 hover:to-red-500 disabled:from-gray-400 disabled:via-gray-500 disabled:to-gray-600 text-gray-900 disabled:text-gray-300 font-extrabold py-3 sm:py-4 px-4 sm:px-6 rounded-xl shadow-2xl transform transition-all duration-300 hover:scale-110 active:scale-95 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-lg border-4 border-white/30 disabled:border-gray-400/30"
+                              style={{
+                                boxShadow: '0 20px 40px rgba(250, 204, 21, 0.5), 0 0 20px rgba(250, 204, 21, 0.3)',
+                              }}
+                            >
+                              <svg
+                                className="w-5 h-5 sm:w-7 sm:h-7 animate-bounce"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={3}
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                              </svg>
+                              <span className="text-sm sm:text-xl">SUBIR GRÁFICA</span>
+                              <svg
+                                className="w-5 h-5 sm:w-7 sm:h-7"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={3}
+                                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                                />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
