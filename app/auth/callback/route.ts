@@ -140,11 +140,17 @@ export async function GET(request: NextRequest) {
         }
         
         // Redirigir al frontend con éxito - usuario NO está logueado, debe hacer login manualmente
+        // MEJORA UX: Usar replace en lugar de redirect para evitar historial innecesario
         const redirectUrl = new URL('/', requestUrl.origin)
         redirectUrl.searchParams.set('confirmed', 'true')
         redirectUrl.searchParams.set('email_confirmed', 'true')
         // NO establecer session_established - el usuario debe hacer login manualmente
+        
+        // Intentar reemplazar la pestaña actual si fue abierta desde otra
+        // Esto ayuda a evitar múltiples pestañas abiertas
         const response = NextResponse.redirect(redirectUrl)
+        // Agregar header para indicar que es una redirección de confirmación
+        response.headers.set('X-Email-Confirmed', 'true')
         return response
       } else {
         console.error('No se obtuvo sesión después de intercambiar code')
@@ -357,12 +363,17 @@ export async function GET(request: NextRequest) {
         
         // Redirigir a la página principal con mensaje de éxito
         // El usuario NO quedará logueado automáticamente - debe hacer login manualmente
+        // MEJORA UX: Usar replace en lugar de redirect para evitar historial innecesario
         const redirectUrl = new URL('/', requestUrl.origin)
         redirectUrl.searchParams.set('confirmed', 'true')
         redirectUrl.searchParams.set('email_confirmed', 'true')
         // NO establecer session_established - el usuario debe hacer login manualmente
         console.log('[CALLBACK] ✅ Redirigiendo - usuario debe hacer login manualmente')
-        return NextResponse.redirect(redirectUrl)
+        
+        const response = NextResponse.redirect(redirectUrl)
+        // Agregar header para indicar que es una redirección de confirmación
+        response.headers.set('X-Email-Confirmed', 'true')
+        return response
       } else {
         // Error al verificar el token
         const redirectUrl = new URL('/', requestUrl.origin)

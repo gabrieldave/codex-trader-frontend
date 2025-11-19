@@ -78,15 +78,20 @@ Este archivo contiene los templates HTML personalizados para los emails de auten
           <!-- CTA Button Section -->
           <tr>
             <td style="padding: 0 40px 40px 40px; background: #ffffff; text-align: center;">
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                <tr>
-                  <td align="center">
-                    <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 12px; font-weight: 700; font-size: 18px; box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); transition: all 0.3s ease; letter-spacing: 0.5px;">
-                      ✨ Confirmar mi cuenta
-                    </a>
-                  </td>
-                </tr>
-              </table>
+                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                       <tr>
+                         <td align="center">
+                           <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 12px; font-weight: 700; font-size: 18px; box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); transition: all 0.3s ease; letter-spacing: 0.5px;">
+                             ✨ Confirmar mi cuenta
+                           </a>
+                         </td>
+                       </tr>
+                     </table>
+                     
+                     <!-- Nota sobre pestañas -->
+                     <p style="margin: 20px 0 0 0; font-size: 12px; color: #6b7280; text-align: center; font-style: italic;">
+                       💡 Este enlace abrirá en la misma pestaña. Si tienes otra pestaña abierta, puedes cerrarla.
+                     </p>
               
               <!-- Benefits List -->
               <div style="margin-top: 40px; padding: 30px; background: #f9fafb; border-radius: 12px; text-align: left;">

@@ -1398,6 +1398,13 @@ function Chat() {
           // Si no hay sesión, Supabase requiere confirmación de email
           toast.success(`¡Registro exitoso! Por favor, revisa tu email (${data.user.email}) para confirmar tu cuenta.`)
           console.log('⚠️ Usuario registrado pero requiere confirmación de email. Los emails se enviarán después de confirmar.')
+          
+          // MEJORA UX: Redirigir a la misma pestaña después de 2 segundos para mostrar mensaje de confirmación
+          // Esto evita que el usuario tenga que cerrar manualmente la pestaña
+          setTimeout(() => {
+            // Redirigir a la misma pestaña con mensaje de confirmación
+            router.replace('/?registered=true&email=' + encodeURIComponent(data.user.email))
+          }, 2000)
         }
         
         // Cambiar a modo login después del registro (inmediatamente, no esperar referido)
