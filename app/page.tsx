@@ -1213,6 +1213,19 @@ function Chat() {
     }
   }
 
+  // Timeout de seguridad: si el loading no se resuelve en 5 segundos, forzarlo
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading && !initialLoadingResolvedRef.current) {
+        console.warn('[page.tsx] ⚠️ Timeout de seguridad: forzando resolución de loading después de 5 segundos')
+        setLoading(false)
+        initialLoadingResolvedRef.current = true
+      }
+    }, 5000) // 5 segundos
+    
+    return () => clearTimeout(timeout)
+  }, [loading])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
