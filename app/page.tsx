@@ -51,6 +51,9 @@ function Chat() {
   const lastTokensCallRef = useRef<number>(0)
   const lastConversationsCallRef = useRef<number>(0)
   
+  // Ref para rastrear si ya se resolvió el loading inicial
+  const initialLoadingResolvedRef = useRef<boolean>(false)
+  
   // Estados para conversaciones
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<Array<{id: string, title: string, created_at: string, updated_at: string}>>([])
@@ -107,6 +110,12 @@ function Chat() {
 
   // Verificar el login del usuario y escuchar cambios
   useEffect(() => {
+    // Evitar múltiples ejecuciones si ya se resolvió
+    if (initialLoadingResolvedRef.current) {
+      console.log('[page.tsx] ⚠️ Loading inicial ya resuelto, saltando verificación duplicada')
+      return
+    }
+    
     const checkUser = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
@@ -129,7 +138,10 @@ function Chat() {
         console.error('Error inesperado al verificar sesión:', err)
       } finally {
         // IMPORTANTE: Siempre resolver el loading, incluso si hay errores
+        // Y marcar como resuelto para evitar ejecuciones duplicadas
         setLoading(false)
+        initialLoadingResolvedRef.current = true
+        console.log('[page.tsx] ✅ Loading inicial resuelto')
       }
     }
     checkUser()
@@ -139,6 +151,13 @@ function Chat() {
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`🔐 onAuthStateChange: event=${event}, hasSession=${!!session}, userEmail=${session?.user?.email || 'none'}`)
+      
+      // Resolver loading si aún no se ha resuelto (para casos de múltiples pestañas)
+      if (!initialLoadingResolvedRef.current) {
+        setLoading(false)
+        initialLoadingResolvedRef.current = true
+        console.log('[page.tsx] ✅ Loading resuelto desde onAuthStateChange')
+      }
       
       if (session) {
         setUser(session.user)
@@ -202,8 +221,12 @@ function Chat() {
         setMessages([])
         setTokensRestantes(null)
         welcomeEmailSent = false // Reset cuando se cierra sesión
+        // Resolver loading si aún no se ha resuelto
+        if (!initialLoadingResolvedRef.current) {
+          setLoading(false)
+          initialLoadingResolvedRef.current = true
+        }
       }
-      setLoading(false)
     })
 
     return () => subscription.unsubscribe()
@@ -245,6 +268,9 @@ function Chat() {
       
       // IMPORTANTE: Asegurar que el loading se resuelva incluso si no hay sesión
       setLoading(false)
+      if (!initialLoadingResolvedRef.current) {
+        initialLoadingResolvedRef.current = true
+      }
       
       // OPCIÓN 2: Llamar al endpoint INMEDIATAMENTE sin esperar sesión
       // Esto asegura que el email se envíe incluso si hay problemas con la sesión
