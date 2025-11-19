@@ -1424,9 +1424,10 @@ function Chat() {
           // MEJORA UX: Redirigir a la misma pestaña después de 2 segundos para mostrar mensaje de confirmación
           // Esto evita que el usuario tenga que cerrar manualmente la pestaña
           if (data.user?.email) {
+            const userEmail = data.user.email // Guardar email en variable para evitar error de TypeScript
             setTimeout(() => {
               // Redirigir a la misma pestaña con mensaje de confirmación
-              router.replace('/?registered=true&email=' + encodeURIComponent(data.user.email))
+              router.replace('/?registered=true&email=' + encodeURIComponent(userEmail))
             }, 2000)
           }
         }
