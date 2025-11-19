@@ -343,6 +343,26 @@ function Chat() {
       router.replace(newUrl.pathname + newUrl.search, { scroll: false })
     }
     
+    // Manejar parámetros de registro exitoso (antes de confirmación)
+    if (registered === 'true' && registeredEmail) {
+      console.log('[PAGE] Registro exitoso detectado para:', registeredEmail)
+      
+      // Mostrar mensaje informativo
+      if (!checkoutNotificationSent.current) {
+        toast.success(`¡Registro exitoso! Revisa tu email (${registeredEmail}) para confirmar tu cuenta.`)
+        checkoutNotificationSent.current = true
+        
+        // Limpiar parámetros de la URL después de mostrar el mensaje
+        setTimeout(() => {
+          const newUrl = new URL(window.location.href)
+          newUrl.searchParams.delete('registered')
+          newUrl.searchParams.delete('email')
+          router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+          checkoutNotificationSent.current = false // Resetear para permitir otros mensajes
+        }, 4000)
+      }
+    }
+    
     // Si hay parámetros de confirmación, esperar a que se establezca la sesión
     if (confirmed === 'true' || emailConfirmed === 'true') {
       console.log('[PAGE] 📧 Confirmación detectada en URL, verificando sesión...')
