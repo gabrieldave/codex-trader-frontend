@@ -33,6 +33,7 @@ function Chat() {
   const [isLoading, setIsLoading] = useState(false)
   const [chatError, setChatError] = useState<string | null>(null)
   const [tokensRestantes, setTokensRestantes] = useState<number | null>(null)
+  const [tokensMonthlyLimit, setTokensMonthlyLimit] = useState<number | null>(null)
   const [showReloadModal, setShowReloadModal] = useState(false)
   const [reloadAmount, setReloadAmount] = useState('10000')
   const [isLoadingTokens, setIsLoadingTokens] = useState(false)
@@ -785,6 +786,23 @@ function Chat() {
         const data = await response.json()
         console.log('[page.tsx] ✅ Tokens recibidos:', data)
         setTokensRestantes(data.tokens_restantes || data.tokens || null)
+        
+        // Intentar obtener el límite mensual desde /me/usage
+        try {
+          const usageResponse = await fetch('/api/me/usage', {
+            headers: {
+              'Authorization': `Bearer ${currentToken}`
+            }
+          })
+          if (usageResponse.ok) {
+            const usageData = await usageResponse.json()
+            if (usageData.tokens_monthly_limit) {
+              setTokensMonthlyLimit(usageData.tokens_monthly_limit)
+            }
+          }
+        } catch (usageError) {
+          console.log('[page.tsx] ℹ️ No se pudo obtener límite mensual (puede no estar disponible)')
+        }
       } else if (response.status === 401) {
         // Si es 401, la sesión expiró - intentar refrescar
         console.warn('[page.tsx] ⚠️ Token inválido (401), intentando refrescar sesión...')
@@ -819,6 +837,34 @@ function Chat() {
     }
   }
 
+  // Función helper para formatear tokens con formato compacto
+  const formatTokensCompact = (tokens: number | null): string => {
+    if (tokens === null) return '...'
+    if (tokens < 0) return '0'
+    return new Intl.NumberFormat('es', { 
+      notation: 'compact', 
+      maximumFractionDigits: 1 
+    }).format(tokens)
+  }
+
+  // Función helper para calcular porcentaje restante
+  const calculateTokenPercentage = (restantes: number | null, limit: number | null): number | null => {
+    if (restantes === null || limit === null || limit === 0) return null
+    if (restantes < 0) return 0
+    const percentage = (restantes / limit) * 100
+    return Math.min(100, Math.max(0, percentage))
+  }
+
+  // Función helper para obtener color según el estado
+  // Verde: >50% restante, Amarillo: 20-50% restante, Rojo: <20% restante o agotado
+  const getTokenStatusColor = (percentage: number | null, restantes: number | null): string => {
+    if (restantes !== null && restantes < 0) return 'red'
+    if (percentage === null) return 'blue'
+    if (percentage > 50) return 'green'
+    if (percentage >= 20) return 'yellow'
+    return 'red'
+  }
+
   // Función para recargar tokens
   const handleReloadTokens = async () => {
     if (!accessToken || !reloadAmount) return
@@ -845,6 +891,8 @@ function Chat() {
         setShowReloadModal(false)
         setReloadAmount('10000')
         toast.success(`¡Tokens recargados! Total: ${data.tokens_totales.toLocaleString()}`)
+        // Recargar también el límite mensual
+        await loadTokens()
       } else {
         let errorMessage = 'Error al recargar tokens'
         try {
@@ -2377,26 +2425,79 @@ function Chat() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
-                    {/* Contador de tokens */}
-                    <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg border-2 border-blue-300 dark:border-blue-700 shadow-sm">
-                      {isLoadingTokens ? (
-                        <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-blue-600 dark:border-blue-400 border-t-transparent"></div>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          <span className={`text-xs sm:text-base font-bold ${
-                            tokensRestantes !== null && tokensRestantes < 0 
-                              ? 'text-red-600 dark:text-red-400' 
-                              : 'text-blue-700 dark:text-blue-300'
-                          }`}>
-                            {tokensRestantes !== null ? tokensRestantes.toLocaleString() : '...'}
-                          </span>
-                          <span className="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400 font-medium hidden sm:inline">tokens</span>
-                        </>
-                      )}
-                    </div>
+                    {/* Contador de tokens con barra de progreso */}
+                    {(() => {
+                      const tokenPercentage = calculateTokenPercentage(tokensRestantes, tokensMonthlyLimit)
+                      const statusColor = getTokenStatusColor(tokenPercentage, tokensRestantes)
+                      
+                      // Colores según el estado
+                      const colorClasses = {
+                        green: {
+                          bg: 'from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30',
+                          border: 'border-green-300 dark:border-green-700',
+                          text: 'text-green-700 dark:text-green-300',
+                          bar: 'bg-green-500 dark:bg-green-400',
+                          icon: 'text-green-600 dark:text-green-400'
+                        },
+                        yellow: {
+                          bg: 'from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30',
+                          border: 'border-yellow-300 dark:border-yellow-700',
+                          text: 'text-yellow-700 dark:text-yellow-300',
+                          bar: 'bg-yellow-500 dark:bg-yellow-400',
+                          icon: 'text-yellow-600 dark:text-yellow-400'
+                        },
+                        red: {
+                          bg: 'from-red-100 to-rose-100 dark:from-red-900/30 dark:to-rose-900/30',
+                          border: 'border-red-300 dark:border-red-700',
+                          text: 'text-red-700 dark:text-red-300',
+                          bar: 'bg-red-500 dark:bg-red-400',
+                          icon: 'text-red-600 dark:text-red-400'
+                        },
+                        blue: {
+                          bg: 'from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30',
+                          border: 'border-blue-300 dark:border-blue-700',
+                          text: 'text-blue-700 dark:text-blue-300',
+                          bar: 'bg-blue-500 dark:bg-blue-400',
+                          icon: 'text-blue-600 dark:text-blue-400'
+                        }
+                      }
+                      
+                      const colors = colorClasses[statusColor as keyof typeof colorClasses] || colorClasses.blue
+                      
+                      return (
+                        <div className={`flex flex-col gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-gradient-to-r ${colors.bg} rounded-lg border-2 ${colors.border} shadow-sm min-w-[80px] sm:min-w-[120px]`}>
+                          {isLoadingTokens ? (
+                            <div className="flex items-center justify-center">
+                              <div className={`animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 ${colors.icon} border-t-transparent`}></div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-1 sm:gap-1.5">
+                                <svg className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${colors.icon} flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className={`text-[10px] sm:text-sm font-bold ${colors.text}`}>
+                                  {formatTokensCompact(tokensRestantes)}
+                                </span>
+                                <span className="text-[8px] sm:text-[10px] text-gray-600 dark:text-gray-400 font-medium hidden sm:inline">Créditos</span>
+                              </div>
+                              {/* Barra de progreso visual */}
+                              {tokenPercentage !== null && (
+                                <div className="w-full h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                  <div 
+                                    className={`h-full ${colors.bar} transition-all duration-300 ease-out`}
+                                    style={{ width: `${tokenPercentage}%` }}
+                                  />
+                                </div>
+                              )}
+                              {tokenPercentage === null && tokensRestantes !== null && (
+                                <div className="w-full h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full" />
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )
+                    })()}
                     {tokensRestantes !== null && tokensRestantes < 0 && (
                       <button
                         onClick={handleResetTokens}
