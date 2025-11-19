@@ -45,6 +45,12 @@ function Chat() {
   // AbortController para cancelar peticiones activas (usamos ref para evitar problemas de closures)
   const currentAbortControllerRef = useRef<AbortController | null>(null)
   
+  // Refs para evitar llamadas duplicadas a loadTokens y loadConversations
+  const isLoadingTokensRef = useRef<boolean>(false)
+  const isLoadingConversationsRef = useRef<boolean>(false)
+  const lastTokensCallRef = useRef<number>(0)
+  const lastConversationsCallRef = useRef<number>(0)
+  
   // Estados para conversaciones
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<Array<{id: string, title: string, created_at: string, updated_at: string}>>([])
@@ -111,9 +117,11 @@ function Chat() {
           console.log('✅ Sesión encontrada al cargar:', session.user.email)
           setUser(session.user)
           setAccessToken(session.access_token)
-          // Cargar tokens y conversaciones si hay sesión
-          loadTokens()
-          loadConversations()
+          // Cargar tokens y conversaciones si hay sesión (con pequeño delay para evitar duplicados)
+          setTimeout(() => {
+            loadTokens()
+            loadConversations()
+          }, 200)
         } else {
           console.log('⚠️ No hay sesión al cargar la página')
         }
@@ -135,9 +143,12 @@ function Chat() {
       if (session) {
         setUser(session.user)
         setAccessToken(session.access_token)
-        // Cargar tokens y conversaciones cuando hay sesión
-        loadTokens()
-        loadConversations()
+        // Cargar tokens y conversaciones cuando hay sesión (con delay para evitar duplicados)
+        // El useEffect de accessToken/user también los cargará, así que esto es redundante pero seguro
+        setTimeout(() => {
+          loadTokens()
+          loadConversations()
+        }, 300)
         
         // Si el usuario acaba de confirmar su email (SIGNED_IN después de confirmación)
         // o si hay parámetros de confirmación en la URL, notificar al backend
@@ -283,9 +294,11 @@ function Chat() {
             setUser(sessionData.session.user)
             setAccessToken(sessionData.session.access_token)
             
-            // IMPORTANTE: Cargar tokens después de establecer sesión
-            loadTokens()
-            loadConversations()
+            // IMPORTANTE: Cargar tokens después de establecer sesión (con delay para evitar duplicados)
+            setTimeout(() => {
+              loadTokens()
+              loadConversations()
+            }, 400)
             
             // Notificar al backend para enviar email de bienvenida (segunda llamada por si la primera falló)
             try {
@@ -342,9 +355,11 @@ function Chat() {
       
       // Si el usuario está autenticado, recargar tokens y conversaciones
       if (accessToken && user) {
-        // Recargar tokens para reflejar la nueva suscripción
-        loadTokens()
-        loadConversations()
+        // Recargar tokens para reflejar la nueva suscripción (con delay para evitar duplicados)
+        setTimeout(() => {
+          loadTokens()
+          loadConversations()
+        }, 500)
       }
       
       // Limpiar los parámetros de la URL después de un delay
@@ -376,14 +391,20 @@ function Chat() {
       router.replace(newUrl.pathname + newUrl.search, { scroll: false })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, router, accessToken, user, supabase])
+  }, [searchParams, router, accessToken, user, supabase, referralCode])
 
   // Cargar tokens y conversaciones cuando el usuario está logueado
+  // IMPORTANTE: Usar un debounce para evitar múltiples llamadas simultáneas
   useEffect(() => {
       if (accessToken && user) {
-        loadTokens()
-        loadConversations()
-        checkIsAdmin()
+        // Usar un pequeño delay para evitar llamadas duplicadas cuando cambian ambos
+        const timer = setTimeout(() => {
+          loadTokens()
+          loadConversations()
+          checkIsAdmin()
+        }, 100) // 100ms de debounce
+        
+        return () => clearTimeout(timer)
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, user])
@@ -448,36 +469,78 @@ function Chat() {
 
   // Función para cargar tokens restantes
   const loadTokens = async () => {
-    if (!accessToken) return
+    if (!accessToken) {
+      console.log('[page.tsx] ⚠️ loadTokens: No hay accessToken, saltando llamada')
+      return
+    }
+    
+    // Protección contra llamadas duplicadas: solo permitir una llamada cada 500ms
+    const now = Date.now()
+    if (isLoadingTokensRef.current || (now - lastTokensCallRef.current < 500)) {
+      console.log('[page.tsx] ⚠️ loadTokens: Llamada duplicada ignorada')
+      return
+    }
+    
+    isLoadingTokensRef.current = true
+    lastTokensCallRef.current = now
     setIsLoadingTokens(true)
+    
     try {
-      // 🚨 DEBUG: Verificar accessToken antes de hacer la llamada
-      console.log('[page.tsx] DEBUG accessToken antes de /api/tokens:', accessToken ? `${accessToken.substring(0, 20)}...` : 'null/undefined')
+      // Verificar sesión antes de hacer la llamada
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
-      const headers = {
-        'Authorization': `Bearer ${accessToken}`
+      if (sessionError || !session?.access_token) {
+        console.warn('[page.tsx] ⚠️ loadTokens: Sesión inválida o expirada, limpiando estado')
+        setUser(null)
+        setAccessToken(null)
+        setTokensRestantes(null)
+        return
       }
-      console.log('[page.tsx] DEBUG Headers que se envían a /api/tokens:', headers)
+      
+      // Usar el token de la sesión actualizada
+      const currentToken = session.access_token
       
       const response = await fetch('/api/tokens', {
-        headers
+        headers: {
+          'Authorization': `Bearer ${currentToken}`
+        }
       })
+      
       if (response.ok) {
         const data = await response.json()
         console.log('[page.tsx] ✅ Tokens recibidos:', data)
         setTokensRestantes(data.tokens_restantes || data.tokens || null)
+      } else if (response.status === 401) {
+        // Si es 401, la sesión expiró - intentar refrescar
+        console.warn('[page.tsx] ⚠️ Token inválido (401), intentando refrescar sesión...')
+        try {
+          const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession()
+          if (refreshError || !newSession) {
+            console.error('[page.tsx] ❌ No se pudo refrescar sesión, limpiando estado')
+            setUser(null)
+            setAccessToken(null)
+            setTokensRestantes(null)
+          } else {
+            console.log('[page.tsx] ✅ Sesión refrescada, actualizando token')
+            setAccessToken(newSession.access_token)
+            // No reintentar automáticamente para evitar loops
+          }
+        } catch (refreshErr) {
+          console.error('[page.tsx] ❌ Error al refrescar sesión:', refreshErr)
+          setUser(null)
+          setAccessToken(null)
+          setTokensRestantes(null)
+        }
       } else {
         const errorText = await response.text()
         console.error('[page.tsx] ❌ Error al cargar tokens:', response.status, errorText)
-        // Si es 401, puede que el token haya expirado
-        if (response.status === 401) {
-          console.warn('[page.tsx] ⚠️ Token de autenticación inválido o expirado')
-        }
       }
     } catch (error) {
       console.error('[page.tsx] ❌ Error al cargar tokens:', error)
+      // No limpiar estado en errores de red, solo en 401
     } finally {
       setIsLoadingTokens(false)
+      isLoadingTokensRef.current = false
     }
   }
 
@@ -574,15 +637,40 @@ function Chat() {
 
   // Función para cargar lista de conversaciones
   const loadConversations = async () => {
-    if (!accessToken) return
+    if (!accessToken) {
+      console.log('[page.tsx] ⚠️ loadConversations: No hay accessToken, saltando llamada')
+      return
+    }
+    
+    // Protección contra llamadas duplicadas: solo permitir una llamada cada 500ms
+    const now = Date.now()
+    if (isLoadingConversationsRef.current || (now - lastConversationsCallRef.current < 500)) {
+      console.log('[page.tsx] ⚠️ loadConversations: Llamada duplicada ignorada')
+      return
+    }
+    
+    isLoadingConversationsRef.current = true
+    lastConversationsCallRef.current = now
     setIsLoadingConversations(true)
+    
     try {
-      // 🚨 DEBUG: Verificar accessToken antes de hacer la llamada
-      console.log('[page.tsx] DEBUG accessToken antes de /api/chat-sessions:', accessToken ? `${accessToken.substring(0, 20)}...` : 'null/undefined')
+      // Verificar sesión antes de hacer la llamada
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError || !session?.access_token) {
+        console.warn('[page.tsx] ⚠️ loadConversations: Sesión inválida o expirada')
+        setUser(null)
+        setAccessToken(null)
+        setConversations([])
+        return
+      }
+      
+      // Usar el token de la sesión actualizada
+      const currentToken = session.access_token
       
       const response = await fetch('/api/chat-sessions?limit=50', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
+          'Authorization': `Bearer ${currentToken}`
         }
       })
 
@@ -594,7 +682,32 @@ function Chat() {
           if (!currentConversationId && data.sessions.length > 0) {
             setCurrentConversationId(data.sessions[0].id)
           }
+        } else {
+          setConversations([])
         }
+      } else if (response.status === 401) {
+        // Si es 401, la sesión expiró - intentar refrescar
+        console.warn('[page.tsx] ⚠️ Token inválido (401) en loadConversations, intentando refrescar sesión...')
+        try {
+          const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession()
+          if (refreshError || !newSession) {
+            console.error('[page.tsx] ❌ No se pudo refrescar sesión, limpiando estado')
+            setUser(null)
+            setAccessToken(null)
+            setConversations([])
+          } else {
+            console.log('[page.tsx] ✅ Sesión refrescada en loadConversations')
+            setAccessToken(newSession.access_token)
+            // No reintentar automáticamente para evitar loops
+          }
+        } catch (refreshErr) {
+          console.error('[page.tsx] ❌ Error al refrescar sesión:', refreshErr)
+          setUser(null)
+          setAccessToken(null)
+          setConversations([])
+        }
+      } else {
+        console.error('[page.tsx] ❌ Error al cargar conversaciones:', response.status)
       }
     } catch (error) {
       console.error('Error al cargar conversaciones:', error)
@@ -1465,7 +1578,7 @@ function Chat() {
                   <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-700/50">
                     <h4 className="text-base sm:text-lg font-semibold text-cyan-400 mb-2">🎯 Enfoque de Nicho</h4>
                     <p className="text-sm sm:text-base text-gray-300">
-                      Nuestra IA está especializada. Cuando preguntas sobre "stop loss", solo recibe contexto de trading. No recibe distracciones, solo precisión.
+                      Nuestra IA está especializada. Cuando preguntas sobre &quot;stop loss&quot;, solo recibe contexto de trading. No recibe distracciones, solo precisión.
                     </p>
                   </div>
                 </div>
