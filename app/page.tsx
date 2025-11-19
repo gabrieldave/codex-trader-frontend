@@ -54,6 +54,12 @@ function Chat() {
   // Ref para rastrear si ya se resolvió el loading inicial
   const initialLoadingResolvedRef = useRef<boolean>(false)
   
+  // Tab ID único para identificar esta pestaña
+  const tabIdRef = useRef<string>(`tab_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
+  
+  // Ref para rastrear si esta pestaña es la "maestra" (primera en cargar)
+  const isMasterTabRef = useRef<boolean>(false)
+  
   // Estados para conversaciones
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<Array<{id: string, title: string, created_at: string, updated_at: string}>>([])
@@ -108,12 +114,52 @@ function Chat() {
     scrollToBottom()
   }, [messages])
 
+  // Sincronización entre pestañas usando Storage Events
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      // Solo procesar eventos de otras pestañas (no de esta)
+      if (e.key === 'supabase.auth.token' || e.key?.startsWith('sb-')) {
+        console.log(`[page.tsx] 🔄 Cambio de sesión detectado desde otra pestaña: ${e.key}`)
+        // Supabase manejará automáticamente la sincronización, pero podemos forzar una verificación
+        if (e.newValue !== e.oldValue) {
+          console.log('[page.tsx] 🔄 Sincronizando sesión desde otra pestaña...')
+          // Supabase onAuthStateChange se disparará automáticamente
+        }
+      }
+    }
+    
+    // Escuchar cambios en localStorage (sincronización entre pestañas)
+    window.addEventListener('storage', handleStorageChange)
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [])
+  
   // Verificar el login del usuario y escuchar cambios
   useEffect(() => {
     // Evitar múltiples ejecuciones si ya se resolvió
     if (initialLoadingResolvedRef.current) {
       console.log('[page.tsx] ⚠️ Loading inicial ya resuelto, saltando verificación duplicada')
       return
+    }
+    
+    // Determinar si esta pestaña es la "maestra" (primera en cargar)
+    try {
+      const masterTab = sessionStorage.getItem('master_tab_id')
+      if (!masterTab) {
+        // Esta es la primera pestaña
+        isMasterTabRef.current = true
+        sessionStorage.setItem('master_tab_id', tabIdRef.current)
+        console.log(`[page.tsx] ✅ Esta pestaña es la maestra: ${tabIdRef.current}`)
+      } else if (masterTab === tabIdRef.current) {
+        isMasterTabRef.current = true
+        console.log(`[page.tsx] ✅ Esta pestaña es la maestra (recuperada): ${tabIdRef.current}`)
+      } else {
+        console.log(`[page.tsx] ℹ️ Esta pestaña es secundaria. Maestra: ${masterTab}, Esta: ${tabIdRef.current}`)
+      }
+    } catch (e) {
+      console.warn('[page.tsx] ⚠️ No se pudo verificar tab master:', e)
     }
     
     const checkUser = async () => {
@@ -150,24 +196,36 @@ function Chat() {
     let welcomeEmailSent = false
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(`🔐 onAuthStateChange: event=${event}, hasSession=${!!session}, userEmail=${session?.user?.email || 'none'}`)
+      console.log(`🔐 [${tabIdRef.current}] onAuthStateChange: event=${event}, hasSession=${!!session}, userEmail=${session?.user?.email || 'none'}`)
       
       // Resolver loading si aún no se ha resuelto (para casos de múltiples pestañas)
       if (!initialLoadingResolvedRef.current) {
         setLoading(false)
         initialLoadingResolvedRef.current = true
-        console.log('[page.tsx] ✅ Loading resuelto desde onAuthStateChange')
+        console.log(`[page.tsx] ✅ Loading resuelto desde onAuthStateChange (tab: ${tabIdRef.current})`)
       }
       
       if (session) {
         setUser(session.user)
         setAccessToken(session.access_token)
-        // Cargar tokens y conversaciones cuando hay sesión (con delay para evitar duplicados)
-        // El useEffect de accessToken/user también los cargará, así que esto es redundante pero seguro
-        setTimeout(() => {
-          loadTokens()
-          loadConversations()
-        }, 300)
+        
+        // Solo la pestaña maestra o si no hay pestaña maestra activa, cargar datos
+        // Esto evita múltiples llamadas simultáneas desde diferentes pestañas
+        const shouldLoadData = isMasterTabRef.current || !sessionStorage.getItem('master_tab_id')
+        
+        if (shouldLoadData) {
+          console.log(`[page.tsx] ✅ Pestaña maestra cargando datos (tab: ${tabIdRef.current})`)
+          // Cargar tokens y conversaciones cuando hay sesión (con delay para evitar duplicados)
+          // El useEffect de accessToken/user también los cargará, así que esto es redundante pero seguro
+          setTimeout(() => {
+            loadTokens()
+            loadConversations()
+          }, 300)
+        } else {
+          console.log(`[page.tsx] ℹ️ Pestaña secundaria, esperando sincronización (tab: ${tabIdRef.current})`)
+          // Las pestañas secundarias esperan a que la maestra cargue los datos
+          // Los datos se sincronizarán automáticamente a través de Supabase
+        }
         
         // Si el usuario acaba de confirmar su email (SIGNED_IN después de confirmación)
         // o si hay parámetros de confirmación en la URL, notificar al backend
@@ -465,10 +523,20 @@ function Chat() {
 
   // Cargar tokens y conversaciones cuando el usuario está logueado
   // IMPORTANTE: Usar un debounce para evitar múltiples llamadas simultáneas
+  // Solo la pestaña maestra debe cargar datos para evitar duplicados
   useEffect(() => {
       if (accessToken && user) {
+        // Verificar si esta pestaña debe cargar datos (solo maestra o si no hay maestra)
+        const shouldLoad = isMasterTabRef.current || !sessionStorage.getItem('master_tab_id')
+        
+        if (!shouldLoad) {
+          console.log(`[page.tsx] ℹ️ Pestaña secundaria, saltando carga de datos (tab: ${tabIdRef.current})`)
+          return
+        }
+        
         // Usar un pequeño delay para evitar llamadas duplicadas cuando cambian ambos
         const timer = setTimeout(() => {
+          console.log(`[page.tsx] ✅ Pestaña maestra cargando datos (tab: ${tabIdRef.current})`)
           loadTokens()
           loadConversations()
           checkIsAdmin()
@@ -478,6 +546,37 @@ function Chat() {
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, user])
+  
+  // Limpiar tab ID cuando se cierra la pestaña
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      try {
+        const masterTab = sessionStorage.getItem('master_tab_id')
+        if (masterTab === tabIdRef.current) {
+          // Si esta es la pestaña maestra y se está cerrando, limpiar
+          sessionStorage.removeItem('master_tab_id')
+          console.log(`[page.tsx] 🧹 Pestaña maestra cerrada, limpiando (tab: ${tabIdRef.current})`)
+        }
+      } catch (e) {
+        // Ignorar errores al limpiar
+      }
+    }
+    
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      // También limpiar al desmontar el componente
+      try {
+        const masterTab = sessionStorage.getItem('master_tab_id')
+        if (masterTab === tabIdRef.current) {
+          sessionStorage.removeItem('master_tab_id')
+        }
+      } catch (e) {
+        // Ignorar errores
+      }
+    }
+  }, [])
 
   
   // Cargar mensajes cuando cambia la conversación actual
@@ -540,14 +639,22 @@ function Chat() {
   // Función para cargar tokens restantes
   const loadTokens = async () => {
     if (!accessToken) {
-      console.log('[page.tsx] ⚠️ loadTokens: No hay accessToken, saltando llamada')
+      console.log(`[page.tsx] ⚠️ loadTokens: No hay accessToken, saltando llamada (tab: ${tabIdRef.current})`)
+      return
+    }
+    
+    // Solo la pestaña maestra debe hacer llamadas API para evitar duplicados entre pestañas
+    const shouldLoad = isMasterTabRef.current || !sessionStorage.getItem('master_tab_id')
+    if (!shouldLoad) {
+      console.log(`[page.tsx] ℹ️ loadTokens: Pestaña secundaria, saltando llamada API (tab: ${tabIdRef.current})`)
+      // Las pestañas secundarias pueden leer de localStorage si Supabase lo sincroniza
       return
     }
     
     // Protección contra llamadas duplicadas: solo permitir una llamada cada 500ms
     const now = Date.now()
     if (isLoadingTokensRef.current || (now - lastTokensCallRef.current < 500)) {
-      console.log('[page.tsx] ⚠️ loadTokens: Llamada duplicada ignorada')
+      console.log(`[page.tsx] ⚠️ loadTokens: Llamada duplicada ignorada (tab: ${tabIdRef.current})`)
       return
     }
     
@@ -708,14 +815,22 @@ function Chat() {
   // Función para cargar lista de conversaciones
   const loadConversations = async () => {
     if (!accessToken) {
-      console.log('[page.tsx] ⚠️ loadConversations: No hay accessToken, saltando llamada')
+      console.log(`[page.tsx] ⚠️ loadConversations: No hay accessToken, saltando llamada (tab: ${tabIdRef.current})`)
+      return
+    }
+    
+    // Solo la pestaña maestra debe hacer llamadas API para evitar duplicados entre pestañas
+    const shouldLoad = isMasterTabRef.current || !sessionStorage.getItem('master_tab_id')
+    if (!shouldLoad) {
+      console.log(`[page.tsx] ℹ️ loadConversations: Pestaña secundaria, saltando llamada API (tab: ${tabIdRef.current})`)
+      // Las pestañas secundarias pueden leer de localStorage si Supabase lo sincroniza
       return
     }
     
     // Protección contra llamadas duplicadas: solo permitir una llamada cada 500ms
     const now = Date.now()
     if (isLoadingConversationsRef.current || (now - lastConversationsCallRef.current < 500)) {
-      console.log('[page.tsx] ⚠️ loadConversations: Llamada duplicada ignorada')
+      console.log(`[page.tsx] ⚠️ loadConversations: Llamada duplicada ignorada (tab: ${tabIdRef.current})`)
       return
     }
     
