@@ -1733,6 +1733,48 @@ function Chat() {
                 Accede a un cerebro enfocado en trading que analiza contenido profesional y te ayuda a entender conceptos, estrategias y psicología del mercado en un solo lugar.
               </p>
               
+              {/* Banner de Prueba Gratis */}
+              <div className="mb-6 sm:mb-8 relative overflow-hidden bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-blue-500/20 border border-emerald-500/30 rounded-lg p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base sm:text-lg font-bold text-white mb-1">
+                      🎁 Prueba Gratis - 20,000 Tokens
+                    </h3>
+                    <p className="text-sm text-gray-200 leading-relaxed">
+                      Regístrate gratis y obtén <span className="font-bold text-emerald-300">20,000 tokens</span> para explorar todas las funcionalidades. Sin tarjeta de crédito, sin compromiso.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Banner de Análisis de Gráficas con IA */}
+              <div className="mb-6 sm:mb-8 relative overflow-hidden bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-orange-500/20 border border-purple-500/30 rounded-lg p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base sm:text-lg font-bold text-white mb-1">
+                      📊 Análisis de Gráficas con IA
+                    </h3>
+                    <p className="text-sm text-gray-200 leading-relaxed">
+                      Sube una foto de tu gráfica y nuestra IA analiza patrones técnicos para <span className="font-bold text-purple-300">predecir la dirección del precio</span>. Análisis profundo instantáneo con tecnología de visión artificial.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
               {/* Bullets de beneficios */}
               <div className="space-y-3 sm:space-y-4 mb-8 sm:mb-10">
                 <div className="flex items-start gap-3">
@@ -1747,6 +1789,55 @@ function Chat() {
                   <span className="text-xl sm:text-2xl mt-0.5 sm:mt-1 flex-shrink-0">🧠</span>
                   <p className="text-sm sm:text-base text-gray-300 flex-1">Respuestas con contexto, no opiniones al azar</p>
                 </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-xl sm:text-2xl mt-0.5 sm:mt-1 flex-shrink-0">📈</span>
+                  <p className="text-sm sm:text-base text-gray-300 flex-1">Análisis de gráficas con IA para predecir movimientos de precio</p>
+                </div>
+              </div>
+              
+              {/* Imágenes de ejemplo de gráficas de bolsa */}
+              <div className="mb-8 sm:mb-10">
+                <h3 className="text-sm sm:text-base font-semibold text-gray-300 mb-3 sm:mb-4">
+                  Ejemplos de análisis de gráficas:
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                  {/* Gráfica 1 - Patrón alcista */}
+                  <div className="relative bg-gray-800/50 rounded-lg p-2 sm:p-3 border border-gray-700/50 hover:border-cyan-500/50 transition-all group">
+                    <div className="aspect-square bg-gradient-to-br from-green-500/20 to-emerald-600/20 rounded flex items-center justify-center">
+                      <svg className="w-full h-full text-green-400 opacity-60" viewBox="0 0 100 60" preserveAspectRatio="none">
+                        <polyline points="10,50 25,45 40,35 55,25 70,20 85,15 90,10" fill="none" stroke="currentColor" strokeWidth="2"/>
+                        <circle cx="90" cy="10" r="2" fill="currentColor"/>
+                      </svg>
+                    </div>
+                    <p className="text-[10px] sm:text-xs text-gray-400 mt-1 text-center">Tendencia Alcista</p>
+                  </div>
+                  
+                  {/* Gráfica 2 - Patrón bajista */}
+                  <div className="relative bg-gray-800/50 rounded-lg p-2 sm:p-3 border border-gray-700/50 hover:border-red-500/50 transition-all group">
+                    <div className="aspect-square bg-gradient-to-br from-red-500/20 to-orange-600/20 rounded flex items-center justify-center">
+                      <svg className="w-full h-full text-red-400 opacity-60" viewBox="0 0 100 60" preserveAspectRatio="none">
+                        <polyline points="10,10 25,15 40,25 55,35 70,40 85,45 90,50" fill="none" stroke="currentColor" strokeWidth="2"/>
+                        <circle cx="90" cy="50" r="2" fill="currentColor"/>
+                      </svg>
+                    </div>
+                    <p className="text-[10px] sm:text-xs text-gray-400 mt-1 text-center">Tendencia Bajista</p>
+                  </div>
+                  
+                  {/* Gráfica 3 - Consolidación */}
+                  <div className="relative bg-gray-800/50 rounded-lg p-2 sm:p-3 border border-gray-700/50 hover:border-yellow-500/50 transition-all group col-span-2 sm:col-span-1">
+                    <div className="aspect-square bg-gradient-to-br from-yellow-500/20 to-amber-600/20 rounded flex items-center justify-center">
+                      <svg className="w-full h-full text-yellow-400 opacity-60" viewBox="0 0 100 60" preserveAspectRatio="none">
+                        <polyline points="10,30 25,28 40,32 55,28 70,32 85,30 90,30" fill="none" stroke="currentColor" strokeWidth="2"/>
+                        <line x1="10" y1="20" x2="90" y2="20" stroke="currentColor" strokeWidth="1" strokeDasharray="2,2"/>
+                        <line x1="10" y1="40" x2="90" y2="40" stroke="currentColor" strokeWidth="1" strokeDasharray="2,2"/>
+                      </svg>
+                    </div>
+                    <p className="text-[10px] sm:text-xs text-gray-400 mt-1 text-center">Consolidación</p>
+                  </div>
+                </div>
+                <p className="text-xs sm:text-sm text-gray-500 mt-3 text-center">
+                  Sube tu gráfica y obtén análisis instantáneo con predicción de precio
+                </p>
               </div>
               
               {/* Branding */}

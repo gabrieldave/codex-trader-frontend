@@ -1,4 +1,4 @@
-export type PlanCode = "explorer" | "trader" | "pro" | "institucional";
+export type PlanCode = "gratis" | "explorer" | "trader" | "pro" | "institucional";
 
 export interface CodexPlan {
   code: PlanCode;
@@ -11,9 +11,24 @@ export interface CodexPlan {
   fullDescription: string;
   fastQueries: string; // "500", "2,500", "Ilimitadas", etc.
   deepQueries: string; // Descripción de estudios detallados con citación
+  isFree?: boolean; // Indica si es el plan gratis
 }
 
 export const CODEX_PLANS: CodexPlan[] = [
+  {
+    code: "gratis",
+    name: "Gratis",
+    priceUsd: 0,
+    tokensPerMonth: 20_000,
+    approxDeepAnalyses: 2,
+    badge: "Prueba gratis",
+    shortDescription: "20,000 tokens gratis para empezar.",
+    fullDescription:
+      "Plan de prueba gratuito con 20,000 tokens para explorar todas las funcionalidades. Perfecto para conocer Codex Trader sin compromiso. Incluye análisis de gráficas con IA.",
+    fastQueries: "50",
+    deepQueries: "2 Análisis Profundos",
+    isFree: true
+  },
   {
     code: "explorer",
     name: "Explorer",

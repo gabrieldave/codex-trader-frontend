@@ -57,6 +57,19 @@ function PlanesPageContent() {
   }, [selectedPlanCode, user])
 
   const handleSelectPlan = async (planCode: PlanCode) => {
+    const plan = getPlanByCode(planCode)
+    
+    // Si es el plan gratis, redirigir al registro
+    if (plan?.isFree) {
+      if (!user || !accessToken) {
+        router.push(`/?plan=${planCode}`)
+      } else {
+        toast.success('Ya tienes acceso al plan gratis. ¡Disfruta de tus 20,000 tokens!')
+        router.push('/')
+      }
+      return
+    }
+    
     if (!user || !accessToken) {
       // Si no está logueado, redirigir al login con el plan seleccionado
       router.push(`/?plan=${planCode}`)
@@ -133,7 +146,7 @@ function PlanesPageContent() {
           </div>
 
           {/* Grid de planes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8 mb-16">
             {CODEX_PLANS.map((plan) => (
               <PlanCard
                 key={plan.code}
@@ -200,10 +213,18 @@ function PlanCard({ plan, onSelect }: PlanCardProps) {
         </h3>
         
         <div className="mb-4">
-          <span className="text-3xl lg:text-4xl font-bold text-white">
-            US${plan.priceUsd}
-          </span>
-          <span className="text-gray-400 text-sm ml-1">/mes</span>
+          {plan.isFree ? (
+            <span className="text-3xl lg:text-4xl font-bold text-emerald-400">
+              Gratis
+            </span>
+          ) : (
+            <>
+              <span className="text-3xl lg:text-4xl font-bold text-white">
+                US${plan.priceUsd}
+              </span>
+              <span className="text-gray-400 text-sm ml-1">/mes</span>
+            </>
+          )}
         </div>
 
         <div className="mb-4 space-y-2">
@@ -223,9 +244,13 @@ function PlanCard({ plan, onSelect }: PlanCardProps) {
       {/* Botón */}
       <button
         onClick={onSelect}
-        className="w-full py-3 px-4 font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-lg transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        className={`w-full py-3 px-4 font-semibold text-white rounded-lg transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+          plan.isFree
+            ? 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500'
+            : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500'
+        }`}
       >
-        Empezar con {plan.name}
+        {plan.isFree ? 'Registrarse Gratis' : `Empezar con ${plan.name}`}
       </button>
     </div>
   )

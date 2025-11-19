@@ -12,6 +12,9 @@ interface MetricsData {
   total_events: number
   total_tokens: number
   total_cost_usd: number
+  total_revenue_usd?: number
+  total_profit_usd?: number
+  profit_margin_percent?: number
   total_deep_events: number
   total_fast_events: number
   deep_events_percentage: number
@@ -19,6 +22,23 @@ interface MetricsData {
   total_users: number
   total_tokens_input?: number
   total_tokens_output?: number
+  costs_by_model?: Array<{
+    model: string
+    cost_usd: number
+    tokens_input: number
+    tokens_output: number
+    total_tokens: number
+    events: number
+  }>
+  costs_by_provider?: Array<{
+    provider: string
+    cost_usd: number
+    tokens_input: number
+    tokens_output: number
+    total_tokens: number
+    events: number
+  }>
+  period?: string
 }
 
 interface TopUser {
@@ -35,6 +55,7 @@ export default function AdminMetricsPage() {
   const [metrics, setMetrics] = useState<MetricsData | null>(null)
   const [topUsers, setTopUsers] = useState<TopUser[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [selectedPeriod, setSelectedPeriod] = useState<'all' | 'day' | 'week' | 'month'>('all')
   const router = useRouter()
 
   // Verificar sesión del usuario
@@ -63,18 +84,21 @@ export default function AdminMetricsPage() {
     return () => subscription.unsubscribe()
   }, [supabase, router])
 
-  // Cargar métricas al montar el componente
+  // Cargar métricas al montar el componente o cuando cambia el período
   useEffect(() => {
     if (user) {
       loadMetrics()
     }
-  }, [user])
+  }, [user, selectedPeriod])
 
   const loadMetrics = async () => {
     setLoadingData(true)
     setError(null)
     try {
-      const data = await authorizedApiCallJson<MetricsData>('/admin/metrics')
+      const url = selectedPeriod === 'all' 
+        ? '/admin/metrics' 
+        : `/admin/metrics?period=${selectedPeriod}`
+      const data = await authorizedApiCallJson<MetricsData>(url)
       setMetrics(data)
       
       // Cargar usuarios con más fast_events (para alerta FUP)
@@ -166,13 +190,59 @@ export default function AdminMetricsPage() {
 
       {/* Contenido principal */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Dashboard de Métricas
-          </h1>
-          <p className="text-blue-200 text-sm">
-            Métricas generales del sistema y uso de servicios
-          </p>
+        <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Dashboard de Métricas
+            </h1>
+            <p className="text-blue-200 text-sm">
+              Métricas generales del sistema, costos por modelo y ganancias
+            </p>
+          </div>
+          
+          {/* Selector de período */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSelectedPeriod('all')}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                selectedPeriod === 'all'
+                  ? 'bg-cyan-600 text-white shadow-lg'
+                  : 'bg-white/10 text-blue-200 hover:bg-white/20'
+              }`}
+            >
+              Todo
+            </button>
+            <button
+              onClick={() => setSelectedPeriod('day')}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                selectedPeriod === 'day'
+                  ? 'bg-cyan-600 text-white shadow-lg'
+                  : 'bg-white/10 text-blue-200 hover:bg-white/20'
+              }`}
+            >
+              Hoy
+            </button>
+            <button
+              onClick={() => setSelectedPeriod('week')}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                selectedPeriod === 'week'
+                  ? 'bg-cyan-600 text-white shadow-lg'
+                  : 'bg-white/10 text-blue-200 hover:bg-white/20'
+              }`}
+            >
+              Semana
+            </button>
+            <button
+              onClick={() => setSelectedPeriod('month')}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                selectedPeriod === 'month'
+                  ? 'bg-cyan-600 text-white shadow-lg'
+                  : 'bg-white/10 text-blue-200 hover:bg-white/20'
+              }`}
+            >
+              Mes
+            </button>
+          </div>
         </div>
 
         {/* Error */}
@@ -182,35 +252,58 @@ export default function AdminMetricsPage() {
           </div>
         )}
 
-        {/* Tarjetas KPI */}
-        {metrics && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {/* Total Cost */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-blue-500/30 shadow-xl p-6">
-                <div className="text-blue-200 text-sm mb-1">Costo Total</div>
+            {/* Tarjetas KPI */}
+            {metrics && (
+              <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {/* Ingresos */}
+              <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 backdrop-blur-sm rounded-lg border border-green-500/30 shadow-xl p-6">
+                <div className="text-green-200 text-sm mb-1">💰 Ingresos</div>
                 <div className="text-4xl font-bold text-white mb-2">
-                  ${metrics.total_cost_usd.toFixed(2)}
+                  ${(metrics.total_revenue_usd || 0).toFixed(2)}
                 </div>
-                <div className="text-blue-300 text-xs">
-                  Costo estimado de API DeepSeek
+                <div className="text-green-300 text-xs">
+                  Ingresos desde Stripe
                 </div>
               </div>
 
-              {/* Total Users */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-blue-500/30 shadow-xl p-6">
-                <div className="text-blue-200 text-sm mb-1">Total Usuarios</div>
+              {/* Costo Total */}
+              <div className="bg-gradient-to-br from-red-600/20 to-orange-600/20 backdrop-blur-sm rounded-lg border border-red-500/30 shadow-xl p-6">
+                <div className="text-red-200 text-sm mb-1">💸 Costo Total</div>
                 <div className="text-4xl font-bold text-white mb-2">
-                  {metrics.total_users.toLocaleString()}
+                  ${metrics.total_cost_usd.toFixed(2)}
                 </div>
-                <div className="text-blue-300 text-xs">
-                  Usuarios registrados en el sistema
+                <div className="text-red-300 text-xs">
+                  Costo real de APIs (DeepSeek + Gemini Flash)
+                </div>
+              </div>
+
+              {/* Ganancias */}
+              <div className={`bg-gradient-to-br backdrop-blur-sm rounded-lg border shadow-xl p-6 ${
+                (metrics.total_profit_usd || 0) >= 0
+                  ? 'from-emerald-600/20 to-green-600/20 border-emerald-500/30'
+                  : 'from-red-600/20 to-orange-600/20 border-red-500/30'
+              }`}>
+                <div className={`text-sm mb-1 ${
+                  (metrics.total_profit_usd || 0) >= 0 ? 'text-emerald-200' : 'text-red-200'
+                }`}>
+                  📈 Ganancias
+                </div>
+                <div className="text-4xl font-bold text-white mb-2">
+                  ${(metrics.total_profit_usd || 0).toFixed(2)}
+                </div>
+                <div className={`text-xs ${
+                  (metrics.total_profit_usd || 0) >= 0 ? 'text-emerald-300' : 'text-red-300'
+                }`}>
+                  {metrics.profit_margin_percent !== undefined 
+                    ? `Margen: ${metrics.profit_margin_percent.toFixed(1)}%`
+                    : 'Ingresos - Costos'}
                 </div>
               </div>
 
               {/* Total Tokens */}
               <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-blue-500/30 shadow-xl p-6">
-                <div className="text-blue-200 text-sm mb-1">Total Tokens</div>
+                <div className="text-blue-200 text-sm mb-1">Tokens</div>
                 <div className="text-4xl font-bold text-white mb-2">
                   {metrics.total_tokens.toLocaleString()}
                 </div>
@@ -225,6 +318,156 @@ export default function AdminMetricsPage() {
                 </div>
               </div>
             </div>
+
+            {/* Costos por Modelo */}
+            {metrics.costs_by_model && metrics.costs_by_model.length > 0 && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-blue-500/30 shadow-xl p-6 mb-8">
+                <h2 className="text-2xl font-semibold text-white mb-4">
+                  💰 Costos por Modelo (Costos Reales)
+                </h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-blue-500/30">
+                        <th className="px-4 py-3 text-blue-200 font-semibold">Modelo</th>
+                        <th className="px-4 py-3 text-blue-200 font-semibold">Costo (USD)</th>
+                        <th className="px-4 py-3 text-blue-200 font-semibold">Tokens Input</th>
+                        <th className="px-4 py-3 text-blue-200 font-semibold">Tokens Output</th>
+                        <th className="px-4 py-3 text-blue-200 font-semibold">Total Tokens</th>
+                        <th className="px-4 py-3 text-blue-200 font-semibold">Eventos</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {metrics.costs_by_model.map((model, index) => (
+                        <tr key={model.model} className="border-b border-blue-500/10 hover:bg-white/5">
+                          <td className="px-4 py-3 text-white font-mono text-sm">
+                            {model.model}
+                          </td>
+                          <td className="px-4 py-3 text-red-300 font-semibold">
+                            ${model.cost_usd.toFixed(4)}
+                          </td>
+                          <td className="px-4 py-3 text-blue-200">
+                            {model.tokens_input.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-blue-200">
+                            {model.tokens_output.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-white font-semibold">
+                            {model.total_tokens.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-cyan-300">
+                            {model.events.toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-blue-500/50 bg-white/5">
+                        <td className="px-4 py-3 text-white font-bold">TOTAL</td>
+                        <td className="px-4 py-3 text-red-300 font-bold">
+                          ${metrics.total_cost_usd.toFixed(4)}
+                        </td>
+                        <td className="px-4 py-3 text-blue-200 font-bold">
+                          {(metrics.total_tokens_input || 0).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 text-blue-200 font-bold">
+                          {(metrics.total_tokens_output || 0).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 text-white font-bold">
+                          {metrics.total_tokens.toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 text-cyan-300 font-bold">
+                          {metrics.total_events.toLocaleString()}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Resumen de Ingresos vs Costos */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Ingresos vs Costos */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-blue-500/30 shadow-xl p-6">
+                <h2 className="text-2xl font-semibold text-white mb-4">
+                  💵 Resumen Financiero
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-green-200">💰 Ingresos (Stripe):</span>
+                    <span className="text-green-400 font-bold text-xl">
+                      ${(metrics.total_revenue_usd || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-red-200">💸 Costos (APIs):</span>
+                    <span className="text-red-400 font-bold text-xl">
+                      ${metrics.total_cost_usd.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="border-t border-blue-500/30 pt-4 mt-4">
+                    <div className="flex justify-between items-center">
+                      <span className={`font-bold text-lg ${
+                        (metrics.total_profit_usd || 0) >= 0 ? 'text-emerald-200' : 'text-red-200'
+                      }`}>
+                        {(metrics.total_profit_usd || 0) >= 0 ? '📈 Ganancia Neta:' : '📉 Pérdida Neta:'}
+                      </span>
+                      <span className={`font-bold text-2xl ${
+                        (metrics.total_profit_usd || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                      }`}>
+                        ${(metrics.total_profit_usd || 0).toFixed(2)}
+                      </span>
+                    </div>
+                    {metrics.profit_margin_percent !== undefined && (
+                      <div className="mt-2 text-sm text-blue-300">
+                        Margen de ganancia: {metrics.profit_margin_percent.toFixed(2)}%
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Users */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-blue-500/30 shadow-xl p-6">
+                <h2 className="text-2xl font-semibold text-white mb-4">
+                  👥 Usuarios
+                </h2>
+                <div className="text-5xl font-bold text-white mb-2">
+                  {metrics.total_users.toLocaleString()}
+                </div>
+                <div className="text-blue-300 text-sm">
+                  Usuarios registrados en el sistema
+                </div>
+              </div>
+            </div>
+
+            {/* Costos por Proveedor */}
+            {metrics.costs_by_provider && metrics.costs_by_provider.length > 0 && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-blue-500/30 shadow-xl p-6 mb-8">
+                <h2 className="text-2xl font-semibold text-white mb-4">
+                  🔌 Costos por Proveedor
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {metrics.costs_by_provider.map((provider) => (
+                    <div key={provider.provider} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-cyan-300 font-semibold capitalize">
+                          {provider.provider === 'deepseek' ? 'DeepSeek Chat' : provider.provider === 'google' ? 'Google Gemini Flash' : provider.provider}
+                        </span>
+                        <span className="text-red-300 font-bold">
+                          ${provider.cost_usd.toFixed(4)}
+                        </span>
+                      </div>
+                      <div className="text-xs text-blue-300 space-y-1">
+                        <div>Tokens: {provider.total_tokens.toLocaleString()}</div>
+                        <div>Eventos: {provider.events.toLocaleString()}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Gráfico de Distribución y Estadísticas */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
