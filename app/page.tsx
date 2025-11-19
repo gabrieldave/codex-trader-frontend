@@ -1896,31 +1896,33 @@ function Chat() {
                         </svg>
                       </button>
                     )}
-                    <h1 className="text-sm sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent truncate">
-                      CODEX TRADER
-                    </h1>
-                    <div className="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 truncate hidden sm:block">
-                      {user.email}
+                    <div className="flex flex-col min-w-0">
+                      <h1 className="text-base sm:text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight whitespace-nowrap">
+                        CODEX TRADER
+                      </h1>
+                      <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-500 truncate max-w-[120px] sm:max-w-none hidden sm:block">
+                        {user.email}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
                     {/* Contador de tokens */}
-                    <div className="flex items-center gap-0.5 sm:gap-2 px-1.5 sm:px-4 py-1 sm:py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg border-2 border-blue-300 dark:border-blue-700 shadow-sm">
                       {isLoadingTokens ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-blue-600 dark:border-blue-400 border-t-transparent"></div>
                       ) : (
                         <>
-                          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span className={`text-[10px] sm:text-sm font-semibold ${
+                          <span className={`text-xs sm:text-base font-bold ${
                             tokensRestantes !== null && tokensRestantes < 0 
                               ? 'text-red-600 dark:text-red-400' 
                               : 'text-blue-700 dark:text-blue-300'
                           }`}>
                             {tokensRestantes !== null ? tokensRestantes.toLocaleString() : '...'}
                           </span>
-                          <span className="text-[8px] sm:text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">tokens</span>
+                          <span className="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400 font-medium hidden sm:inline">tokens</span>
                         </>
                       )}
                     </div>

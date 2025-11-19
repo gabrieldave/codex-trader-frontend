@@ -74,6 +74,13 @@ export default function InvitarPage() {
 
     if (accessToken) {
       loadReferralsSummary()
+      
+      // Actualizar estadísticas cada 30 segundos para reflejar cambios en tiempo real
+      const interval = setInterval(() => {
+        loadReferralsSummary()
+      }, 30000) // 30 segundos
+      
+      return () => clearInterval(interval)
     }
   }, [accessToken])
 
