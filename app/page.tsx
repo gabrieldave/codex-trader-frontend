@@ -1978,13 +1978,11 @@ function Chat() {
   // CRÍTICO: Este useEffect debe estar ANTES de los returns condicionales para cumplir con las reglas de hooks
   useEffect(() => {
     let touchStartY = 0
-    let isScrolling = false
     
-    // Prevenir pull-to-refresh en móvil - SOLO en el body, no en elementos interactivos
-    const preventPullToRefresh = (e: TouchEvent) => {
-      // NO prevenir si el evento viene de un elemento interactivo (botones, inputs, links)
-      const target = e.target as HTMLElement
-      if (target && (
+    // Función para verificar si un elemento es interactivo
+    const isInteractiveElement = (target: HTMLElement | null): boolean => {
+      if (!target) return false
+      return !!(
         target.tagName === 'BUTTON' ||
         target.tagName === 'INPUT' ||
         target.tagName === 'TEXTAREA' ||
@@ -1995,8 +1993,15 @@ function Chat() {
         target.closest('input') ||
         target.closest('textarea') ||
         target.closest('[role="button"]') ||
+        target.closest('[onclick]') ||
         target.isContentEditable
-      )) {
+      )
+    }
+    
+    // Prevenir pull-to-refresh en móvil - SOLO en el body, no en elementos interactivos
+    const preventPullToRefresh = (e: TouchEvent) => {
+      // NO prevenir si el evento viene de un elemento interactivo
+      if (isInteractiveElement(e.target as HTMLElement)) {
         return // Permitir el evento normal en elementos interactivos
       }
       
@@ -2004,7 +2009,7 @@ function Chat() {
       if (window.scrollY === 0 && touchStartY > 0) {
         const touch = e.touches[0]
         if (touch && touch.clientY > touchStartY + 10) {
-          // El usuario está deslizando hacia abajo desde la parte superior
+          // El usuario está deslizando hacia abajo desde la parte superior (pull-to-refresh)
           e.preventDefault()
         }
       }
@@ -2012,31 +2017,17 @@ function Chat() {
     
     // Guardar la posición inicial del touch
     const handleTouchStart = (e: TouchEvent) => {
-      // NO bloquear elementos interactivos
-      const target = e.target as HTMLElement
-      if (target && (
-        target.tagName === 'BUTTON' ||
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.tagName === 'SELECT' ||
-        target.tagName === 'A' ||
-        target.closest('button') ||
-        target.closest('a') ||
-        target.closest('input') ||
-        target.closest('textarea') ||
-        target.closest('[role="button"]') ||
-        target.isContentEditable
-      )) {
-        touchStartY = 0
-        isScrolling = false
+      // NO bloquear elementos interactivos - permitir clicks normales
+      if (isInteractiveElement(e.target as HTMLElement)) {
+        touchStartY = 0 // Resetear para no prevenir
         return // Permitir el evento normal en elementos interactivos
       }
       
+      // Solo guardar posición si no es un elemento interactivo
       touchStartY = e.touches[0]?.clientY || 0
-      isScrolling = false
     }
     
-    // Solo prevenir en el body/container principal, no en elementos interactivos
+    // Agregar listeners al body - usar passive: true en touchstart para mejor performance
     document.body.addEventListener('touchmove', preventPullToRefresh, { passive: false })
     document.body.addEventListener('touchstart', handleTouchStart, { passive: true })
     
