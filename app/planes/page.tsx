@@ -219,10 +219,10 @@ function PlanCard({ plan, onSelect }: PlanCardProps) {
             </span>
           ) : (
             <>
-              <span className="text-3xl lg:text-4xl font-bold text-white">
-                US${plan.priceUsd}
-              </span>
-              <span className="text-gray-400 text-sm ml-1">/mes</span>
+          <span className="text-3xl lg:text-4xl font-bold text-white">
+            US${plan.priceUsd}
+          </span>
+          <span className="text-gray-400 text-sm ml-1">/mes</span>
             </>
           )}
         </div>

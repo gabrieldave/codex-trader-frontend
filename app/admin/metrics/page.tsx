@@ -192,10 +192,10 @@ export default function AdminMetricsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">
-              Dashboard de Métricas
-            </h1>
-            <p className="text-blue-200 text-sm">
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Dashboard de Métricas
+          </h1>
+          <p className="text-blue-200 text-sm">
               Métricas generales del sistema, costos por modelo y ganancias
             </p>
           </div>
@@ -252,9 +252,9 @@ export default function AdminMetricsPage() {
           </div>
         )}
 
-            {/* Tarjetas KPI */}
-            {metrics && (
-              <>
+        {/* Tarjetas KPI */}
+        {metrics && (
+          <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {/* Ingresos */}
               <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 backdrop-blur-sm rounded-lg border border-green-500/30 shadow-xl p-6">
