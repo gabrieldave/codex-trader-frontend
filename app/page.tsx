@@ -1795,51 +1795,6 @@ function Chat() {
                 </div>
               </div>
               
-              {/* Imágenes de ejemplo de gráficas de bolsa */}
-              <div className="mb-8 sm:mb-10">
-                <h3 className="text-sm sm:text-base font-semibold text-gray-300 mb-3 sm:mb-4">
-                  Ejemplos de análisis de gráficas:
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                  {/* Gráfica 1 - Patrón alcista */}
-                  <div className="relative bg-gray-800/50 rounded-lg p-2 sm:p-3 border border-gray-700/50 hover:border-cyan-500/50 transition-all group">
-                    <div className="aspect-square bg-gradient-to-br from-green-500/20 to-emerald-600/20 rounded flex items-center justify-center">
-                      <svg className="w-full h-full text-green-400 opacity-60" viewBox="0 0 100 60" preserveAspectRatio="none">
-                        <polyline points="10,50 25,45 40,35 55,25 70,20 85,15 90,10" fill="none" stroke="currentColor" strokeWidth="2"/>
-                        <circle cx="90" cy="10" r="2" fill="currentColor"/>
-                      </svg>
-                    </div>
-                    <p className="text-[10px] sm:text-xs text-gray-400 mt-1 text-center">Tendencia Alcista</p>
-                  </div>
-                  
-                  {/* Gráfica 2 - Patrón bajista */}
-                  <div className="relative bg-gray-800/50 rounded-lg p-2 sm:p-3 border border-gray-700/50 hover:border-red-500/50 transition-all group">
-                    <div className="aspect-square bg-gradient-to-br from-red-500/20 to-orange-600/20 rounded flex items-center justify-center">
-                      <svg className="w-full h-full text-red-400 opacity-60" viewBox="0 0 100 60" preserveAspectRatio="none">
-                        <polyline points="10,10 25,15 40,25 55,35 70,40 85,45 90,50" fill="none" stroke="currentColor" strokeWidth="2"/>
-                        <circle cx="90" cy="50" r="2" fill="currentColor"/>
-                      </svg>
-                    </div>
-                    <p className="text-[10px] sm:text-xs text-gray-400 mt-1 text-center">Tendencia Bajista</p>
-                  </div>
-                  
-                  {/* Gráfica 3 - Consolidación */}
-                  <div className="relative bg-gray-800/50 rounded-lg p-2 sm:p-3 border border-gray-700/50 hover:border-yellow-500/50 transition-all group col-span-2 sm:col-span-1">
-                    <div className="aspect-square bg-gradient-to-br from-yellow-500/20 to-amber-600/20 rounded flex items-center justify-center">
-                      <svg className="w-full h-full text-yellow-400 opacity-60" viewBox="0 0 100 60" preserveAspectRatio="none">
-                        <polyline points="10,30 25,28 40,32 55,28 70,32 85,30 90,30" fill="none" stroke="currentColor" strokeWidth="2"/>
-                        <line x1="10" y1="20" x2="90" y2="20" stroke="currentColor" strokeWidth="1" strokeDasharray="2,2"/>
-                        <line x1="10" y1="40" x2="90" y2="40" stroke="currentColor" strokeWidth="1" strokeDasharray="2,2"/>
-                      </svg>
-                    </div>
-                    <p className="text-[10px] sm:text-xs text-gray-400 mt-1 text-center">Consolidación</p>
-                  </div>
-                </div>
-                <p className="text-xs sm:text-sm text-gray-500 mt-3 text-center">
-                  Sube tu gráfica y obtén análisis instantáneo con predicción de precio
-                </p>
-              </div>
-              
               {/* Branding */}
               <div className="pt-6 border-t border-gray-700">
                 <p className="text-sm text-gray-400 mb-2">
