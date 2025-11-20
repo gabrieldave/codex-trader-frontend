@@ -1987,7 +1987,6 @@ function Chat() {
   // CRÍTICO: Este useEffect debe estar ANTES de los returns condicionales para cumplir con las reglas de hooks
   useEffect(() => {
     let touchStartY = 0
-    let touchStartTime = 0
     let isPullToRefresh = false
     
     // Función para verificar si un elemento es interactivo
@@ -2044,7 +2043,6 @@ function Chat() {
       // Solo guardar posición si estamos en la parte superior
       if (window.scrollY === 0) {
         touchStartY = e.touches[0]?.clientY || 0
-        touchStartTime = Date.now()
         isPullToRefresh = false
       } else {
         touchStartY = 0
@@ -2052,7 +2050,7 @@ function Chat() {
     }
     
     // Manejar el fin del touch - detectar si fue pull-to-refresh
-    const handleTouchEnd = (e: TouchEvent) => {
+    const handleTouchEnd = () => {
       if (isPullToRefresh && window.scrollY === 0) {
         // El usuario hizo pull-to-refresh - recargar datos
         console.log('[page.tsx] 🔄 Pull-to-refresh detectado, recargando datos...')
@@ -2084,6 +2082,7 @@ function Chat() {
       document.body.removeEventListener('touchmove', handleTouchMove)
       document.body.removeEventListener('touchend', handleTouchEnd)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   
   if (loading) {
