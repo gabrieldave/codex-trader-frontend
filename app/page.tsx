@@ -153,8 +153,9 @@ function Chat() {
     // Variable para rastrear si ya enviamos el email de bienvenida
     let welcomeEmailSent = false
     
-    // IMPORTANTE: Configurar onAuthStateChange SIEMPRE (antes de cualquier return)
-    // Esto asegura que el hook se ejecute en el mismo orden siempre
+    // IMPORTANTE: Configurar onAuthStateChange SIEMPRE primero
+    // CRÍTICO: Debe ejecutarse antes de cualquier return condicional
+    // para cumplir con las reglas de hooks de React (orden consistente)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`🔐 [${tabIdRef.current}] onAuthStateChange: event=${event}, hasSession=${!!session}, userEmail=${session?.user?.email || 'none'}`)
       
