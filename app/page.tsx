@@ -620,17 +620,16 @@ function Chat() {
   // IMPORTANTE: Usar un debounce para evitar múltiples llamadas simultáneas
   // Solo la pestaña maestra debe cargar datos para evitar duplicados
   useEffect(() => {
-      if (accessToken && user) {
-        // Verificar si esta pestaña debe cargar datos (solo maestra o si no hay maestra)
-        const shouldLoad = isMasterTabRef.current || !sessionStorage.getItem('master_tab_id')
-        
-        if (!shouldLoad) {
-          console.log(`[page.tsx] ℹ️ Pestaña secundaria, saltando carga de datos (tab: ${tabIdRef.current})`)
-          return
-        }
-        
+    // CRÍTICO: El return de limpieza debe estar siempre presente, no condicionalmente
+    let timer: NodeJS.Timeout | null = null
+    
+    if (accessToken && user) {
+      // Verificar si esta pestaña debe cargar datos (solo maestra o si no hay maestra)
+      const shouldLoad = isMasterTabRef.current || !sessionStorage.getItem('master_tab_id')
+      
+      if (shouldLoad) {
         // Usar un pequeño delay para evitar llamadas duplicadas cuando cambian ambos
-        const timer = setTimeout(() => {
+        timer = setTimeout(() => {
           console.log(`[page.tsx] ✅ Pestaña maestra cargando datos (tab: ${tabIdRef.current})`)
           // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
           if (!isLoadingTokensRef.current) {
@@ -639,9 +638,17 @@ function Chat() {
           loadConversations()
           checkIsAdmin()
         }, 100) // 100ms de debounce
-        
-        return () => clearTimeout(timer)
+      } else {
+        console.log(`[page.tsx] ℹ️ Pestaña secundaria, saltando carga de datos (tab: ${tabIdRef.current})`)
       }
+    }
+    
+    // CRÍTICO: Return de limpieza siempre presente (no condicional)
+    return () => {
+      if (timer) {
+        clearTimeout(timer)
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, user])
   
