@@ -2137,11 +2137,11 @@ function Chat() {
             <div className="flex-1 flex flex-col justify-center w-full lg:w-auto">
             <div className="max-w-xl mx-auto lg:mx-0 px-2 sm:px-0">
               {/* Logo y Título */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-4 tracking-tight">
                 CODEX TRADER
               </h1>
               
-              <h2 className="text-lg sm:text-xl lg:text-2xl text-cyan-400 mb-6 font-semibold">
+              <h2 className="text-base sm:text-lg lg:text-xl text-cyan-400 mb-6 font-semibold">
                 Asistente de IA especializado en Trading
               </h2>
               
@@ -3024,7 +3024,7 @@ function Chat() {
                       </button>
                     )}
                     <div className="flex flex-col min-w-0">
-                      <h1 className="text-base sm:text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight whitespace-nowrap">
+                      <h1 className="text-sm sm:text-base font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight whitespace-nowrap">
                         CODEX TRADER
                       </h1>
                       <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-500 truncate max-w-[120px] sm:max-w-none hidden sm:block">
