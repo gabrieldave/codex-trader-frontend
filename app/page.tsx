@@ -1977,34 +1977,73 @@ function Chat() {
   // Deshabilitar pull-to-refresh completamente (ahora tenemos botón de actualizar)
   // CRÍTICO: Este useEffect debe estar ANTES de los returns condicionales para cumplir con las reglas de hooks
   useEffect(() => {
-    // Prevenir pull-to-refresh en móvil
+    let touchStartY = 0
+    let isScrolling = false
+    
+    // Prevenir pull-to-refresh en móvil - SOLO en el body, no en elementos interactivos
     const preventPullToRefresh = (e: TouchEvent) => {
-      // Si el usuario está en la parte superior de la página (scrollY === 0)
-      // y desliza hacia abajo, prevenir el refresh
-      if (window.scrollY === 0) {
+      // NO prevenir si el evento viene de un elemento interactivo (botones, inputs, links)
+      const target = e.target as HTMLElement
+      if (target && (
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.tagName === 'A' ||
+        target.closest('button') ||
+        target.closest('a') ||
+        target.closest('input') ||
+        target.closest('textarea') ||
+        target.closest('[role="button"]') ||
+        target.isContentEditable
+      )) {
+        return // Permitir el evento normal en elementos interactivos
+      }
+      
+      // Solo prevenir si estamos en la parte superior y es un deslizamiento hacia abajo
+      if (window.scrollY === 0 && touchStartY > 0) {
         const touch = e.touches[0]
-        if (touch && touch.clientY > 10) {
+        if (touch && touch.clientY > touchStartY + 10) {
           // El usuario está deslizando hacia abajo desde la parte superior
           e.preventDefault()
         }
       }
     }
     
-    // Agregar listener para prevenir pull-to-refresh
-    const preventOverscroll = (e: TouchEvent) => {
-      // Solo prevenir si estamos en la parte superior
-      if (window.scrollY === 0 && e.touches[0]?.clientY > 10) {
-        e.preventDefault()
+    // Guardar la posición inicial del touch
+    const handleTouchStart = (e: TouchEvent) => {
+      // NO bloquear elementos interactivos
+      const target = e.target as HTMLElement
+      if (target && (
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.tagName === 'A' ||
+        target.closest('button') ||
+        target.closest('a') ||
+        target.closest('input') ||
+        target.closest('textarea') ||
+        target.closest('[role="button"]') ||
+        target.isContentEditable
+      )) {
+        touchStartY = 0
+        isScrolling = false
+        return // Permitir el evento normal en elementos interactivos
       }
+      
+      touchStartY = e.touches[0]?.clientY || 0
+      isScrolling = false
     }
     
-    document.addEventListener('touchmove', preventPullToRefresh, { passive: false })
-    document.addEventListener('touchstart', preventOverscroll, { passive: false })
+    // Solo prevenir en el body/container principal, no en elementos interactivos
+    document.body.addEventListener('touchmove', preventPullToRefresh, { passive: false })
+    document.body.addEventListener('touchstart', handleTouchStart, { passive: true })
     
     // Limpiar listeners al desmontar
     return () => {
-      document.removeEventListener('touchmove', preventPullToRefresh)
-      document.removeEventListener('touchstart', preventOverscroll)
+      document.body.removeEventListener('touchmove', preventPullToRefresh)
+      document.body.removeEventListener('touchstart', handleTouchStart)
     }
   }, [])
   
@@ -2768,9 +2807,9 @@ function Chat() {
     <div 
       className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
       style={{
-        // Deshabilitar pull-to-refresh usando CSS
+        // Deshabilitar pull-to-refresh usando CSS - pero permitir clicks
         overscrollBehaviorY: 'contain', // Previene pull-to-refresh
-        touchAction: 'pan-y', // Solo permite scroll vertical, no pull-to-refresh
+        touchAction: 'pan-y pinch-zoom', // Permite scroll vertical y pinch-zoom, previene pull-to-refresh pero permite clicks
       }}
     >
       <Toaster position="top-center" />
