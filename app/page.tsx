@@ -225,13 +225,6 @@ function Chat() {
       }
     }, 5000) // 5 segundos máximo (reducido para mejor UX)
     
-    // Limpiar timeout al desmontar
-    return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current)
-      }
-    }
-
     // Variable para rastrear si ya enviamos el email de bienvenida
     let welcomeEmailSent = false
     
@@ -383,7 +376,14 @@ function Chat() {
       }
     })
 
-    return () => subscription.unsubscribe()
+    // Limpiar timeout y suscripción al desmontar
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current)
+        loadingTimeoutRef.current = null
+      }
+      subscription.unsubscribe()
+    }
   }, [supabase])
 
   // Manejar mensajes de confirmación de email desde la URL
