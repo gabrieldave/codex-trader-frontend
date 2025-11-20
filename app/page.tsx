@@ -963,28 +963,63 @@ function Chat() {
           console.log('[page.tsx] ℹ️ No se pudo obtener límite mensual (puede no estar disponible)')
         }
       } else if (response.status === 401) {
-        // Si es 401, la sesión expiró - intentar refrescar
+        // Si es 401, la sesión expiró - intentar refrescar SOLO si somos la pestaña maestra
         console.warn('[page.tsx] ⚠️ Token inválido (401), intentando refrescar sesión...')
+        // Solo refrescar si somos la pestaña maestra para evitar conflictos
+        const shouldRefresh = isMasterTabRef.current || !sessionStorage.getItem('master_tab_id')
+        if (!shouldRefresh) {
+          console.log('[page.tsx] ℹ️ Pestaña secundaria, esperando sincronización de sesión desde otra pestaña')
+          setIsLoadingTokens(false)
+          isLoadingTokensRef.current = false
+          return
+        }
         try {
-          const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession()
-          if (refreshError || !newSession) {
-            console.error('[page.tsx] ❌ No se pudo refrescar sesión, limpiando estado')
+          const { data: { session: currentSession } } = await supabase.auth.getSession()
+          // Solo refrescar si tenemos una sesión válida con refresh_token
+          if (currentSession?.refresh_token) {
+            const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession()
+            if (refreshError) {
+              // Si el error es "Invalid Refresh Token" o "Refresh Token Not Found", la sesión expiró
+              if (refreshError.message?.includes('Invalid Refresh Token') || refreshError.message?.includes('Refresh Token Not Found')) {
+                console.warn('[page.tsx] ⚠️ Refresh token no válido, sesión expirada. Limpiando estado.')
+                setUser(null)
+                setAccessToken(null)
+                setTokensRestantes(null)
+              } else {
+                console.error('[page.tsx] ❌ Error al refrescar sesión:', refreshError.message)
+              }
+              setIsLoadingTokens(false)
+              isLoadingTokensRef.current = false
+            } else if (!newSession) {
+              console.error('[page.tsx] ❌ No se pudo refrescar sesión, limpiando estado')
+              setUser(null)
+              setAccessToken(null)
+              setTokensRestantes(null)
+              setIsLoadingTokens(false)
+              isLoadingTokensRef.current = false
+            } else {
+              console.log('[page.tsx] ✅ Sesión refrescada, actualizando token')
+              setAccessToken(newSession.access_token)
+              setIsLoadingTokens(false)
+              isLoadingTokensRef.current = false
+            }
+          } else {
+            // No hay refresh_token, la sesión expiró completamente
+            console.warn('[page.tsx] ⚠️ No hay refresh_token disponible, sesión expirada')
             setUser(null)
             setAccessToken(null)
             setTokensRestantes(null)
-            // IMPORTANTE: Resetear el estado de loading
-            setIsLoadingTokens(false)
-            isLoadingTokensRef.current = false
-          } else {
-            console.log('[page.tsx] ✅ Sesión refrescada, actualizando token')
-            setAccessToken(newSession.access_token)
-            // No reintentar automáticamente para evitar loops
-            // IMPORTANTE: Resetear el estado de loading
             setIsLoadingTokens(false)
             isLoadingTokensRef.current = false
           }
         } catch (refreshErr) {
           console.error('[page.tsx] ❌ Error al refrescar sesión:', refreshErr)
+          // Si el error indica que el refresh token no existe, limpiar estado silenciosamente
+          const errorMsg = refreshErr instanceof Error ? refreshErr.message : String(refreshErr)
+          if (!errorMsg.includes('Invalid Refresh Token') && !errorMsg.includes('Refresh Token Not Found')) {
+            // Solo loggear errores que no sean "token no encontrado"
+            console.error('[page.tsx] ❌ Error inesperado al refrescar sesión')
+          }
           setUser(null)
           setAccessToken(null)
           setTokensRestantes(null)
@@ -1218,22 +1253,51 @@ function Chat() {
           setConversations([])
         }
       } else if (response.status === 401) {
-        // Si es 401, la sesión expiró - intentar refrescar
+        // Si es 401, la sesión expiró - intentar refrescar SOLO si somos la pestaña maestra
         console.warn('[page.tsx] ⚠️ Token inválido (401) en loadConversations, intentando refrescar sesión...')
+        // Solo refrescar si somos la pestaña maestra para evitar conflictos
+        const shouldRefresh = isMasterTabRef.current || !sessionStorage.getItem('master_tab_id')
+        if (!shouldRefresh) {
+          console.log('[page.tsx] ℹ️ Pestaña secundaria en loadConversations, esperando sincronización')
+          return
+        }
         try {
-          const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession()
-          if (refreshError || !newSession) {
-            console.error('[page.tsx] ❌ No se pudo refrescar sesión, limpiando estado')
+          const { data: { session: currentSession } } = await supabase.auth.getSession()
+          // Solo refrescar si tenemos una sesión válida con refresh_token
+          if (currentSession?.refresh_token) {
+            const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession()
+            if (refreshError) {
+              // Si el error es "Invalid Refresh Token" o "Refresh Token Not Found", la sesión expiró
+              if (refreshError.message?.includes('Invalid Refresh Token') || refreshError.message?.includes('Refresh Token Not Found')) {
+                console.warn('[page.tsx] ⚠️ Refresh token no válido en loadConversations, sesión expirada.')
+                setUser(null)
+                setAccessToken(null)
+                setConversations([])
+              } else {
+                console.error('[page.tsx] ❌ Error al refrescar sesión en loadConversations:', refreshError.message)
+              }
+            } else if (!newSession) {
+              console.error('[page.tsx] ❌ No se pudo refrescar sesión en loadConversations')
+              setUser(null)
+              setAccessToken(null)
+              setConversations([])
+            } else {
+              console.log('[page.tsx] ✅ Sesión refrescada en loadConversations')
+              setAccessToken(newSession.access_token)
+            }
+          } else {
+            // No hay refresh_token, la sesión expiró completamente
+            console.warn('[page.tsx] ⚠️ No hay refresh_token en loadConversations, sesión expirada')
             setUser(null)
             setAccessToken(null)
             setConversations([])
-          } else {
-            console.log('[page.tsx] ✅ Sesión refrescada en loadConversations')
-            setAccessToken(newSession.access_token)
-            // No reintentar automáticamente para evitar loops
           }
         } catch (refreshErr) {
-          console.error('[page.tsx] ❌ Error al refrescar sesión:', refreshErr)
+          // Si el error indica que el refresh token no existe, limpiar estado silenciosamente
+          const errorMsg = refreshErr instanceof Error ? refreshErr.message : String(refreshErr)
+          if (!errorMsg.includes('Invalid Refresh Token') && !errorMsg.includes('Refresh Token Not Found')) {
+            console.error('[page.tsx] ❌ Error inesperado al refrescar sesión en loadConversations:', refreshErr)
+          }
           setUser(null)
           setAccessToken(null)
           setConversations([])
