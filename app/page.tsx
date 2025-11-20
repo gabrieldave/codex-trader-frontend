@@ -63,6 +63,15 @@ function Chat() {
   // Ref para rastrear si esta pestaña es la "maestra" (primera en cargar)
   const isMasterTabRef = useRef<boolean>(false)
   
+  // Ref para timeout de seguridad del loading inicial
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Ref para AbortController de loadTokens (para cancelar llamadas anteriores)
+  const loadTokensAbortControllerRef = useRef<AbortController | null>(null)
+  
+  // Ref para rastrear si el usuario está en fase de registro inicial
+  const isInitialRegistrationRef = useRef<boolean>(false)
+  
   // Estados para conversaciones
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [conversations, setConversations] = useState<Array<{id: string, title: string, created_at: string, updated_at: string}>>([])
