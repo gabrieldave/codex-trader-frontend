@@ -1940,8 +1940,11 @@ function Chat() {
 
   // TIMEOUT DE EMERGENCIA: Si loading está activo por más de 8 segundos, forzarlo a false
   useEffect(() => {
+    // CRÍTICO: El return de limpieza debe estar siempre presente, no condicionalmente
+    let emergencyTimeout: NodeJS.Timeout | null = null
+    
     if (loading && !initialLoadingResolvedRef.current) {
-      const emergencyTimeout = setTimeout(() => {
+      emergencyTimeout = setTimeout(() => {
         console.error('[page.tsx] 🚨 EMERGENCIA: Loading activo por más de 8 segundos, forzando resolución')
         setLoading(false)
         initialLoadingResolvedRef.current = true
@@ -1951,10 +1954,49 @@ function Chat() {
           loadingTimeoutRef.current = null
         }
       }, 8000) // 8 segundos de emergencia
-      
-      return () => clearTimeout(emergencyTimeout)
+    }
+    
+    // CRÍTICO: Return de limpieza siempre presente (no condicional)
+    return () => {
+      if (emergencyTimeout) {
+        clearTimeout(emergencyTimeout)
+      }
     }
   }, [loading])
+
+  // Deshabilitar pull-to-refresh completamente (ahora tenemos botón de actualizar)
+  // CRÍTICO: Este useEffect debe estar ANTES de los returns condicionales para cumplir con las reglas de hooks
+  useEffect(() => {
+    // Prevenir pull-to-refresh en móvil
+    const preventPullToRefresh = (e: TouchEvent) => {
+      // Si el usuario está en la parte superior de la página (scrollY === 0)
+      // y desliza hacia abajo, prevenir el refresh
+      if (window.scrollY === 0) {
+        const touch = e.touches[0]
+        if (touch && touch.clientY > 10) {
+          // El usuario está deslizando hacia abajo desde la parte superior
+          e.preventDefault()
+        }
+      }
+    }
+    
+    // Agregar listener para prevenir pull-to-refresh
+    const preventOverscroll = (e: TouchEvent) => {
+      // Solo prevenir si estamos en la parte superior
+      if (window.scrollY === 0 && e.touches[0]?.clientY > 10) {
+        e.preventDefault()
+      }
+    }
+    
+    document.addEventListener('touchmove', preventPullToRefresh, { passive: false })
+    document.addEventListener('touchstart', preventOverscroll, { passive: false })
+    
+    // Limpiar listeners al desmontar
+    return () => {
+      document.removeEventListener('touchmove', preventPullToRefresh)
+      document.removeEventListener('touchstart', preventOverscroll)
+    }
+  }, [])
   
   if (loading) {
     return (
@@ -2711,40 +2753,6 @@ function Chat() {
       </div>
     )
   }
-
-  // Deshabilitar pull-to-refresh completamente (ahora tenemos botón de actualizar)
-  useEffect(() => {
-    // Prevenir pull-to-refresh en móvil
-    const preventPullToRefresh = (e: TouchEvent) => {
-      // Si el usuario está en la parte superior de la página (scrollY === 0)
-      // y desliza hacia abajo, prevenir el refresh
-      if (window.scrollY === 0) {
-        const touch = e.touches[0]
-        if (touch && touch.clientY > 10) {
-          // El usuario está deslizando hacia abajo desde la parte superior
-          e.preventDefault()
-        }
-      }
-    }
-    
-    // Agregar listener para prevenir pull-to-refresh
-    document.addEventListener('touchmove', preventPullToRefresh, { passive: false })
-    
-    // También prevenir el comportamiento de overscroll
-    const preventOverscroll = (e: TouchEvent) => {
-      if (window.scrollY === 0 && e.touches[0].clientY > 10) {
-        e.preventDefault()
-      }
-    }
-    
-    document.addEventListener('touchstart', preventOverscroll, { passive: false })
-    
-    // Limpiar listeners al desmontar
-    return () => {
-      document.removeEventListener('touchmove', preventPullToRefresh)
-      document.removeEventListener('touchstart', preventOverscroll)
-    }
-  }, [])
   
   return (
     <div 
