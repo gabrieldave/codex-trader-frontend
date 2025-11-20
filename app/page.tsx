@@ -1711,14 +1711,18 @@ function Chat() {
       })
       
       if (error) {
+        console.error('[page.tsx] ❌ Error en login:', error)
         toast.error(`Error al iniciar sesión: ${error.message}`)
+        setIsAuthLoading(false)
         return
       }
       
       if (data?.session) {
+        console.log('[page.tsx] ✅ Login exitoso:', data.session.user.email)
         toast.success(`¡Bienvenido, ${data.session.user.email}!`)
         setUser(data.session.user)
         setAccessToken(data.session.access_token)
+        setIsAuthLoading(false)
         // Limpiar formulario
         setEmail('')
         setName('')
@@ -1742,9 +1746,15 @@ function Chat() {
         if (selectedPlan) {
           router.push(`/planes?selected=${selectedPlan}`)
         }
+      } else {
+        console.warn('[page.tsx] ⚠️ Login exitoso pero sin sesión')
+        toast.error('Error: No se pudo obtener la sesión')
+        setIsAuthLoading(false)
       }
     } catch (err) {
+      console.error('[page.tsx] ❌ Error inesperado en login:', err)
       toast.error(`Error inesperado: ${err instanceof Error ? err.message : 'Error desconocido'}`)
+      setIsAuthLoading(false)
     } finally {
       setIsAuthLoading(false)
     }
