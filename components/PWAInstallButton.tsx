@@ -138,7 +138,7 @@ export default function PWAInstallButton() {
   return (
     <button
       onClick={handleInstallClick}
-      className="px-1.5 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-1 sm:gap-2"
+      className="px-1.5 sm:px-2.5 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg transition-all transform hover:scale-105 shadow-sm hover:shadow-md flex items-center gap-0.5 sm:gap-1.5 flex-shrink-0"
       title="Instalar aplicación"
     >
       <span className="hidden sm:inline">📱 Instalar App</span>

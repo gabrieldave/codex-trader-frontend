@@ -2955,7 +2955,7 @@ function Chat() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
+                  <div className="flex items-center gap-0.5 sm:gap-2 flex-shrink-0 overflow-x-auto flex-nowrap scrollbar-hide">
                     {/* Contador de tokens con barra de progreso */}
                     {(() => {
                       const tokenPercentage = calculateTokenPercentage(tokensRestantes, tokensMonthlyLimit)
@@ -2996,30 +2996,29 @@ function Chat() {
                       const colors = colorClasses[statusColor as keyof typeof colorClasses] || colorClasses.blue
                       
                       return (
-                        <div className={`flex flex-col gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-gradient-to-r ${colors.bg} rounded-lg border-2 ${colors.border} shadow-sm min-w-[80px] sm:min-w-[120px]`}>
+                        <div className={`flex flex-col gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 bg-gradient-to-r ${colors.bg} rounded-lg border-2 ${colors.border} shadow-sm min-w-[70px] sm:min-w-[100px] flex-shrink-0`}>
                           {isLoadingTokens ? (
                             <div className="flex items-center justify-center">
-                              <div className={`animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 ${colors.icon} border-t-transparent`}></div>
+                              <div className={`animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-2 ${colors.icon} border-t-transparent`}></div>
                             </div>
                           ) : (
                             <>
-                              <div className="flex items-center gap-1 sm:gap-1.5">
-                                <svg className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${colors.icon} flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                              <div className="flex items-center gap-0.5 sm:gap-1">
+                                <svg className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${colors.icon} flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span className={`text-[10px] sm:text-sm font-bold ${colors.text}`}>
+                                <span className={`text-[9px] sm:text-xs font-bold ${colors.text}`}>
                                   {formatTokensCompact(tokensRestantes)}
                                 </span>
                                 {tokensRestantes !== null && (
-                                  <span className="text-[8px] text-gray-500 dark:text-gray-500 font-medium ml-1">
+                                  <span className="text-[7px] sm:text-[8px] text-gray-500 dark:text-gray-500 font-medium hidden sm:inline">
                                     ({tokensRestantes.toLocaleString()})
                                   </span>
                                 )}
-                                <span className="text-[8px] sm:text-[10px] text-gray-600 dark:text-gray-400 font-medium hidden sm:inline">Créditos</span>
                               </div>
                               {/* Barra de progreso visual */}
                               {tokenPercentage !== null && (
-                                <div className="w-full h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <div className="w-full h-1 sm:h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                   <div 
                                     className={`h-full ${colors.bar} transition-all duration-300 ease-out`}
                                     style={{ width: `${tokenPercentage}%` }}
@@ -3027,7 +3026,7 @@ function Chat() {
                                 </div>
                               )}
                               {tokenPercentage === null && tokensRestantes !== null && (
-                                <div className="w-full h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full" />
+                                <div className="w-full h-1 sm:h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full" />
                               )}
                             </>
                           )}
@@ -3049,7 +3048,7 @@ function Chat() {
                         }
                       }}
                       disabled={isLoadingTokens || isLoadingConversations}
-                      className={`px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-1 sm:gap-2 ${
+                      className={`px-1.5 sm:px-2.5 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold rounded-lg transition-all transform hover:scale-105 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-0.5 sm:gap-1.5 flex-shrink-0 ${
                         isLoadingTokens || isLoadingConversations
                           ? 'bg-gray-400 text-gray-600 cursor-wait'
                           : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white'
@@ -3058,16 +3057,16 @@ function Chat() {
                     >
                       {(isLoadingTokens || isLoadingConversations) ? (
                         <>
-                          <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent"></div>
-                          <span className="hidden sm:inline">Actualizando...</span>
+                          <div className="animate-spin rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 border-2 border-white border-t-transparent"></div>
+                          <span className="hidden sm:inline text-xs">Actualizando...</span>
                         </>
                       ) : (
                         <>
-                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                           </svg>
-                          <span className="hidden sm:inline">Actualizar</span>
-                          <span className="sm:hidden">↻</span>
+                          <span className="hidden sm:inline text-xs">Actualizar</span>
+                          <span className="sm:hidden text-[10px]">↻</span>
                         </>
                       )}
                     </button>
@@ -3076,16 +3075,17 @@ function Chat() {
                       <button
                         onClick={handleResetTokens}
                         disabled={isLoadingTokens}
-                        className="px-3 py-2 text-xs font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors border border-orange-200 dark:border-orange-800"
+                        className="px-1.5 sm:px-2 py-1 sm:py-1.5 text-[9px] sm:text-xs font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors border border-orange-200 dark:border-orange-800 flex-shrink-0"
                         title="Resetear tokens a 20,000 (emergencia)"
                       >
-                        Resetear
+                        <span className="hidden sm:inline">Resetear</span>
+                        <span className="sm:hidden">↺</span>
                       </button>
                     )}
                     {isAdmin && (
                       <button
                         onClick={() => router.push('/admin/metrics')}
-                        className="px-1.5 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-md hover:shadow-lg"
+                        className="px-1.5 sm:px-2.5 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-sm hover:shadow-md flex-shrink-0"
                         title="Dashboard de administración"
                       >
                         <span className="hidden sm:inline">📊 Admin</span>
@@ -3095,7 +3095,7 @@ function Chat() {
                     <button
                       onClick={() => router.push('/planes')}
                       disabled={isLoadingTokens || isLoading}
-                      className="px-1.5 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 transition-all transform hover:scale-105 shadow-md hover:shadow-lg disabled:transform-none disabled:cursor-not-allowed"
+                      className="px-1.5 sm:px-2.5 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 transition-all transform hover:scale-105 shadow-sm hover:shadow-md disabled:transform-none disabled:cursor-not-allowed flex-shrink-0"
                       title="Ver planes y suscripciones"
                     >
                       <span className="hidden sm:inline">Recargar</span>
@@ -3104,7 +3104,7 @@ function Chat() {
                     <PWAInstallButton />
                     <button
                       onClick={handleLogout}
-                      className="px-1.5 sm:px-4 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      className="px-1.5 sm:px-2.5 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
                       title="Cerrar sesión"
                     >
                       <span className="hidden sm:inline">Salir</span>
