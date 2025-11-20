@@ -1419,9 +1419,18 @@ function Chat() {
           setCurrentConversationId(null)
           setMessages([])
         }
-        // Recargar lista de conversaciones
-        await loadConversations()
+        
+        // Actualizar inmediatamente el estado local para mejor UX
+        setConversations(prev => prev.filter(conv => conv.id !== conversationId))
         toast.success('Conversación eliminada')
+        
+        // Recargar lista de conversaciones del servidor para sincronización
+        // Forzar actualización sin el debounce de protección
+        isLoadingConversationsRef.current = false
+        lastConversationsCallRef.current = 0 // Resetear el debounce
+        await loadConversations()
+      } else {
+        toast.error('Error al eliminar conversación')
       }
     } catch (error) {
       console.error('Error al eliminar conversación:', error)
@@ -1974,10 +1983,12 @@ function Chat() {
     }
   }, [loading])
 
-  // Deshabilitar pull-to-refresh completamente (ahora tenemos botón de actualizar)
+  // Pull-to-refresh reactivado - permite refrescar datos pero no bloquea clicks
   // CRÍTICO: Este useEffect debe estar ANTES de los returns condicionales para cumplir con las reglas de hooks
   useEffect(() => {
     let touchStartY = 0
+    let touchStartTime = 0
+    let isPullToRefresh = false
     
     // Función para verificar si un elemento es interactivo
     const isInteractiveElement = (target: HTMLElement | null): boolean => {
@@ -1998,19 +2009,25 @@ function Chat() {
       )
     }
     
-    // Prevenir pull-to-refresh en móvil - SOLO en el body, no en elementos interactivos
-    const preventPullToRefresh = (e: TouchEvent) => {
-      // NO prevenir si el evento viene de un elemento interactivo
+    // Manejar pull-to-refresh - solo en la parte superior y sin bloquear clicks
+    const handleTouchMove = (e: TouchEvent) => {
+      // NO bloquear elementos interactivos
       if (isInteractiveElement(e.target as HTMLElement)) {
+        isPullToRefresh = false
         return // Permitir el evento normal en elementos interactivos
       }
       
-      // Solo prevenir si estamos en la parte superior y es un deslizamiento hacia abajo
+      // Solo permitir pull-to-refresh si estamos en la parte superior
       if (window.scrollY === 0 && touchStartY > 0) {
         const touch = e.touches[0]
-        if (touch && touch.clientY > touchStartY + 10) {
-          // El usuario está deslizando hacia abajo desde la parte superior (pull-to-refresh)
-          e.preventDefault()
+        if (touch) {
+          const deltaY = touch.clientY - touchStartY
+          // Si el usuario desliza hacia abajo más de 30px, es pull-to-refresh
+          if (deltaY > 30) {
+            isPullToRefresh = true
+            // NO prevenir el evento - permitir que el navegador maneje el pull-to-refresh
+            // Esto permite que el usuario refresque los datos
+          }
         }
       }
     }
@@ -2019,22 +2036,53 @@ function Chat() {
     const handleTouchStart = (e: TouchEvent) => {
       // NO bloquear elementos interactivos - permitir clicks normales
       if (isInteractiveElement(e.target as HTMLElement)) {
-        touchStartY = 0 // Resetear para no prevenir
+        touchStartY = 0
+        isPullToRefresh = false
         return // Permitir el evento normal en elementos interactivos
       }
       
-      // Solo guardar posición si no es un elemento interactivo
-      touchStartY = e.touches[0]?.clientY || 0
+      // Solo guardar posición si estamos en la parte superior
+      if (window.scrollY === 0) {
+        touchStartY = e.touches[0]?.clientY || 0
+        touchStartTime = Date.now()
+        isPullToRefresh = false
+      } else {
+        touchStartY = 0
+      }
     }
     
-    // Agregar listeners al body - usar passive: true en touchstart para mejor performance
-    document.body.addEventListener('touchmove', preventPullToRefresh, { passive: false })
+    // Manejar el fin del touch - detectar si fue pull-to-refresh
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (isPullToRefresh && window.scrollY === 0) {
+        // El usuario hizo pull-to-refresh - recargar datos
+        console.log('[page.tsx] 🔄 Pull-to-refresh detectado, recargando datos...')
+        if (!isLoadingTokensRef.current && !isLoadingConversationsRef.current) {
+          Promise.all([
+            loadTokens(),
+            loadConversations()
+          ]).then(() => {
+            toast.success('Datos actualizados', { duration: 1500 })
+          }).catch((error) => {
+            console.error('[page.tsx] ❌ Error al recargar datos:', error)
+          })
+        }
+      }
+      
+      // Resetear estado
+      touchStartY = 0
+      isPullToRefresh = false
+    }
+    
+    // Agregar listeners - usar passive para mejor performance
     document.body.addEventListener('touchstart', handleTouchStart, { passive: true })
+    document.body.addEventListener('touchmove', handleTouchMove, { passive: true })
+    document.body.addEventListener('touchend', handleTouchEnd, { passive: true })
     
     // Limpiar listeners al desmontar
     return () => {
-      document.body.removeEventListener('touchmove', preventPullToRefresh)
       document.body.removeEventListener('touchstart', handleTouchStart)
+      document.body.removeEventListener('touchmove', handleTouchMove)
+      document.body.removeEventListener('touchend', handleTouchEnd)
     }
   }, [])
   
@@ -2798,9 +2846,9 @@ function Chat() {
     <div 
       className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
       style={{
-        // Deshabilitar pull-to-refresh usando CSS - pero permitir clicks
-        overscrollBehaviorY: 'contain', // Previene pull-to-refresh
-        touchAction: 'pan-y pinch-zoom', // Permite scroll vertical y pinch-zoom, previene pull-to-refresh pero permite clicks
+        // Permitir pull-to-refresh usando CSS - pero manteniendo scroll suave
+        overscrollBehaviorY: 'auto', // Permite pull-to-refresh nativo del navegador
+        touchAction: 'pan-y pinch-zoom', // Permite scroll vertical, pinch-zoom y pull-to-refresh
       }}
     >
       <Toaster position="top-center" />
