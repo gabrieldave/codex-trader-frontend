@@ -3023,8 +3023,8 @@ function Chat() {
                         </svg>
                       </button>
                     )}
-                    <div className="flex flex-col min-w-0">
-                      <h1 className="text-sm sm:text-base font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight whitespace-nowrap">
+                    <div className="flex flex-col min-w-0 flex-shrink-0">
+                      <h1 className="text-sm sm:text-base font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight">
                         CODEX TRADER
                       </h1>
                       <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-500 truncate max-w-[120px] sm:max-w-none hidden sm:block">
