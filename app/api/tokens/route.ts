@@ -44,6 +44,10 @@ export async function GET(req: Request) {
     }
 
     const data = await response.json()
+    // 🚨 DEBUG: Logging de la respuesta del backend
+    console.log('[API /tokens] DEBUG Respuesta del backend:', data)
+    console.log('[API /tokens] DEBUG tokens_restantes:', data.tokens_restantes)
+    console.log('[API /tokens] DEBUG Tipo de tokens_restantes:', typeof data.tokens_restantes)
     return NextResponse.json(data)
   } catch (error) {
     console.error('Error:', error)

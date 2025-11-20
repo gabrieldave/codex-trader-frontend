@@ -175,11 +175,16 @@ function Chat() {
           console.log('✅ Sesión encontrada al cargar:', session.user.email)
           setUser(session.user)
           setAccessToken(session.access_token)
-          // Cargar tokens y conversaciones si hay sesión (con pequeño delay para evitar duplicados)
+          // Cargar tokens y conversaciones inmediatamente si hay sesión
+          // Usar un pequeño delay solo para evitar conflictos con otros efectos
           setTimeout(() => {
-            loadTokens()
+            // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
+            if (!isLoadingTokensRef.current) {
+              console.log('[page.tsx] 🔄 Cargando tokens iniciales...')
+              loadTokens()
+            }
             loadConversations()
-          }, 200)
+          }, 100) // Reducido a 100ms para carga más rápida
         } else {
           console.log('⚠️ No hay sesión al cargar la página')
         }
@@ -194,6 +199,29 @@ function Chat() {
       }
     }
     checkUser()
+    
+    // TIMEOUT DE SEGURIDAD: Forzar resolución del loading después de 5 segundos
+    // Esto previene que la app quede bloqueada durante el registro inicial
+    // CRÍTICO: La app NO debe quedar bloqueada NUNCA
+    loadingTimeoutRef.current = setTimeout(() => {
+      if (!initialLoadingResolvedRef.current || loading) {
+        console.warn('[page.tsx] ⚠️ TIMEOUT DE SEGURIDAD: Forzando resolución del loading después de 5 segundos')
+        setLoading(false)
+        initialLoadingResolvedRef.current = true
+        // Limpiar el timeout
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current)
+          loadingTimeoutRef.current = null
+        }
+      }
+    }, 5000) // 5 segundos máximo (reducido para mejor UX)
+    
+    // Limpiar timeout al desmontar
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current)
+      }
+    }
 
     // Variable para rastrear si ya enviamos el email de bienvenida
     let welcomeEmailSent = false
@@ -205,6 +233,11 @@ function Chat() {
       if (!initialLoadingResolvedRef.current) {
         setLoading(false)
         initialLoadingResolvedRef.current = true
+        // Limpiar timeout de seguridad si se resolvió antes
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current)
+          loadingTimeoutRef.current = null
+        }
         console.log(`[page.tsx] ✅ Loading resuelto desde onAuthStateChange (tab: ${tabIdRef.current})`)
       }
       
@@ -218,12 +251,16 @@ function Chat() {
         
         if (shouldLoadData) {
           console.log(`[page.tsx] ✅ Pestaña maestra cargando datos (tab: ${tabIdRef.current})`)
-          // Cargar tokens y conversaciones cuando hay sesión (con delay para evitar duplicados)
+          // Cargar tokens y conversaciones cuando hay sesión
           // El useEffect de accessToken/user también los cargará, así que esto es redundante pero seguro
           setTimeout(() => {
-            loadTokens()
+            // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
+            if (!isLoadingTokensRef.current) {
+              console.log('[page.tsx] 🔄 Cargando tokens desde onAuthStateChange...')
+              loadTokens()
+            }
             loadConversations()
-          }, 300)
+          }, 150) // Reducido a 150ms para carga más rápida
         } else {
           console.log(`[page.tsx] ℹ️ Pestaña secundaria, esperando sincronización (tab: ${tabIdRef.current})`)
           // Las pestañas secundarias esperan a que la maestra cargue los datos
@@ -254,6 +291,12 @@ function Chat() {
         if (isNewRegistration && session.access_token && !welcomeEmailSent) {
           console.log('✅ Usuario confirmado detectado en onAuthStateChange, notificando al backend para enviar email de bienvenida')
           welcomeEmailSent = true // Marcar como enviado para evitar duplicados
+          // Marcar como registro inicial para aplicar protecciones especiales
+          isInitialRegistrationRef.current = true
+          // Resetear después de 15 segundos
+          setTimeout(() => {
+            isInitialRegistrationRef.current = false
+          }, 15000)
           
           try {
             // Intentar recuperar contraseña de sessionStorage si está disponible
@@ -271,6 +314,31 @@ function Chat() {
               }
             }
             
+            // Verificar que el token sea válido antes de llamar
+            if (!session.access_token) {
+              console.warn('⚠️ No hay access_token, esperando a que se establezca la sesión...')
+              // Reintentar después de un delay
+              setTimeout(async () => {
+                const { data: { session: retrySession } } = await supabase.auth.getSession()
+                if (retrySession?.access_token) {
+                  try {
+                    console.log(`   Reintentando /users/notify-registration...`)
+                    const response = await authorizedApiCall('/users/notify-registration', {
+                      method: 'POST',
+                      body: JSON.stringify({ password: userPassword })
+                    })
+                    if (response.ok) {
+                      const responseData = await response.json()
+                      console.log('✅ Email de bienvenida solicitado correctamente (reintento)', responseData)
+                    }
+                  } catch (retryErr) {
+                    console.error('❌ Error al notificar registro (reintento):', retryErr)
+                  }
+                }
+              }, 2000)
+              return
+            }
+            
             console.log(`   Llamando a /users/notify-registration...`)
             const response = await authorizedApiCall('/users/notify-registration', {
               method: 'POST',
@@ -285,6 +353,7 @@ function Chat() {
             } else {
               const errorText = await response.text()
               console.error('❌ Error al notificar registro:', response.status, errorText)
+              // No reintentar automáticamente - puede causar loops
             }
           } catch (err) {
             console.error('❌ Error al notificar registro desde onAuthStateChange:', err)
@@ -376,37 +445,16 @@ function Chat() {
       setLoading(false)
       if (!initialLoadingResolvedRef.current) {
         initialLoadingResolvedRef.current = true
+        // Limpiar timeout de seguridad si se resolvió antes
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current)
+          loadingTimeoutRef.current = null
+        }
       }
       
-      // OPCIÓN 2: Llamar al endpoint INMEDIATAMENTE sin esperar sesión
-      // Esto asegura que el email se envíe incluso si hay problemas con la sesión
-      console.log('[PAGE] 📧 Llamando al endpoint inmediatamente (sin esperar sesión)...')
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.codextrader.tech'
-      const notifyUrl = `${backendUrl}/users/notify-registration`
-      
-      // Intentar llamar al endpoint con el code si está disponible
-      fetch(notifyUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          token_hash: code || undefined
-        })
-      })
-      .then(async response => {
-        console.log('[PAGE] 📧 Response status (llamada inmediata):', response.status)
-        if (response.ok) {
-          const responseData = await response.json()
-          console.log('[PAGE] ✅ Email de bienvenida solicitado correctamente (llamada inmediata):', responseData)
-        } else {
-          const errorText = await response.text()
-          console.error('[PAGE] ❌ Error en llamada inmediata:', response.status, errorText)
-        }
-      })
-      .catch(fetchError => {
-        console.error('[PAGE] ❌ Error de red en llamada inmediata:', fetchError)
-      })
+      // NO llamar inmediatamente sin sesión - esto causa errores 401
+      // Esperar a que se establezca la sesión antes de llamar al endpoint
+      console.log('[PAGE] 📧 Esperando a que se establezca la sesión antes de notificar registro...')
       
       // Intentar obtener la sesión después de un delay para dar tiempo a que se establezca
       setTimeout(async () => {
@@ -428,7 +476,10 @@ function Chat() {
             
             // IMPORTANTE: Cargar tokens después de establecer sesión (con delay para evitar duplicados)
             setTimeout(() => {
-              loadTokens()
+              // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
+              if (!isLoadingTokensRef.current) {
+                loadTokens()
+              }
               loadConversations()
             }, 400)
             
@@ -447,6 +498,13 @@ function Chat() {
                 } catch (e) {
                   console.warn('[PAGE] ⚠️ No se pudo recuperar contraseña de sessionStorage:', e)
                 }
+              }
+              
+              // Verificar que el token sea válido antes de llamar
+              if (!sessionData.session.access_token) {
+                console.warn('[PAGE] ⚠️ No hay access_token, saltando notificación de registro')
+                toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
+                return
               }
               
               const response = await authorizedApiCall('/users/notify-registration', {
@@ -510,7 +568,10 @@ function Chat() {
       if (accessToken && user) {
         // Recargar tokens para reflejar la nueva suscripción (con delay para evitar duplicados)
         setTimeout(() => {
-          loadTokens()
+          // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
+          if (!isLoadingTokensRef.current) {
+            loadTokens()
+          }
           loadConversations()
         }, 500)
       }
@@ -562,7 +623,10 @@ function Chat() {
         // Usar un pequeño delay para evitar llamadas duplicadas cuando cambian ambos
         const timer = setTimeout(() => {
           console.log(`[page.tsx] ✅ Pestaña maestra cargando datos (tab: ${tabIdRef.current})`)
-          loadTokens()
+          // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
+          if (!isLoadingTokensRef.current) {
+            loadTokens()
+          }
           loadConversations()
           checkIsAdmin()
         }, 100) // 100ms de debounce
@@ -602,7 +666,10 @@ function Chat() {
             // Recargar datos ahora que somos maestra
             if (accessToken && user) {
               setTimeout(() => {
-                loadTokens()
+                // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
+                if (!isLoadingTokensRef.current) {
+                  loadTokens()
+                }
                 loadConversations()
               }, 100)
             }
@@ -617,7 +684,10 @@ function Chat() {
               // Recargar datos ahora que somos maestra
               if (accessToken && user) {
                 setTimeout(() => {
-                  loadTokens()
+                  // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
+                  if (!isLoadingTokensRef.current) {
+                    loadTokens()
+                  }
                   loadConversations()
                 }, 100)
               }
@@ -739,9 +809,24 @@ function Chat() {
 
   // Función para cargar tokens restantes
   const loadTokens = async () => {
-    if (!accessToken) {
-      console.log(`[page.tsx] ⚠️ loadTokens: No hay accessToken, saltando llamada (tab: ${tabIdRef.current})`)
-      return
+    // Verificar accessToken, pero también intentar obtenerlo de la sesión si no está disponible
+    let tokenToUse = accessToken
+    if (!tokenToUse) {
+      console.log(`[page.tsx] ⚠️ loadTokens: No hay accessToken en estado, intentando obtener de sesión...`)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.access_token) {
+          tokenToUse = session.access_token
+          setAccessToken(tokenToUse)
+          console.log(`[page.tsx] ✅ Token obtenido de sesión`)
+        } else {
+          console.log(`[page.tsx] ⚠️ loadTokens: No hay accessToken ni sesión, saltando llamada (tab: ${tabIdRef.current})`)
+          return
+        }
+      } catch (error) {
+        console.log(`[page.tsx] ⚠️ loadTokens: Error al obtener sesión, saltando llamada (tab: ${tabIdRef.current})`)
+        return
+      }
     }
     
     // Solo la pestaña maestra debe hacer llamadas API para evitar duplicados entre pestañas
@@ -752,12 +837,36 @@ function Chat() {
       return
     }
     
-    // Protección contra llamadas duplicadas: solo permitir una llamada cada 500ms
+    // Protección contra llamadas duplicadas: solo permitir una llamada a la vez
     const now = Date.now()
-    if (isLoadingTokensRef.current || (now - lastTokensCallRef.current < 500)) {
-      console.log(`[page.tsx] ⚠️ loadTokens: Llamada duplicada ignorada (tab: ${tabIdRef.current})`)
+    
+    // CRÍTICO: Si hay una llamada en progreso, cancelarla primero antes de iniciar una nueva
+    // Esto previene bloqueos durante pull-to-refresh en registro inicial
+    if (isLoadingTokensRef.current && loadTokensAbortControllerRef.current) {
+      console.log(`[page.tsx] ⚠️ loadTokens: Cancelando llamada anterior antes de iniciar nueva (tab: ${tabIdRef.current})`)
+      loadTokensAbortControllerRef.current.abort()
+      loadTokensAbortControllerRef.current = null
+    }
+    
+    if (isLoadingTokensRef.current) {
+      console.log(`[page.tsx] ⚠️ loadTokens: Ya hay una llamada en progreso, ignorando (tab: ${tabIdRef.current})`)
       return
     }
+    
+    // Solo bloquear si la última llamada fue hace menos del tiempo de debounce
+    // Durante registro inicial (primeros 15 segundos), usar debounce más largo para evitar bloqueos
+    const timeSinceLastCall = now - lastTokensCallRef.current
+    const isRecentRegistration = isInitialRegistrationRef.current || (user && user.created_at && (Date.now() - new Date(user.created_at).getTime() < 15000))
+    const debounceTime = isRecentRegistration ? 1000 : 200 // 1 segundo durante registro inicial, 200ms normal
+    
+    if (timeSinceLastCall < debounceTime) {
+      console.log(`[page.tsx] ⚠️ loadTokens: Llamada muy reciente (hace ${timeSinceLastCall}ms, debounce: ${debounceTime}ms), ignorando (tab: ${tabIdRef.current})`)
+      return
+    }
+    
+    // Crear nuevo AbortController para esta llamada
+    loadTokensAbortControllerRef.current = new AbortController()
+    const signal = loadTokensAbortControllerRef.current.signal
     
     isLoadingTokensRef.current = true
     lastTokensCallRef.current = now
@@ -772,29 +881,61 @@ function Chat() {
         setUser(null)
         setAccessToken(null)
         setTokensRestantes(null)
+        // IMPORTANTE: Resetear el estado de loading incluso si hay error
+        setIsLoadingTokens(false)
+        isLoadingTokensRef.current = false
         return
       }
       
-      // Usar el token de la sesión actualizada
-      const currentToken = session.access_token
+      // Usar el token de la sesión actualizada (o el que ya teníamos)
+      const currentToken = session.access_token || tokenToUse
       
+      // Actualizar el accessToken si cambió
+      if (session.access_token && session.access_token !== accessToken) {
+        setAccessToken(session.access_token)
+      }
+      
+      // IMPORTANTE: Agregar signal para poder cancelar la llamada si es necesario
       const response = await fetch('/api/tokens', {
         headers: {
           'Authorization': `Bearer ${currentToken}`
-        }
+        },
+        signal: signal // Agregar signal para poder cancelar la llamada
       })
       
       if (response.ok) {
         const data = await response.json()
         console.log('[page.tsx] ✅ Tokens recibidos:', data)
-        setTokensRestantes(data.tokens_restantes || data.tokens || null)
+        console.log('[page.tsx] 🔍 DEBUG tokens_restantes del response:', data.tokens_restantes)
+        console.log('[page.tsx] 🔍 DEBUG tokens del response:', data.tokens)
+        const tokensValue = data.tokens_restantes || data.tokens || null
+        console.log('[page.tsx] 🔍 DEBUG Valor final a establecer:', tokensValue)
+        console.log('[page.tsx] 🔍 DEBUG Tipo de dato:', typeof tokensValue)
+        
+        // Forzar actualización inmediata del estado
+        if (tokensValue !== null && tokensValue !== undefined) {
+          // Convertir a número si es string
+          const numValue = typeof tokensValue === 'string' ? parseInt(tokensValue, 10) : tokensValue
+          setTokensRestantes(numValue)
+          console.log('[page.tsx] ✅ Estado tokensRestantes actualizado inmediatamente a:', numValue)
+          
+          // Forzar re-render si es necesario (usando un pequeño delay para asegurar que React procese el cambio)
+          setTimeout(() => {
+            // Verificar que el estado se actualizó correctamente
+            console.log('[page.tsx] 🔍 Verificación: Estado debería ser', numValue)
+          }, 100)
+        } else {
+          setTokensRestantes(null)
+          console.log('[page.tsx] ⚠️ tokensValue es null/undefined, estableciendo a null')
+        }
         
         // Intentar obtener el límite mensual desde /me/usage
         try {
           const usageResponse = await fetch('/api/me/usage', {
             headers: {
               'Authorization': `Bearer ${currentToken}`
-            }
+            },
+            signal: signal // También agregar signal aquí para poder cancelar
           })
           if (usageResponse.ok) {
             const usageData = await usageResponse.json()
@@ -815,27 +956,69 @@ function Chat() {
             setUser(null)
             setAccessToken(null)
             setTokensRestantes(null)
+            // IMPORTANTE: Resetear el estado de loading
+            setIsLoadingTokens(false)
+            isLoadingTokensRef.current = false
           } else {
             console.log('[page.tsx] ✅ Sesión refrescada, actualizando token')
             setAccessToken(newSession.access_token)
             // No reintentar automáticamente para evitar loops
+            // IMPORTANTE: Resetear el estado de loading
+            setIsLoadingTokens(false)
+            isLoadingTokensRef.current = false
           }
         } catch (refreshErr) {
           console.error('[page.tsx] ❌ Error al refrescar sesión:', refreshErr)
           setUser(null)
           setAccessToken(null)
           setTokensRestantes(null)
+          // IMPORTANTE: Resetear el estado de loading incluso en catch
+          setIsLoadingTokens(false)
+          isLoadingTokensRef.current = false
         }
       } else {
         const errorText = await response.text()
         console.error('[page.tsx] ❌ Error al cargar tokens:', response.status, errorText)
+        // IMPORTANTE: Resetear el estado de loading en otros errores también
+        setIsLoadingTokens(false)
+        isLoadingTokensRef.current = false
       }
     } catch (error) {
+      // Si el error es por cancelación (AbortError), no es un error real
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log(`[page.tsx] ℹ️ loadTokens: Llamada cancelada (nueva llamada iniciada) (tab: ${tabIdRef.current})`)
+        return // Salir sin resetear el estado, la nueva llamada lo manejará
+      }
+      
       console.error('[page.tsx] ❌ Error al cargar tokens:', error)
-      // No limpiar estado en errores de red, solo en 401
+      // IMPORTANTE: Siempre resetear el estado de loading incluso si hay error
+      // Esto previene que el estado quede bloqueado en pull-to-refresh
+      setTokensRestantes(null)
     } finally {
-      setIsLoadingTokens(false)
-      isLoadingTokensRef.current = false
+      // CRÍTICO: Siempre resetear el estado de loading en el finally
+      // Esto asegura que no quede bloqueado, incluso si hay errores o excepciones
+      // ESPECIALMENTE importante durante registro inicial cuando múltiples efectos se ejecutan
+      
+      // Solo resetear si esta llamada no fue cancelada (AbortError)
+      const wasCancelled = loadTokensAbortControllerRef.current?.signal.aborted
+      
+      if (!wasCancelled) {
+        setIsLoadingTokens(false)
+        isLoadingTokensRef.current = false
+        loadTokensAbortControllerRef.current = null
+        console.log(`[page.tsx] ✅ loadTokens completado, estado de loading reseteado (tab: ${tabIdRef.current})`)
+        
+        // Si es un registro reciente, esperar un poco más antes de permitir otra llamada
+        // Esto previene que múltiples efectos llamen simultáneamente durante el registro inicial
+        if (isInitialRegistrationRef.current) {
+          lastTokensCallRef.current = Date.now() + 500 // Agregar 500ms extra de protección durante registro
+        }
+      } else {
+        // Si fue cancelada, solo limpiar el controller pero no resetear el estado de loading
+        // porque la nueva llamada lo manejará
+        loadTokensAbortControllerRef.current = null
+        console.log(`[page.tsx] ℹ️ loadTokens cancelada, nueva llamada se encargará del estado (tab: ${tabIdRef.current})`)
+      }
     }
   }
 
@@ -1329,7 +1512,17 @@ function Chat() {
         loadConversations()
       }
 
-      await loadTokens()
+      // Recargar tokens inmediatamente después de enviar mensaje
+      // Usar un pequeño delay para asegurar que el backend haya procesado el descuento
+      // IMPORTANTE: Verificar que no haya una llamada en progreso antes de llamar
+      if (!isLoadingTokensRef.current) {
+        setTimeout(() => {
+          // Solo cargar si no hay otra llamada en progreso
+          if (!isLoadingTokensRef.current) {
+            loadTokens()
+          }
+        }, 500)
+      }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         return
@@ -1665,6 +1858,24 @@ function Chat() {
     return () => clearTimeout(timeout)
   }, [loading])
 
+  // TIMEOUT DE EMERGENCIA: Si loading está activo por más de 8 segundos, forzarlo a false
+  useEffect(() => {
+    if (loading && !initialLoadingResolvedRef.current) {
+      const emergencyTimeout = setTimeout(() => {
+        console.error('[page.tsx] 🚨 EMERGENCIA: Loading activo por más de 8 segundos, forzando resolución')
+        setLoading(false)
+        initialLoadingResolvedRef.current = true
+        // Limpiar timeout de seguridad principal
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current)
+          loadingTimeoutRef.current = null
+        }
+      }, 8000) // 8 segundos de emergencia
+      
+      return () => clearTimeout(emergencyTimeout)
+    }
+  }, [loading])
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -2421,8 +2632,49 @@ function Chat() {
     )
   }
 
+  // Deshabilitar pull-to-refresh completamente (ahora tenemos botón de actualizar)
+  useEffect(() => {
+    // Prevenir pull-to-refresh en móvil
+    const preventPullToRefresh = (e: TouchEvent) => {
+      // Si el usuario está en la parte superior de la página (scrollY === 0)
+      // y desliza hacia abajo, prevenir el refresh
+      if (window.scrollY === 0) {
+        const touch = e.touches[0]
+        if (touch && touch.clientY > 10) {
+          // El usuario está deslizando hacia abajo desde la parte superior
+          e.preventDefault()
+        }
+      }
+    }
+    
+    // Agregar listener para prevenir pull-to-refresh
+    document.addEventListener('touchmove', preventPullToRefresh, { passive: false })
+    
+    // También prevenir el comportamiento de overscroll
+    const preventOverscroll = (e: TouchEvent) => {
+      if (window.scrollY === 0 && e.touches[0].clientY > 10) {
+        e.preventDefault()
+      }
+    }
+    
+    document.addEventListener('touchstart', preventOverscroll, { passive: false })
+    
+    // Limpiar listeners al desmontar
+    return () => {
+      document.removeEventListener('touchmove', preventPullToRefresh)
+      document.removeEventListener('touchstart', preventOverscroll)
+    }
+  }, [])
+  
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div 
+      className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
+      style={{
+        // Deshabilitar pull-to-refresh usando CSS
+        overscrollBehaviorY: 'contain', // Previene pull-to-refresh
+        touchAction: 'pan-y', // Solo permite scroll vertical, no pull-to-refresh
+      }}
+    >
       <Toaster position="top-center" />
       
       {/* Contenedor principal: sin max-width en móvil, centrado en escritorio */}
@@ -2660,6 +2912,11 @@ function Chat() {
                                 <span className={`text-[10px] sm:text-sm font-bold ${colors.text}`}>
                                   {formatTokensCompact(tokensRestantes)}
                                 </span>
+                                {tokensRestantes !== null && (
+                                  <span className="text-[8px] text-gray-500 dark:text-gray-500 font-medium ml-1">
+                                    ({tokensRestantes.toLocaleString()})
+                                  </span>
+                                )}
                                 <span className="text-[8px] sm:text-[10px] text-gray-600 dark:text-gray-400 font-medium hidden sm:inline">Créditos</span>
                               </div>
                               {/* Barra de progreso visual */}
@@ -2679,6 +2936,44 @@ function Chat() {
                         </div>
                       )
                     })()}
+                    
+                    {/* Botón de refresh/actualizar - siempre visible */}
+                    <button
+                      onClick={async () => {
+                        // Cargar tokens y conversaciones cuando se hace click
+                        if (!isLoadingTokens && !isLoadingConversations) {
+                          console.log('[page.tsx] 🔄 Botón refresh clickeado, actualizando datos...')
+                          await Promise.all([
+                            loadTokens(),
+                            loadConversations()
+                          ])
+                          toast.success('Datos actualizados', { duration: 1500 })
+                        }
+                      }}
+                      disabled={isLoadingTokens || isLoadingConversations}
+                      className={`px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-1 sm:gap-2 ${
+                        isLoadingTokens || isLoadingConversations
+                          ? 'bg-gray-400 text-gray-600 cursor-wait'
+                          : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white'
+                      }`}
+                      title={isLoadingTokens || isLoadingConversations ? "Actualizando..." : "Actualizar datos"}
+                    >
+                      {(isLoadingTokens || isLoadingConversations) ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent"></div>
+                          <span className="hidden sm:inline">Actualizando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          <span className="hidden sm:inline">Actualizar</span>
+                          <span className="sm:hidden">↻</span>
+                        </>
+                      )}
+                    </button>
+                    
                     {tokensRestantes !== null && tokensRestantes < 0 && (
                       <button
                         onClick={handleResetTokens}
