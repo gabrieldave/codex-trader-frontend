@@ -150,84 +150,11 @@ function Chat() {
   
   // Verificar el login del usuario y escuchar cambios
   useEffect(() => {
-    // Evitar múltiples ejecuciones si ya se resolvió
-    if (initialLoadingResolvedRef.current) {
-      console.log('[page.tsx] ⚠️ Loading inicial ya resuelto, saltando verificación duplicada')
-      return
-    }
-    
-    // Determinar si esta pestaña es la "maestra" (primera en cargar)
-    try {
-      const masterTab = sessionStorage.getItem('master_tab_id')
-      if (!masterTab) {
-        // Esta es la primera pestaña
-        isMasterTabRef.current = true
-        sessionStorage.setItem('master_tab_id', tabIdRef.current)
-        console.log(`[page.tsx] ✅ Esta pestaña es la maestra: ${tabIdRef.current}`)
-      } else if (masterTab === tabIdRef.current) {
-        isMasterTabRef.current = true
-        console.log(`[page.tsx] ✅ Esta pestaña es la maestra (recuperada): ${tabIdRef.current}`)
-      } else {
-        console.log(`[page.tsx] ℹ️ Esta pestaña es secundaria. Maestra: ${masterTab}, Esta: ${tabIdRef.current}`)
-      }
-    } catch (e) {
-      console.warn('[page.tsx] ⚠️ No se pudo verificar tab master:', e)
-    }
-    
-    const checkUser = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession()
-        if (error) {
-          console.error('Error al obtener sesión:', error)
-        }
-        if (session) {
-          console.log('✅ Sesión encontrada al cargar:', session.user.email)
-          setUser(session.user)
-          setAccessToken(session.access_token)
-          // Cargar tokens y conversaciones inmediatamente si hay sesión
-          // Usar un pequeño delay solo para evitar conflictos con otros efectos
-          setTimeout(() => {
-            // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
-            if (!isLoadingTokensRef.current) {
-              console.log('[page.tsx] 🔄 Cargando tokens iniciales...')
-              loadTokens()
-            }
-            loadConversations()
-          }, 100) // Reducido a 100ms para carga más rápida
-        } else {
-          console.log('⚠️ No hay sesión al cargar la página')
-        }
-      } catch (err) {
-        console.error('Error inesperado al verificar sesión:', err)
-      } finally {
-        // IMPORTANTE: Siempre resolver el loading, incluso si hay errores
-        // Y marcar como resuelto para evitar ejecuciones duplicadas
-        setLoading(false)
-        initialLoadingResolvedRef.current = true
-        console.log('[page.tsx] ✅ Loading inicial resuelto')
-      }
-    }
-    checkUser()
-    
-    // TIMEOUT DE SEGURIDAD: Forzar resolución del loading después de 5 segundos
-    // Esto previene que la app quede bloqueada durante el registro inicial
-    // CRÍTICO: La app NO debe quedar bloqueada NUNCA
-    loadingTimeoutRef.current = setTimeout(() => {
-      if (!initialLoadingResolvedRef.current || loading) {
-        console.warn('[page.tsx] ⚠️ TIMEOUT DE SEGURIDAD: Forzando resolución del loading después de 5 segundos')
-        setLoading(false)
-        initialLoadingResolvedRef.current = true
-        // Limpiar el timeout
-        if (loadingTimeoutRef.current) {
-          clearTimeout(loadingTimeoutRef.current)
-          loadingTimeoutRef.current = null
-        }
-      }
-    }, 5000) // 5 segundos máximo (reducido para mejor UX)
-    
     // Variable para rastrear si ya enviamos el email de bienvenida
     let welcomeEmailSent = false
     
+    // IMPORTANTE: Configurar onAuthStateChange SIEMPRE (antes de cualquier return)
+    // Esto asegura que el hook se ejecute en el mismo orden siempre
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`🔐 [${tabIdRef.current}] onAuthStateChange: event=${event}, hasSession=${!!session}, userEmail=${session?.user?.email || 'none'}`)
       
@@ -375,6 +302,78 @@ function Chat() {
         }
       }
     })
+
+    // Evitar múltiples ejecuciones de checkUser si ya se resolvió
+    if (!initialLoadingResolvedRef.current) {
+      // Determinar si esta pestaña es la "maestra" (primera en cargar)
+      try {
+        const masterTab = sessionStorage.getItem('master_tab_id')
+        if (!masterTab) {
+          // Esta es la primera pestaña
+          isMasterTabRef.current = true
+          sessionStorage.setItem('master_tab_id', tabIdRef.current)
+          console.log(`[page.tsx] ✅ Esta pestaña es la maestra: ${tabIdRef.current}`)
+        } else if (masterTab === tabIdRef.current) {
+          isMasterTabRef.current = true
+          console.log(`[page.tsx] ✅ Esta pestaña es la maestra (recuperada): ${tabIdRef.current}`)
+        } else {
+          console.log(`[page.tsx] ℹ️ Esta pestaña es secundaria. Maestra: ${masterTab}, Esta: ${tabIdRef.current}`)
+        }
+      } catch (e) {
+        console.warn('[page.tsx] ⚠️ No se pudo verificar tab master:', e)
+      }
+      
+      const checkUser = async () => {
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession()
+          if (error) {
+            console.error('Error al obtener sesión:', error)
+          }
+          if (session) {
+            console.log('✅ Sesión encontrada al cargar:', session.user.email)
+            setUser(session.user)
+            setAccessToken(session.access_token)
+            // Cargar tokens y conversaciones inmediatamente si hay sesión
+            // Usar un pequeño delay solo para evitar conflictos con otros efectos
+            setTimeout(() => {
+              // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
+              if (!isLoadingTokensRef.current) {
+                console.log('[page.tsx] 🔄 Cargando tokens iniciales...')
+                loadTokens()
+              }
+              loadConversations()
+            }, 100) // Reducido a 100ms para carga más rápida
+          } else {
+            console.log('⚠️ No hay sesión al cargar la página')
+          }
+        } catch (err) {
+          console.error('Error inesperado al verificar sesión:', err)
+        } finally {
+          // IMPORTANTE: Siempre resolver el loading, incluso si hay errores
+          // Y marcar como resuelto para evitar ejecuciones duplicadas
+          setLoading(false)
+          initialLoadingResolvedRef.current = true
+          console.log('[page.tsx] ✅ Loading inicial resuelto')
+        }
+      }
+      checkUser()
+      
+      // TIMEOUT DE SEGURIDAD: Forzar resolución del loading después de 5 segundos
+      // Esto previene que la app quede bloqueada durante el registro inicial
+      // CRÍTICO: La app NO debe quedar bloqueada NUNCA
+      loadingTimeoutRef.current = setTimeout(() => {
+        if (!initialLoadingResolvedRef.current || loading) {
+          console.warn('[page.tsx] ⚠️ TIMEOUT DE SEGURIDAD: Forzando resolución del loading después de 5 segundos')
+          setLoading(false)
+          initialLoadingResolvedRef.current = true
+          // Limpiar el timeout
+          if (loadingTimeoutRef.current) {
+            clearTimeout(loadingTimeoutRef.current)
+            loadingTimeoutRef.current = null
+          }
+        }
+      }, 5000) // 5 segundos máximo (reducido para mejor UX)
+    }
 
     // Limpiar timeout y suscripción al desmontar
     return () => {
