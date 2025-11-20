@@ -241,17 +241,19 @@ function PlanCard({ plan, onSelect }: PlanCardProps) {
         </p>
       </div>
 
-      {/* Botón */}
-      <button
-        onClick={onSelect}
-        className={`w-full py-3 px-4 font-semibold text-white rounded-lg transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
-          plan.isFree
-            ? 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500'
-            : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500'
-        }`}
-      >
-        {plan.isFree ? 'Registrarse Gratis' : `Empezar con ${plan.name}`}
-      </button>
+      {/* Acción */}
+      {plan.isFree ? (
+        <div className="w-full rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          Para activar este plan tienes que ir a registrarte. Solo es informativo.
+        </div>
+      ) : (
+        <button
+          onClick={onSelect}
+          className="w-full py-3 px-4 font-semibold text-white rounded-lg transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500"
+        >
+          {`Empezar con ${plan.name}`}
+        </button>
+      )}
     </div>
   )
 }
