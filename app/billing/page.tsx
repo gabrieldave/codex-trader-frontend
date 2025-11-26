@@ -95,15 +95,6 @@ export default function BillingPage() {
             </p>
           </Link>
 
-          <Link
-            href="/invitar"
-            className="bg-white/10 backdrop-blur-sm rounded-lg border border-blue-500/30 shadow-xl p-6 hover:bg-white/15 transition-colors"
-          >
-            <h3 className="text-xl font-semibold text-white mb-2">Invita y gana tokens</h3>
-            <p className="text-blue-200 text-sm">
-              Comparte tu enlace de referido y gana tokens cuando tus amigos se suscriban.
-            </p>
-          </Link>
         </div>
       </div>
     </div>
