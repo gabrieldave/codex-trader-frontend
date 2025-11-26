@@ -142,31 +142,9 @@ export async function authorizedApiCall(
   // 7. Manejar errores comunes
   if (response.status === 401) {
     console.error('[API] Error 401: Token inválido o expirado')
-    // Intentar refrescar la sesión antes de cerrar
-    try {
-      const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession()
-      if (newSession && !refreshError) {
-        console.log('[API] ✅ Sesión refrescada, reintentando llamada...')
-        // Reintentar la llamada con el nuevo token
-        const retryHeaders: HeadersInit = {
-          ...options.headers,
-          'Authorization': `Bearer ${newSession.access_token}`,
-          'Content-Type': 'application/json',
-        }
-        return fetch(url, { ...options, headers: retryHeaders, body })
-      }
-    } catch (refreshErr) {
-      console.error('[API] Error al refrescar sesión:', refreshErr)
-    }
-    // Si no se pudo refrescar, cerrar sesión
+    // Opcional: limpiar sesión y redirigir al login
     await supabase.auth.signOut()
     throw new Error('Unauthorized: La sesión ha expirado. Por favor, inicia sesión nuevamente.')
-  }
-  
-  // Error 503: Servicio no disponible (problemas de DNS/conexión en el backend)
-  if (response.status === 503) {
-    console.warn('[API] ⚠️ Error 503: Servicio temporalmente no disponible')
-    throw new Error('ServiceUnavailable: El servidor está experimentando problemas temporales. Intenta de nuevo en unos segundos.')
   }
   
   return response

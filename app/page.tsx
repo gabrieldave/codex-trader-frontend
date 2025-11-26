@@ -1308,7 +1308,10 @@ function Chat() {
     } catch (error) {
       console.error('Error al cargar conversaciones:', error)
     } finally {
+      // CRÍTICO: Siempre resetear AMBOS estados (state y ref) para evitar bloqueos
       setIsLoadingConversations(false)
+      isLoadingConversationsRef.current = false
+      console.log(`[page.tsx] ✅ loadConversations completado, estado de loading reseteado (tab: ${tabIdRef.current})`)
     }
   }
   
@@ -1826,20 +1829,6 @@ function Chat() {
       }
       
       if (data?.user) {
-        // IMPORTANTE: Detectar si el email ya está registrado
-        // Supabase devuelve user pero con identities vacío cuando el email ya existe
-        const isExistingUser = !data.user.identities || data.user.identities.length === 0
-        
-        if (isExistingUser) {
-          // El email ya está registrado - mostrar mensaje claro al usuario
-          toast.error(
-            '📧 Este email ya está registrado. Por favor inicia sesión o usa "¿Olvidaste tu contraseña?" si no recuerdas tus credenciales.',
-            { duration: 6000 }
-          )
-          setAuthMode('login') // Cambiar automáticamente a modo login
-          return
-        }
-        
         // Guardar contraseña temporalmente en sessionStorage para incluirla en el email de bienvenida
         // Se eliminará después de enviar el email
         if (data.user.email) {
