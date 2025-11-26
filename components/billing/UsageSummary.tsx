@@ -89,13 +89,15 @@ export default function UsageSummary({ accessToken, className = '' }: UsageSumma
 
   const plan = usageData.current_plan ? getPlanByCode(usageData.current_plan as PlanCode) : null
   const usagePercent = usageData.usage_percent || 0
+  const tokensRestantes = usageData.tokens_restantes ?? 0
+  const tokensMonthlyLimit = usageData.tokens_monthly_limit ?? 0
   const progressColor = 
     usagePercent >= 90 ? 'bg-red-500' :
     usagePercent >= 80 ? 'bg-yellow-500' :
     'bg-green-500'
 
   return (
-    <div className={`bg-white/10 backdrop-blur-sm rounded-lg border border-blue-500/30 shadow-xl p-6 ${className}`}>
+    <div className={`bg-white/10 backdrop-blur-sm rounded-lg border border-blue-500/30 shadow-xl p-6 text-center ${className}`}>
       <h3 className="text-2xl font-semibold text-white mb-4">Resumen de uso</h3>
 
       {/* Plan actual */}
@@ -110,28 +112,28 @@ export default function UsageSummary({ accessToken, className = '' }: UsageSumma
       <div className="mb-4">
         <p className="text-blue-200 text-sm mb-1">Tokens disponibles</p>
         <p className="text-white font-semibold text-xl mb-1">
-          {usageData.tokens_restantes.toLocaleString()} tokens
+          {tokensRestantes.toLocaleString()} tokens
         </p>
-        {usageData.tokens_restantes > usageData.tokens_monthly_limit ? (
+        {tokensRestantes > tokensMonthlyLimit ? (
           // Si tiene más tokens que el límite (tokens extra)
           <div className="text-green-300 text-xs">
             <p className="mb-1">
-              ✅ {usageData.tokens_monthly_limit.toLocaleString()} tokens del plan
+              ✅ {tokensMonthlyLimit.toLocaleString()} tokens del plan
             </p>
             <p>
-              + {(usageData.tokens_restantes - usageData.tokens_monthly_limit).toLocaleString()} tokens extra
+              + {(tokensRestantes - tokensMonthlyLimit).toLocaleString()} tokens extra
             </p>
           </div>
         ) : (
           // Si está usando tokens del límite mensual
           <p className="text-blue-300 text-xs">
-            {usageData.tokens_restantes.toLocaleString()} / {usageData.tokens_monthly_limit.toLocaleString()} del límite mensual
+            {tokensRestantes.toLocaleString()} / {tokensMonthlyLimit.toLocaleString()} del límite mensual
           </p>
         )}
       </div>
 
       {/* Barra de progreso - solo mostrar si está usando tokens del límite */}
-      {usageData.tokens_restantes <= usageData.tokens_monthly_limit && (
+      {tokensRestantes <= tokensMonthlyLimit && (
         <div className="mb-4">
           <div className="w-full bg-blue-900/50 rounded-full h-4 mb-2 overflow-hidden">
             <div
@@ -139,7 +141,7 @@ export default function UsageSummary({ accessToken, className = '' }: UsageSumma
               style={{ width: `${Math.min(usagePercent, 100)}%` }}
             />
           </div>
-          <p className="text-blue-200 text-xs text-center">
+          <p className="text-blue-200 text-xs">
             Has usado ~{usagePercent.toFixed(1)}% de tu límite mensual.
           </p>
         </div>
