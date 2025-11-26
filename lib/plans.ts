@@ -14,6 +14,10 @@ export interface CodexPlan {
   isFree?: boolean; // Indica si es el plan gratis
 }
 
+// NOTA: Los análisis con imágenes (gráficas) consumen aproximadamente 4x más tokens
+// que los análisis de texto. El número de análisis profundos está calculado
+// asumiendo consultas de texto. Si subes muchas imágenes, el consumo será mayor.
+
 export const CODEX_PLANS: CodexPlan[] = [
   {
     code: "gratis",
@@ -24,7 +28,7 @@ export const CODEX_PLANS: CodexPlan[] = [
     badge: "Prueba gratis",
     shortDescription: "20,000 tokens gratis para empezar.",
     fullDescription:
-      "Plan de prueba gratuito con 20,000 tokens para explorar todas las funcionalidades. Perfecto para conocer Codex Trader sin compromiso. Incluye análisis de gráficas con IA.",
+      "Plan de prueba gratuito con 20,000 tokens para explorar todas las funcionalidades. Perfecto para conocer Codex Trader sin compromiso. Nota: los análisis con imagen consumen ~4x más tokens.",
     fastQueries: "50",
     deepQueries: "2 Análisis Profundos",
     isFree: true
