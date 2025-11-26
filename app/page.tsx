@@ -389,14 +389,20 @@ function Chat() {
       setTimeout(() => {
         checkoutNotificationSent.current = false
       }, 1000)
-    } else if (checkoutStatus === 'cancelled') {
+    } else if (checkoutStatus === 'cancelled' && !checkoutNotificationSent.current) {
       console.log('⚠️ Checkout cancelado por el usuario')
+      checkoutNotificationSent.current = true // Evitar duplicados
       toast.error('El pago fue cancelado. Puedes intentar nuevamente cuando estés listo.')
       
       // Limpiar los parámetros de la URL
       const newUrl = new URL(window.location.href)
       newUrl.searchParams.delete('checkout')
       router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+      
+      // Resetear la bandera después de un momento
+      setTimeout(() => {
+        checkoutNotificationSent.current = false
+      }, 1000)
     }
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
