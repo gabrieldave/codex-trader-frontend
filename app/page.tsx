@@ -181,16 +181,13 @@ function Chat() {
         
         if (shouldLoadData) {
           console.log(`[page.tsx] ✅ Pestaña maestra cargando datos (tab: ${tabIdRef.current})`)
-          // Cargar tokens y conversaciones cuando hay sesión
-          // El useEffect de accessToken/user también los cargará, así que esto es redundante pero seguro
-          setTimeout(() => {
-            // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
-            if (!isLoadingTokensRef.current) {
-              console.log('[page.tsx] 🔄 Cargando tokens desde onAuthStateChange...')
-              loadTokens()
-            }
-            loadConversations()
-          }, 150) // Reducido a 150ms para carga más rápida
+          // Cargar tokens y conversaciones cuando hay sesión - INMEDIATAMENTE sin delay
+          // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
+          if (!isLoadingTokensRef.current) {
+            console.log('[page.tsx] 🔄 Cargando tokens desde onAuthStateChange...')
+            loadTokens()
+          }
+          loadConversations()
         } else {
           console.log(`[page.tsx] ℹ️ Pestaña secundaria, esperando sincronización (tab: ${tabIdRef.current})`)
           // Las pestañas secundarias esperan a que la maestra cargue los datos
@@ -334,16 +331,12 @@ function Chat() {
             console.log('✅ Sesión encontrada al cargar:', session.user.email)
             setUser(session.user)
             setAccessToken(session.access_token)
-            // Cargar tokens y conversaciones inmediatamente si hay sesión
-            // Usar un pequeño delay solo para evitar conflictos con otros efectos
-            setTimeout(() => {
-              // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
-              if (!isLoadingTokensRef.current) {
-                console.log('[page.tsx] 🔄 Cargando tokens iniciales...')
-                loadTokens()
-              }
-              loadConversations()
-            }, 100) // Reducido a 100ms para carga más rápida
+            // Cargar tokens y conversaciones inmediatamente si hay sesión - SIN DELAY
+            if (!isLoadingTokensRef.current) {
+              console.log('[page.tsx] 🔄 Cargando tokens iniciales...')
+              loadTokens()
+            }
+            loadConversations()
           } else {
             console.log('⚠️ No hay sesión al cargar la página')
           }
@@ -571,29 +564,29 @@ function Chat() {
     if (checkoutStatus === 'success' && !checkoutNotificationSent.current) {
       console.log('✅ Checkout exitoso detectado, session_id:', sessionId)
       checkoutNotificationSent.current = true // Marcar como enviado para evitar duplicados
-      toast.success('¡Pago exitoso! Tu suscripción ha sido activada. Recargando información...')
+      toast.success('¡Pago exitoso! Tu suscripción ha sido activada.')
       
-      // Si el usuario está autenticado, recargar tokens y conversaciones
+      // Si el usuario está autenticado, recargar tokens y conversaciones INMEDIATAMENTE
       if (accessToken && user) {
-        // Recargar tokens para reflejar la nueva suscripción (con delay para evitar duplicados)
-        setTimeout(() => {
-          // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
-          if (!isLoadingTokensRef.current) {
-            loadTokens()
-          }
-          loadConversations()
-        }, 500)
+        // IMPORTANTE: Resetear refs para forzar recarga inmediata después de compra
+        isLoadingTokensRef.current = false
+        isLoadingConversationsRef.current = false
+        lastTokensCallRef.current = 0
+        lastConversationsCallRef.current = 0
+        // Cargar inmediatamente sin delays
+        loadTokens()
+        loadConversations()
       }
       
-      // Limpiar los parámetros de la URL después de un delay
+      // Limpiar los parámetros de la URL inmediatamente
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('checkout')
+      newUrl.searchParams.delete('session_id')
+      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+      // Resetear la bandera después de un momento
       setTimeout(() => {
-        const newUrl = new URL(window.location.href)
-        newUrl.searchParams.delete('checkout')
-        newUrl.searchParams.delete('session_id')
-        router.replace(newUrl.pathname + newUrl.search, { scroll: false })
-        // Resetear la bandera después de limpiar la URL
         checkoutNotificationSent.current = false
-      }, 3000)
+      }, 1000)
     } else if (checkoutStatus === 'cancelled') {
       console.log('⚠️ Checkout cancelado por el usuario')
       toast.error('El pago fue cancelado. Puedes intentar nuevamente cuando estés listo.')
@@ -628,16 +621,15 @@ function Chat() {
       const shouldLoad = isMasterTabRef.current || !sessionStorage.getItem('master_tab_id')
       
       if (shouldLoad) {
-        // Usar un pequeño delay para evitar llamadas duplicadas cuando cambian ambos
+        // Delay mínimo para evitar duplicados cuando cambian accessToken y user simultáneamente
         timer = setTimeout(() => {
           console.log(`[page.tsx] ✅ Pestaña maestra cargando datos (tab: ${tabIdRef.current})`)
-          // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
           if (!isLoadingTokensRef.current) {
             loadTokens()
           }
           loadConversations()
           checkIsAdmin()
-        }, 100) // 100ms de debounce
+        }, 50) // 50ms - mínimo necesario
       } else {
         console.log(`[page.tsx] ℹ️ Pestaña secundaria, saltando carga de datos (tab: ${tabIdRef.current})`)
       }
@@ -679,15 +671,12 @@ function Chat() {
             sessionStorage.setItem('master_tab_id', tabIdRef.current)
             sessionStorage.setItem('master_tab_heartbeat', Date.now().toString())
             console.log(`[page.tsx] ✅ Pestaña promovida a maestra (tab: ${tabIdRef.current})`)
-            // Recargar datos ahora que somos maestra
+            // Recargar datos ahora que somos maestra - inmediatamente
             if (accessToken && user) {
-              setTimeout(() => {
-                // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
-                if (!isLoadingTokensRef.current) {
-                  loadTokens()
-                }
-                loadConversations()
-              }, 100)
+              if (!isLoadingTokensRef.current) {
+                loadTokens()
+              }
+              loadConversations()
             }
           } else {
             const heartbeatAge = Date.now() - parseInt(lastHeartbeat, 10)
@@ -697,15 +686,12 @@ function Chat() {
               isMasterTabRef.current = true
               sessionStorage.setItem('master_tab_id', tabIdRef.current)
               sessionStorage.setItem('master_tab_heartbeat', Date.now().toString())
-              // Recargar datos ahora que somos maestra
+              // Recargar datos ahora que somos maestra - inmediatamente
               if (accessToken && user) {
-                setTimeout(() => {
-                  // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
-                  if (!isLoadingTokensRef.current) {
-                    loadTokens()
-                  }
-                  loadConversations()
-                }, 100)
+                if (!isLoadingTokensRef.current) {
+                  loadTokens()
+                }
+                loadConversations()
               }
             }
           }
@@ -870,13 +856,12 @@ function Chat() {
     }
     
     // Solo bloquear si la última llamada fue hace menos del tiempo de debounce
-    // Durante registro inicial (primeros 15 segundos), usar debounce más largo para evitar bloqueos
+    // Debounce reducido para mejor UX - 100ms es suficiente para evitar duplicados
     const timeSinceLastCall = now - lastTokensCallRef.current
-    const isRecentRegistration = isInitialRegistrationRef.current || (user && user.created_at && (Date.now() - new Date(user.created_at).getTime() < 15000))
-    const debounceTime = isRecentRegistration ? 1000 : 200 // 1 segundo durante registro inicial, 200ms normal
+    const debounceTime = 100 // 100ms debounce para todas las situaciones
     
     if (timeSinceLastCall < debounceTime) {
-      console.log(`[page.tsx] ⚠️ loadTokens: Llamada muy reciente (hace ${timeSinceLastCall}ms, debounce: ${debounceTime}ms), ignorando (tab: ${tabIdRef.current})`)
+      console.log(`[page.tsx] ⚠️ loadTokens: Llamada muy reciente (hace ${timeSinceLastCall}ms), ignorando (tab: ${tabIdRef.current})`)
       return
     }
     
@@ -1058,12 +1043,6 @@ function Chat() {
         isLoadingTokensRef.current = false
         loadTokensAbortControllerRef.current = null
         console.log(`[page.tsx] ✅ loadTokens completado, estado de loading reseteado (tab: ${tabIdRef.current})`)
-        
-        // Si es un registro reciente, esperar un poco más antes de permitir otra llamada
-        // Esto previene que múltiples efectos llamen simultáneamente durante el registro inicial
-        if (isInitialRegistrationRef.current) {
-          lastTokensCallRef.current = Date.now() + 500 // Agregar 500ms extra de protección durante registro
-        }
       } else {
         // Si fue cancelada, solo limpiar el controller pero no resetear el estado de loading
         // porque la nueva llamada lo manejará
@@ -1209,9 +1188,9 @@ function Chat() {
       return
     }
     
-    // Protección contra llamadas duplicadas: solo permitir una llamada cada 500ms
+    // Protección contra llamadas duplicadas: solo permitir una llamada cada 100ms
     const now = Date.now()
-    if (isLoadingConversationsRef.current || (now - lastConversationsCallRef.current < 500)) {
+    if (isLoadingConversationsRef.current || (now - lastConversationsCallRef.current < 100)) {
       console.log(`[page.tsx] ⚠️ loadConversations: Llamada duplicada ignorada (tab: ${tabIdRef.current})`)
       return
     }
@@ -1604,17 +1583,13 @@ function Chat() {
         loadConversations()
       }
 
-      // Recargar tokens inmediatamente después de enviar mensaje
-      // Usar un pequeño delay para asegurar que el backend haya procesado el descuento
-      // IMPORTANTE: Verificar que no haya una llamada en progreso antes de llamar
-      if (!isLoadingTokensRef.current) {
-        setTimeout(() => {
-          // Solo cargar si no hay otra llamada en progreso
-          if (!isLoadingTokensRef.current) {
-            loadTokens()
-          }
-        }, 500)
-      }
+      // Recargar tokens después de enviar mensaje
+      // Delay mínimo de 150ms para que el backend procese el descuento
+      setTimeout(() => {
+        if (!isLoadingTokensRef.current) {
+          loadTokens()
+        }
+      }, 150)
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         return
