@@ -197,96 +197,9 @@ function Chat() {
         // Si el usuario acaba de confirmar su email (SIGNED_IN después de confirmación)
         // o si hay parámetros de confirmación en la URL, notificar al backend
         const urlParams = new URLSearchParams(window.location.search)
-        const emailConfirmed = urlParams.get('email_confirmed')
-        const code = urlParams.get('code')
-        const confirmed = urlParams.get('confirmed')
-        
-        console.log(`   URL params: email_confirmed=${emailConfirmed}, code=${!!code}, confirmed=${confirmed}`)
-        
-        // Detectar si es un nuevo registro (usuario recién confirmado)
-        // Verificar si el usuario es nuevo (creado recientemente) o si hay parámetros de confirmación
-        const userCreatedAt = session.user ? new Date(session.user.created_at).getTime() : 0
-        const isRecentlyCreated = userCreatedAt > Date.now() - 300000 // Últimos 5 minutos (aumentado de 1 minuto)
-        
-        const isNewRegistration = (
-          (event === 'SIGNED_IN' && (emailConfirmed === 'true' || code || confirmed === 'true')) ||
-          (event === 'SIGNED_IN' && isRecentlyCreated) // Usuario creado recientemente
-        )
-        
-        console.log(`   isNewRegistration: ${isNewRegistration}, welcomeEmailSent: ${welcomeEmailSent}`)
-        
-        if (isNewRegistration && session.access_token && !welcomeEmailSent) {
-          console.log('✅ Usuario confirmado detectado en onAuthStateChange, notificando al backend para enviar email de bienvenida')
-          welcomeEmailSent = true // Marcar como enviado para evitar duplicados
-          // Marcar como registro inicial para aplicar protecciones especiales
-          isInitialRegistrationRef.current = true
-          // Resetear después de 15 segundos
-          setTimeout(() => {
-            isInitialRegistrationRef.current = false
-          }, 15000)
-          
-          try {
-            // Intentar recuperar contraseña de sessionStorage si está disponible
-            let userPassword = null
-            if (session.user?.email) {
-              try {
-                userPassword = sessionStorage.getItem(`temp_password_${session.user.email}`)
-                if (userPassword) {
-                  console.log('📝 Contraseña recuperada de sessionStorage para email de bienvenida')
-                  // Eliminar después de usar
-                  sessionStorage.removeItem(`temp_password_${session.user.email}`)
-                }
-              } catch (e) {
-                console.warn('⚠️ No se pudo recuperar contraseña de sessionStorage:', e)
-              }
-            }
-            
-            // Verificar que el token sea válido antes de llamar
-            if (!session.access_token) {
-              console.warn('⚠️ No hay access_token, esperando a que se establezca la sesión...')
-              // Reintentar después de un delay
-              setTimeout(async () => {
-                const { data: { session: retrySession } } = await supabase.auth.getSession()
-                if (retrySession?.access_token) {
-                  try {
-                    console.log(`   Reintentando /users/notify-registration...`)
-                    const response = await authorizedApiCall('/users/notify-registration', {
-                      method: 'POST',
-                      body: JSON.stringify({ password: userPassword })
-                    })
-                    if (response.ok) {
-                      const responseData = await response.json()
-                      console.log('✅ Email de bienvenida solicitado correctamente (reintento)', responseData)
-                    }
-                  } catch (retryErr) {
-                    console.error('❌ Error al notificar registro (reintento):', retryErr)
-                  }
-                }
-              }, 2000)
-              return
-            }
-            
-            console.log(`   Llamando a /users/notify-registration...`)
-            const response = await authorizedApiCall('/users/notify-registration', {
-              method: 'POST',
-              body: JSON.stringify({ password: userPassword })
-            })
-            
-            console.log(`   Response status: ${response.status}`)
-            
-            if (response.ok) {
-              const responseData = await response.json()
-              console.log('✅ Email de bienvenida solicitado correctamente desde onAuthStateChange', responseData)
-            } else {
-              const errorText = await response.text()
-              console.error('❌ Error al notificar registro:', response.status, errorText)
-              // No reintentar automáticamente - puede causar loops
-            }
-          } catch (err) {
-            console.error('❌ Error al notificar registro desde onAuthStateChange:', err)
-            welcomeEmailSent = false // Permitir reintentar si falla
-          }
-        }
+        // NOTA: El email de bienvenida ahora solo se envía desde handleSignUp
+        // cuando el usuario se registra con sesión inmediata (sin confirmación de email)
+        // Esto evita duplicados y simplifica el flujo
       } else {
         setUser(null)
         setAccessToken(null)
@@ -419,140 +332,30 @@ function Chat() {
       router.replace(newUrl.pathname + newUrl.search, { scroll: false })
     }
     
-    // Manejar parámetros de registro exitoso (antes de confirmación)
-    if (registered === 'true' && registeredEmail) {
-      console.log('[PAGE] Registro exitoso detectado para:', registeredEmail)
-      
-      // Mostrar mensaje informativo
-      if (!checkoutNotificationSent.current) {
-        toast.success(`¡Registro exitoso! Revisa tu email (${registeredEmail}) para confirmar tu cuenta.`)
-        checkoutNotificationSent.current = true
-        
-        // Limpiar parámetros de la URL después de mostrar el mensaje
-        setTimeout(() => {
-          const newUrl = new URL(window.location.href)
-          newUrl.searchParams.delete('registered')
-          newUrl.searchParams.delete('email')
-          router.replace(newUrl.pathname + newUrl.search, { scroll: false })
-          checkoutNotificationSent.current = false // Resetear para permitir otros mensajes
-        }, 4000)
-      }
+    // Limpiar parámetros de registro legacy si existen
+    if (registered === 'true') {
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('registered')
+      newUrl.searchParams.delete('email')
+      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
     }
     
-    // Si hay parámetros de confirmación, esperar a que se establezca la sesión
+    // Si hay parámetros de confirmación de email (flujo legacy)
+    // NOTA: Con confirmación desactivada en Supabase, este código raramente se ejecutará
     if (confirmed === 'true' || emailConfirmed === 'true') {
-      console.log('[PAGE] 📧 Confirmación detectada en URL, verificando sesión...')
-      
-      // IMPORTANTE: Asegurar que el loading se resuelva incluso si no hay sesión
+      console.log('[PAGE] 📧 Confirmación detectada en URL')
       setLoading(false)
-      if (!initialLoadingResolvedRef.current) {
-        initialLoadingResolvedRef.current = true
-        // Limpiar timeout de seguridad si se resolvió antes
-        if (loadingTimeoutRef.current) {
-          clearTimeout(loadingTimeoutRef.current)
-          loadingTimeoutRef.current = null
-        }
-      }
+      initialLoadingResolvedRef.current = true
       
-      // NO llamar inmediatamente sin sesión - esto causa errores 401
-      // Esperar a que se establezca la sesión antes de llamar al endpoint
-      console.log('[PAGE] 📧 Esperando a que se establezca la sesión antes de notificar registro...')
+      toast.success('¡Cuenta confirmada! Ya puedes iniciar sesión.')
+      setAuthMode('login')
       
-      // Intentar obtener la sesión después de un delay para dar tiempo a que se establezca
-      setTimeout(async () => {
-        try {
-          const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-          
-          if (sessionError) {
-            console.log('[PAGE] ⚠️ Error al obtener sesión:', sessionError)
-            // Mostrar mensaje y cambiar a modo login
-            toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
-            setAuthMode('login')
-            return
-          }
-          
-          if (sessionData?.session?.access_token && sessionData.session.user) {
-            console.log('[PAGE] ✅ Sesión encontrada después de confirmación:', sessionData.session.user.email)
-            setUser(sessionData.session.user)
-            setAccessToken(sessionData.session.access_token)
-            
-            // IMPORTANTE: Cargar tokens después de establecer sesión (con delay para evitar duplicados)
-            setTimeout(() => {
-              // Solo cargar si no hay una llamada en progreso (evita bloqueos en pull-to-refresh)
-              if (!isLoadingTokensRef.current) {
-                loadTokens()
-              }
-              loadConversations()
-            }, 400)
-            
-            // Notificar al backend para enviar email de bienvenida (segunda llamada por si la primera falló)
-            try {
-              // Intentar recuperar contraseña de sessionStorage si está disponible
-              let userPassword = null
-              if (sessionData.session.user?.email) {
-                try {
-                  userPassword = sessionStorage.getItem(`temp_password_${sessionData.session.user.email}`)
-                  if (userPassword) {
-                    console.log('[PAGE] 📝 Contraseña recuperada de sessionStorage para email de bienvenida')
-                    // Eliminar después de usar
-                    sessionStorage.removeItem(`temp_password_${sessionData.session.user.email}`)
-                  }
-                } catch (e) {
-                  console.warn('[PAGE] ⚠️ No se pudo recuperar contraseña de sessionStorage:', e)
-                }
-              }
-              
-              // Verificar que el token sea válido antes de llamar
-              if (!sessionData.session.access_token) {
-                console.warn('[PAGE] ⚠️ No hay access_token, saltando notificación de registro')
-                toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
-                return
-              }
-              
-              const response = await authorizedApiCall('/users/notify-registration', {
-                method: 'POST',
-                body: JSON.stringify({ password: userPassword })
-              })
-              
-              if (response.ok) {
-                const responseData = await response.json()
-                console.log('[PAGE] ✅ Email de bienvenida solicitado correctamente (con sesión):', responseData)
-                toast.success('¡Cuenta confirmada exitosamente! El email de bienvenida llegará pronto.')
-              } else {
-                const errorText = await response.text()
-                console.error('[PAGE] ❌ Error al notificar registro:', response.status, errorText)
-                toast.success('¡Cuenta confirmada exitosamente! (El email de bienvenida puede tardar un momento)')
-              }
-            } catch (err) {
-              console.error('[PAGE] ❌ Error al notificar registro después de confirmación:', err)
-              toast.success('¡Cuenta confirmada exitosamente! (El email de bienvenida puede tardar un momento)')
-            }
-          } else {
-            console.log('[PAGE] ⚠️ No hay sesión después de confirmación, el usuario debe hacer login')
-            toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
-            setAuthMode('login')
-            // Asegurar que el usuario no esté logueado
-            setUser(null)
-            setAccessToken(null)
-          }
-        } catch (err) {
-          console.error('[PAGE] ❌ Error al verificar sesión después de confirmación:', err)
-          toast.success('¡Cuenta confirmada exitosamente! Por favor, inicia sesión para continuar.')
-          setAuthMode('login')
-          // Asegurar que el usuario no esté logueado
-          setUser(null)
-          setAccessToken(null)
-        }
-      }, 1500) // Aumentar a 1.5 segundos para dar más tiempo
-      
-      // Limpiar el parámetro de la URL (incluyendo code si existe) después de un delay
-      setTimeout(() => {
-        const newUrl = new URL(window.location.href)
-        newUrl.searchParams.delete('confirmed')
-        newUrl.searchParams.delete('email_confirmed')
-        newUrl.searchParams.delete('code')
-        router.replace(newUrl.pathname + newUrl.search, { scroll: false })
-      }, 2000)
+      // Limpiar parámetros de la URL
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('confirmed')
+      newUrl.searchParams.delete('email_confirmed')
+      newUrl.searchParams.delete('code')
+      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
     } else if (error) {
       const errorMessage = message || 'Error al confirmar tu cuenta'
       toast.error(errorMessage)
@@ -1816,49 +1619,25 @@ function Chat() {
         }
         
         // Si hay sesión inmediata, el usuario ya está autenticado
-        if (data.session) {
-          toast.success(`¡Registro exitoso! Usuario creado: ${data.user.email}`)
-          
-          // IMPORTANTE: Notificar al backend sobre el nuevo registro (para enviar emails)
-          // Esto se hace en segundo plano y no bloquea el flujo
-          if (data.session.access_token) {
-            console.log('📧 Registro con sesión inmediata detectado, notificando al backend...')
-            try {
-              console.log(`   Llamando a /users/notify-registration...`)
-              // Incluir contraseña en el body para el email de bienvenida
-              const response = await authorizedApiCall('/users/notify-registration', {
-                method: 'POST',
-                body: JSON.stringify({ password: password.trim() })
-              })
-              
-              console.log(`   Response status: ${response.status}`)
-              
-              if (response.ok) {
-                const responseData = await response.json()
-                console.log('✅ Emails de registro enviados correctamente (admin + bienvenida)', responseData)
-              } else {
-                const errorText = await response.text()
-                console.error('❌ Error al notificar registro:', response.status, errorText)
-              }
-            } catch (error) {
-              console.error('❌ Error al notificar registro (no crítico):', error)
+        // Con confirmación de email desactivada, siempre hay sesión inmediata
+        toast.success(`¡Registro exitoso! Bienvenido a Codex Trader`)
+        
+        // Notificar al backend para enviar email de bienvenida
+        if (data.session?.access_token) {
+          console.log('📧 Notificando al backend para enviar email de bienvenida...')
+          try {
+            const response = await authorizedApiCall('/users/notify-registration', {
+              method: 'POST',
+              body: JSON.stringify({ password: password.trim() })
+            })
+            
+            if (response.ok) {
+              console.log('✅ Email de bienvenida enviado')
+            } else {
+              console.error('❌ Error al enviar email de bienvenida:', response.status)
             }
-          } else {
-            console.warn('⚠️ No hay access_token en la sesión inmediata')
-          }
-        } else {
-          // Si no hay sesión, Supabase requiere confirmación de email
-          toast.success(`¡Registro exitoso! Por favor, revisa tu email (${data.user.email}) para confirmar tu cuenta.`)
-          console.log('⚠️ Usuario registrado pero requiere confirmación de email. Los emails se enviarán después de confirmar.')
-          
-          // MEJORA UX: Redirigir a la misma pestaña después de 2 segundos para mostrar mensaje de confirmación
-          // Esto evita que el usuario tenga que cerrar manualmente la pestaña
-          if (data.user?.email) {
-            const userEmail = data.user.email // Guardar email en variable para evitar error de TypeScript
-            setTimeout(() => {
-              // Redirigir a la misma pestaña con mensaje de confirmación
-              router.replace('/?registered=true&email=' + encodeURIComponent(userEmail))
-            }, 2000)
+          } catch (error) {
+            console.error('❌ Error al notificar registro (no crítico):', error)
           }
         }
         
@@ -1885,18 +1664,6 @@ function Chat() {
         if (selectedPlan) {
           router.push(`/planes?selected=${selectedPlan}`)
         }
-      } else if (data?.user) {
-        // Si solo hay user pero no session, esperar a que se confirme el email
-        toast.success(`¡Registro exitoso! Revisa tu email para confirmar tu cuenta.`)
-        
-        // IMPORTANTE: El email de bienvenida se enviará cuando el usuario confirme su email
-        // a través del callback /auth/callback
-        console.log('Usuario creado, esperando confirmación de email. El email de bienvenida se enviará después de confirmar.')
-        
-        setAuthMode('login')
-        setName('')
-        setPassword('')
-        setConfirmPassword('')
       }
     } catch (err) {
       toast.error(`Error inesperado: ${err instanceof Error ? err.message : 'Error desconocido'}`)
