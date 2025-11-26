@@ -6,7 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import toast, { Toaster } from 'react-hot-toast'
 import { CODEX_PLANS } from '@/lib/plans'
-import { processReferral } from '@/lib/referrals'
+// Sistema de referidos eliminado
 import { authorizedApiCall } from '@/lib/api'
 import UsageSummary from '@/components/billing/UsageSummary'
 import Link from 'next/link'
@@ -27,7 +27,6 @@ function Chat() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const selectedPlan = searchParams.get('plan')
-  const referralCode = searchParams.get('ref') // Código de referido desde la URL
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
@@ -400,17 +399,8 @@ function Chat() {
       router.replace(newUrl.pathname + newUrl.search, { scroll: false })
     }
     
-    // IMPORTANTE: Si el usuario ya está logueado y hay un código de referido en la URL,
-    // limpiarlo sin intentar procesarlo (los códigos solo se usan al registrarse)
-    if (referralCode && user && accessToken) {
-      console.log('ℹ️ Usuario ya logueado detectado con código de referido en URL. Limpiando parámetro (los códigos solo se usan al registrarse).')
-      // Limpiar el parámetro ref de la URL sin intentar procesarlo
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.delete('ref')
-      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, router, accessToken, user, supabase, referralCode])
+  }, [searchParams, router, accessToken, user, supabase])
 
   // Cargar tokens y conversaciones cuando el usuario está logueado
   // IMPORTANTE: Usar un debounce para evitar múltiples llamadas simultáneas
@@ -1519,19 +1509,6 @@ function Chat() {
         setPassword('')
         setConfirmPassword('')
         
-        // Procesar código de referido si existe (en background para no bloquear)
-        if (referralCode) {
-          // Procesar en background sin bloquear la UI
-          processReferral(referralCode)
-            .then(() => {
-              toast.success('¡Código de referido aplicado correctamente!')
-            })
-            .catch((error) => {
-              // No mostrar error si falla el referido, solo loguear
-              console.error('Error al procesar código de referido:', error)
-            })
-        }
-        
         // Si hay un plan seleccionado, redirigir a planes después del login
         if (selectedPlan) {
           router.push(`/planes?selected=${selectedPlan}`)
@@ -1646,19 +1623,6 @@ function Chat() {
         setName('')
         setPassword('')
         setConfirmPassword('')
-        
-        // Procesar código de referido si existe (en background, no bloquea la UI)
-        if (referralCode) {
-          // Ejecutar en background sin await para no bloquear la UI
-          processReferral(referralCode)
-            .then(() => {
-              toast.success('¡Código de referido aplicado correctamente!')
-            })
-            .catch((error) => {
-              // No mostrar error si falla el referido, solo loguear
-              console.error('Error al procesar código de referido:', error)
-            })
-        }
         
         // Si hay un plan seleccionado, redirigir a planes después del registro
         if (selectedPlan) {
@@ -2640,13 +2604,6 @@ function Chat() {
             >
               + Nueva Conversación
             </button>
-            <Link
-              href="/invitar"
-              className="w-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-md flex items-center justify-center gap-2 mb-2"
-            >
-              <span>🎁</span>
-              Invita y gana tokens
-            </Link>
             <Link
               href="/billing"
               className="w-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-md flex items-center justify-center gap-2"
