@@ -53,6 +53,10 @@ function Chat() {
   const lastTokensCallRef = useRef<number>(0)
   const lastConversationsCallRef = useRef<number>(0)
   
+  // Ref para evitar múltiples mensajes "datos actualizados" en un corto período
+  const lastDataUpdatedToastRef = useRef<number>(0)
+  const DATA_UPDATE_TOAST_DEBOUNCE_MS = 3000 // No mostrar el mensaje más de una vez cada 3 segundos
+  
   // Ref para rastrear si ya se resolvió el loading inicial
   const initialLoadingResolvedRef = useRef<boolean>(false)
   
@@ -851,6 +855,18 @@ function Chat() {
     }
   }
 
+  // Función helper para mostrar toast de datos actualizados con protección contra duplicados
+  const showDataUpdatedToast = () => {
+    const now = Date.now()
+    const timeSinceLastToast = now - lastDataUpdatedToastRef.current
+    
+    // Solo mostrar el toast si han pasado al menos 3 segundos desde el último
+    if (timeSinceLastToast >= DATA_UPDATE_TOAST_DEBOUNCE_MS) {
+      lastDataUpdatedToastRef.current = now
+      toast.success('Datos actualizados', { duration: 1500 })
+    }
+  }
+  
   // Función helper para formatear tokens con formato compacto
   const formatTokensCompact = (tokens: number | null): string => {
     if (tokens === null) return '...'
@@ -1774,7 +1790,7 @@ function Chat() {
             loadTokens(),
             loadConversations()
           ]).then(() => {
-            toast.success('Datos actualizados', { duration: 1500 })
+            showDataUpdatedToast()
           }).catch((error) => {
             console.error('[page.tsx] ❌ Error al recargar datos:', error)
           })
@@ -2829,7 +2845,7 @@ function Chat() {
                             loadTokens(),
                             loadConversations()
                           ])
-                          toast.success('Datos actualizados', { duration: 1500 })
+                          showDataUpdatedToast()
                         }
                       }}
                       disabled={isLoadingTokens || isLoadingConversations}
